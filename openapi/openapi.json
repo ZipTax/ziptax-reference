@@ -80,44 +80,6 @@
             }
           },
           {
-            "name": "state",
-            "in": "query",
-            "description": "State name or abbreviation",
-            "schema": {
-              "type": "string",
-              "maxLength": 50
-            }
-          },
-          {
-            "name": "stateCode",
-            "in": "query",
-            "description": "Two-letter state code",
-            "schema": {
-              "type": "string",
-              "minLength": 2,
-              "maxLength": 2,
-              "pattern": "^[A-Z]{2}$"
-            }
-          },
-          {
-            "name": "city",
-            "in": "query",
-            "description": "City name",
-            "schema": {
-              "type": "string",
-              "maxLength": 50
-            }
-          },
-          {
-            "name": "county",
-            "in": "query",
-            "description": "County name",
-            "schema": {
-              "type": "string",
-              "maxLength": 50
-            }
-          },
-          {
             "name": "countryCode",
             "in": "query",
             "description": "Country code",
@@ -141,16 +103,6 @@
                 "xml"
               ],
               "default": "json"
-            }
-          },
-          {
-            "name": "adjustment",
-            "in": "query",
-            "description": "Address adjustment parameter",
-            "schema": {
-              "type": "string",
-              "maxLength": 100,
-              "default": "auto"
             }
           },
           {
