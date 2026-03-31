@@ -15,7 +15,7 @@
   },
   "servers": [
     {
-      "url": "https://api.ziptax.com",
+      "url": "https://api.zip-tax.com",
       "description": "Production"
     }
   ],
