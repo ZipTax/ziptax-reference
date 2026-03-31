@@ -6,8 +6,8 @@
     "description": "RESTful service for US sales tax data lookup by address or coordinates.",
     "contact": {
       "name": "ZipTax Support",
-      "email": "support@ziptax.com",
-      "url": "https://ziptax.com"
+      "email": "support@zip.tax",
+      "url": "https://zip.tax"
     },
     "license": {
       "name": "Proprietary"
