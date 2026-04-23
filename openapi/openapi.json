@@ -1,474 +1,1032 @@
 {
-  "openapi": "3.1.0",
-  "info": {
-    "title": "ZipTax API",
-    "version": "6.0.0",
-    "description": "RESTful service for US sales tax data lookup by address or coordinates.",
-    "contact": {
-      "name": "ZipTax Support",
-      "email": "support@zip.tax",
-      "url": "https://zip.tax"
-    },
-    "license": {
-      "name": "Proprietary"
-    }
-  },
-  "servers": [
-    {
-      "url": "https://api.zip-tax.com",
-      "description": "Production"
-    }
-  ],
-  "security": [
-    {
-      "ApiKeyQuery": []
-    },
-    {
-      "ApiKeyHeader": []
-    }
-  ],
-  "paths": {
-    "/request/v60": {
-      "get": {
-        "operationId": "getTaxRatesV60",
-        "summary": "Get Tax Rates (v6.0)",
-        "description": "Returns tax rates in a structured format with separate base rates, service/shipping taxability, sourcing rules, and tax summaries. Requires an address or lat/lng coordinates to resolve a single tax jurisdiction.",
-        "tags": [
-          "Tax Rates"
-        ],
-        "parameters": [
-          {
-            "name": "key",
-            "in": "query",
-            "required": true,
-            "description": "API key for authentication",
-            "schema": {
-              "type": "string",
-              "minLength": 10,
-              "maxLength": 100
-            }
+  "components": {
+    "schemas": {
+      "Component": {
+        "additionalProperties": false,
+        "properties": {
+          "message": {
+            "description": "Optional status message",
+            "type": "string"
           },
-          {
-            "name": "address",
-            "in": "query",
-            "description": "Street address for geocoding. Provide a full or partial US street address (e.g. \"200 Spectrum Center Dr, Irvine, CA 92618\").",
-            "schema": {
-              "type": "string",
-              "maxLength": 100
-            }
-          },
-          {
-            "name": "lat",
-            "in": "query",
-            "description": "Latitude coordinate. Use with `lng` as an alternative to `address`.",
-            "schema": {
-              "type": "number",
-              "format": "double",
-              "minimum": -90,
-              "maximum": 90
-            }
-          },
-          {
-            "name": "lng",
-            "in": "query",
-            "description": "Longitude coordinate. Use with `lat` as an alternative to `address`.",
-            "schema": {
-              "type": "number",
-              "format": "double",
-              "minimum": -180,
-              "maximum": 180
-            }
-          },
-          {
-            "name": "countryCode",
-            "in": "query",
-            "description": "Country code",
-            "schema": {
-              "type": "string",
-              "enum": [
-                "USA",
-                "CAN"
-              ],
-              "default": "USA"
-            }
-          },
-          {
-            "name": "format",
-            "in": "query",
-            "description": "Response format",
-            "schema": {
-              "type": "string",
-              "enum": [
-                "json",
-                "xml"
-              ],
-              "default": "json"
-            }
-          },
-          {
-            "name": "sat_item_total",
-            "in": "query",
-            "description": "Single Article Tax item total for Tennessee",
-            "schema": {
-              "type": "number",
-              "format": "double",
-              "minimum": 0
-            }
-          },
-          {
-            "name": "historical",
-            "in": "query",
-            "description": "Historical date for rates in YYYY-MM format",
-            "schema": {
-              "type": "string",
-              "pattern": "^[0-9]{4}-[0-9]{2}$"
-            }
-          },
-          {
-            "name": "taxabilityCode",
-            "in": "query",
-            "description": "Product taxability code (TIC). When provided, the response includes a `productDetail` section with product-specific rate rules. Requires the `product_rates` entitlement.",
-            "schema": {
-              "type": "integer",
-              "format": "int64"
-            }
-          },
-          {
-            "name": "addressDetailExtended",
-            "in": "query",
-            "description": "When set to `true` or `1`, the `addressDetail` section includes a nested `address` object with individual address components.",
-            "schema": {
-              "type": "string",
-              "enum": [
-                "true",
-                "false",
-                "1",
-                "0"
-              ],
-              "default": "false"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful tax rate lookup",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/V60Response"
-                },
-                "example": {
-                  "metadata": {
-                    "version": "v60",
-                    "response": {
-                      "code": 100,
-                      "name": "RESPONSE_CODE_SUCCESS",
-                      "message": "Successful API Request.",
-                      "definition": ""
-                    }
-                  },
-                  "baseRates": [
-                    {
-                      "rate": 0.06,
-                      "jurType": "US_STATE_SALES_TAX",
-                      "jurName": "US_STATE",
-                      "jurDescription": "US State Sales Tax",
-                      "jurTaxCode": null
-                    },
-                    {
-                      "rate": 0.0025,
-                      "jurType": "US_COUNTY_SALES_TAX",
-                      "jurName": "US_COUNTY",
-                      "jurDescription": "US County Sales Tax",
-                      "jurTaxCode": null
-                    },
-                    {
-                      "rate": 0.015,
-                      "jurType": "US_DISTRICT_SALES_TAX",
-                      "jurName": "US_DISTRICT",
-                      "jurDescription": "US District Sales Tax",
-                      "jurTaxCode": "37"
-                    }
-                  ],
-                  "service": {
-                    "adjustmentType": "SERVICE_TAXABLE",
-                    "taxable": "N",
-                    "description": "Labor portion, separately stated"
-                  },
-                  "shipping": {
-                    "adjustmentType": "FREIGHT_TAXABLE",
-                    "taxable": "N",
-                    "description": "Freight portion, separately stated"
-                  },
-                  "sourcingRules": {
-                    "adjustmentType": "ORIGIN_DESTINATION",
-                    "description": "Destination Based Taxation",
-                    "value": "D"
-                  },
-                  "taxSummaries": [
-                    {
-                      "rate": 0.0775,
-                      "taxType": "SALES_TAX",
-                      "summaryName": "Total Base Sales Tax",
-                      "displayRates": [
-                        {
-                          "name": "State",
-                          "rate": 0.06
-                        },
-                        {
-                          "name": "County",
-                          "rate": 0.0025
-                        },
-                        {
-                          "name": "District",
-                          "rate": 0.015
-                        }
-                      ]
-                    },
-                    {
-                      "rate": 0.0775,
-                      "taxType": "USE_TAX",
-                      "summaryName": "Total Base Use Tax",
-                      "displayRates": []
-                    }
-                  ],
-                  "addressDetail": {
-                    "normalizedAddress": "200 Spectrum Center Dr, Irvine, CA 92618-5003, United States",
-                    "incorporated": "true",
-                    "geoLat": 33.65253,
-                    "geoLng": -117.74794
-                  }
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Unauthorized – invalid or missing API key",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/V60Response"
-                },
-                "example": {
-                  "metadata": {
-                    "version": "v60",
-                    "response": {
-                      "code": 101,
-                      "name": "RESPONSE_CODE_INVALID_KEY",
-                      "message": "Key format is not valid or key not found.",
-                      "definition": ""
-                    }
-                  },
-                  "baseRates": [],
-                  "service": {},
-                  "shipping": {},
-                  "sourcingRules": {},
-                  "taxSummaries": [],
-                  "addressDetail": {}
-                }
-              }
-            }
-          },
-          "403": {
-            "description": "Forbidden – feature or international rates not enabled for this key",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/V60Response"
-                }
-              }
-            }
-          },
-          "405": {
-            "description": "Method Not Allowed – requested feature or version not enabled for current plan",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/V60Response"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Unprocessable Entity – invalid parameters, incomplete address, or no result found",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/V60Response"
-                }
-              }
-            }
-          },
-          "429": {
-            "description": "Too Many Requests – API request limit reached",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/V60Response"
-                }
-              }
-            }
-          },
-          "500": {
-            "description": "Internal Server Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/V60Response"
-                }
-              }
-            }
+          "status": {
+            "description": "Component status",
+            "enum": [
+              "healthy",
+              "degraded",
+              "unhealthy"
+            ],
+            "type": "string"
           }
         },
-        "security": [
-          {
-            "ApiKeyQuery": []
-          },
-          {
-            "ApiKeyHeader": []
-          }
-        ]
-      }
-    }
-  },
-  "components": {
-    "securitySchemes": {
-      "ApiKeyQuery": {
-        "type": "apiKey",
-        "in": "query",
-        "name": "key",
-        "description": "API key passed as a query parameter"
-      },
-      "ApiKeyHeader": {
-        "type": "apiKey",
-        "in": "header",
-        "name": "X-API-KEY",
-        "description": "API key passed in a request header"
-      }
-    },
-    "schemas": {
-      "V60Response": {
-        "type": "object",
-        "description": "v6.0 structured tax rate response",
         "required": [
-          "metadata",
-          "baseRates",
-          "service",
-          "shipping",
-          "sourcingRules",
-          "taxSummaries",
-          "addressDetail"
+          "status"
         ],
-        "properties": {
-          "metadata": {
-            "$ref": "#/components/schemas/MetadataV60"
-          },
-          "baseRates": {
-            "type": "array",
-            "description": "Base tax rates broken down by jurisdiction",
-            "items": {
-              "$ref": "#/components/schemas/BaseRateV60"
-            }
-          },
-          "service": {
-            "$ref": "#/components/schemas/ServiceV60"
-          },
-          "shipping": {
-            "$ref": "#/components/schemas/ShippingV60"
-          },
-          "sourcingRules": {
-            "$ref": "#/components/schemas/OriginDestinationV60"
-          },
-          "taxSummaries": {
-            "type": "array",
-            "description": "Aggregated tax rate summaries (sales tax and use tax totals)",
-            "items": {
-              "$ref": "#/components/schemas/TaxSummaryV60"
-            }
-          },
-          "productDetail": {
-            "$ref": "#/components/schemas/ProductDetailV60",
-            "description": "Product-specific taxability detail. Present only when `taxabilityCode` is provided in the request."
-          },
-          "addressDetail": {
-            "$ref": "#/components/schemas/AddressDetailV60"
-          }
-        }
+        "type": "object"
       },
-      "MetadataV60": {
-        "type": "object",
-        "description": "Response metadata including API version and response status",
-        "required": [
-          "version",
-          "response"
-        ],
+      "ErrorDetail": {
+        "additionalProperties": false,
         "properties": {
-          "version": {
-            "type": "string",
-            "description": "API version identifier",
-            "examples": [
-              "v60"
-            ]
-          },
-          "response": {
-            "$ref": "#/components/schemas/ResponseInfoV60"
-          }
-        }
-      },
-      "ResponseInfoV60": {
-        "type": "object",
-        "description": "Structured response status information",
-        "required": [
-          "code",
-          "name",
-          "message"
-        ],
-        "properties": {
-          "code": {
-            "type": "integer",
-            "description": "Numeric response code. 100 indicates success; other values indicate specific error conditions.",
-            "examples": [
-              100
-            ]
-          },
-          "name": {
-            "type": "string",
-            "description": "Machine-readable response code name",
-            "examples": [
-              "RESPONSE_CODE_SUCCESS"
-            ]
+          "location": {
+            "description": "Where the error occurred, e.g. 'body.items[3].tags' or 'path.thing-id'",
+            "type": "string"
           },
           "message": {
-            "type": "string",
-            "description": "Human-readable response message",
+            "description": "Error message text",
+            "type": "string"
+          },
+          "value": {
+            "description": "The value at the given location"
+          }
+        },
+        "type": "object"
+      },
+      "ErrorModel": {
+        "additionalProperties": false,
+        "properties": {
+          "detail": {
+            "description": "A human-readable explanation specific to this occurrence of the problem.",
             "examples": [
-              "Successful API Request."
+              "Property foo is required but is missing."
+            ],
+            "type": "string"
+          },
+          "errors": {
+            "description": "Optional list of individual error details",
+            "items": {
+              "$ref": "#/components/schemas/ErrorDetail"
+            },
+            "type": [
+              "array",
+              "null"
             ]
           },
-          "definition": {
-            "type": "string",
-            "description": "Optional extended definition or URL for the response code"
-          }
-        }
-      },
-      "BaseRateV60": {
-        "type": "object",
-        "description": "Individual tax rate for a single jurisdiction",
-        "required": [
-          "rate",
-          "jurType",
-          "jurName",
-          "jurDescription"
-        ],
-        "properties": {
-          "rate": {
-            "type": "number",
-            "format": "float",
-            "description": "Tax rate as a decimal (e.g. 0.06 = 6%)"
+          "instance": {
+            "description": "A URI reference that identifies the specific occurrence of the problem.",
+            "examples": [
+              "https://example.com/error-log/abc123"
+            ],
+            "format": "uri",
+            "type": "string"
           },
-          "jurType": {
-            "type": "string",
-            "description": "Jurisdiction tax type",
+          "status": {
+            "description": "HTTP status code",
+            "examples": [
+              400
+            ],
+            "format": "int64",
+            "type": "integer"
+          },
+          "title": {
+            "description": "A short, human-readable summary of the problem type. This value should not change between occurrences of the error.",
+            "examples": [
+              "Bad Request"
+            ],
+            "type": "string"
+          },
+          "type": {
+            "default": "about:blank",
+            "description": "A URI reference to human-readable documentation for the error.",
+            "examples": [
+              "https://example.com/errors/example"
+            ],
+            "format": "uri",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "HealthResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "components": {
+            "additionalProperties": {
+              "$ref": "#/components/schemas/Component"
+            },
+            "description": "Component health statuses",
+            "type": "object"
+          },
+          "status": {
+            "description": "Overall system status",
+            "enum": [
+              "healthy",
+              "degraded",
+              "unhealthy"
+            ],
+            "type": "string"
+          },
+          "timestamp": {
+            "description": "Health check timestamp",
+            "format": "date-time",
+            "type": "string"
+          },
+          "version": {
+            "description": "API version",
+            "type": "string"
+          }
+        },
+        "required": [
+          "status",
+          "version",
+          "timestamp",
+          "components"
+        ],
+        "type": "object"
+      },
+      "MetadataResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "buildTime": {
+            "description": "Build timestamp",
+            "type": "string"
+          },
+          "environment": {
+            "description": "Environment name",
+            "type": "string"
+          },
+          "features": {
+            "additionalProperties": {
+              "type": "boolean"
+            },
+            "description": "Enabled features",
+            "type": "object"
+          },
+          "gitCommit": {
+            "description": "Git commit hash",
+            "type": "string"
+          },
+          "metadata": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "description": "Additional metadata",
+            "type": "object"
+          },
+          "version": {
+            "description": "API version",
+            "type": "string"
+          }
+        },
+        "required": [
+          "version",
+          "environment",
+          "buildTime",
+          "gitCommit",
+          "features",
+          "metadata"
+        ],
+        "type": "object"
+      },
+      "MetricsResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "core_request_count": {
+            "description": "Core request count",
+            "format": "int64",
+            "type": "integer"
+          },
+          "core_request_limit": {
+            "description": "Core request limit",
+            "format": "int64",
+            "type": "integer"
+          },
+          "core_usage_percent": {
+            "description": "Core usage percentage",
+            "format": "double",
+            "type": "number"
+          },
+          "geo_enabled": {
+            "description": "Geo features enabled",
+            "type": "boolean"
+          },
+          "geo_request_count": {
+            "description": "Geo request count",
+            "format": "int64",
+            "type": "integer"
+          },
+          "geo_request_limit": {
+            "description": "Geo request limit",
+            "format": "int64",
+            "type": "integer"
+          },
+          "geo_usage_percent": {
+            "description": "Geo usage percentage",
+            "format": "double",
+            "type": "number"
+          },
+          "is_active": {
+            "description": "Account active status",
+            "type": "boolean"
+          },
+          "last_updated": {
+            "description": "Last update timestamp",
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "core_request_count",
+          "core_request_limit",
+          "core_usage_percent",
+          "geo_enabled",
+          "geo_request_count",
+          "geo_request_limit",
+          "geo_usage_percent",
+          "is_active",
+          "last_updated"
+        ],
+        "type": "object"
+      },
+      "TICData": {
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "description": "TIC code",
+            "type": "string"
+          },
+          "label": {
+            "description": "TIC description",
+            "type": "string"
+          },
+          "nl_label": {
+            "description": "Non-localized TIC description",
+            "type": "string"
+          },
+          "nl_title": {
+            "description": "Non-localized TIC title",
+            "type": "string"
+          },
+          "parent": {
+            "description": "Parent TIC code",
+            "type": "string"
+          },
+          "title": {
+            "description": "TIC title",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "parent",
+          "title",
+          "label",
+          "nl_title",
+          "nl_label"
+        ],
+        "type": "object"
+      },
+      "TICEntry": {
+        "additionalProperties": false,
+        "properties": {
+          "tic": {
+            "$ref": "#/components/schemas/TICData",
+            "description": "TIC record"
+          }
+        },
+        "required": [
+          "tic"
+        ],
+        "type": "object"
+      },
+      "TICResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "tic_list": {
+            "description": "List of TIC codes",
+            "items": {
+              "$ref": "#/components/schemas/TICEntry"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "tic_list"
+        ],
+        "type": "object"
+      },
+      "V10Response": {
+        "additionalProperties": false,
+        "properties": {
+          "rCode": {
+            "description": "Response code (100=success)",
+            "examples": [
+              100
+            ],
+            "format": "int64",
+            "type": "integer"
+          },
+          "results": {
+            "description": "Tax rate results",
+            "items": {
+              "$ref": "#/components/schemas/V10TaxResult"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "version": {
+            "description": "API version",
+            "type": "string"
+          }
+        },
+        "required": [
+          "version",
+          "rCode",
+          "results"
+        ],
+        "type": "object"
+      },
+      "V10TaxResult": {
+        "additionalProperties": false,
+        "properties": {
+          "geoCity": {
+            "description": "Geocoded city name",
+            "type": "string"
+          },
+          "geoCounty": {
+            "description": "Geocoded county name",
+            "type": "string"
+          },
+          "geoPostalCode": {
+            "description": "Geocoded postal code",
+            "type": "string"
+          },
+          "geoState": {
+            "description": "Geocoded state",
+            "type": "string"
+          },
+          "taxSales": {
+            "description": "Total sales tax rate",
+            "format": "float",
+            "type": "number"
+          },
+          "taxUse": {
+            "description": "Total use tax rate",
+            "format": "float",
+            "type": "number"
+          },
+          "txbFreight": {
+            "description": "Freight taxability",
+            "type": "string"
+          },
+          "txbService": {
+            "description": "Service taxability",
+            "type": "string"
+          }
+        },
+        "required": [
+          "geoPostalCode",
+          "geoCity",
+          "geoCounty",
+          "geoState",
+          "taxSales",
+          "taxUse",
+          "txbService",
+          "txbFreight"
+        ],
+        "type": "object"
+      },
+      "V20Response": {
+        "additionalProperties": false,
+        "properties": {
+          "rCode": {
+            "description": "Response code (100=success)",
+            "format": "int64",
+            "type": "integer"
+          },
+          "results": {
+            "description": "Tax rate results",
+            "items": {
+              "$ref": "#/components/schemas/V20TaxResult"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "version": {
+            "description": "API version",
+            "type": "string"
+          }
+        },
+        "required": [
+          "version",
+          "rCode",
+          "results"
+        ],
+        "type": "object"
+      },
+      "V20TaxResult": {
+        "additionalProperties": false,
+        "properties": {
+          "citySalesTax": {
+            "description": "City sales tax rate",
+            "format": "float",
+            "type": "number"
+          },
+          "cityTaxCode": {
+            "description": "City tax code",
+            "type": "string"
+          },
+          "cityUseTax": {
+            "description": "City use tax rate",
+            "format": "float",
+            "type": "number"
+          },
+          "countySalesTax": {
+            "description": "County sales tax rate",
+            "format": "float",
+            "type": "number"
+          },
+          "countyTaxCode": {
+            "description": "County tax code",
+            "type": "string"
+          },
+          "countyUseTax": {
+            "description": "County use tax rate",
+            "format": "float",
+            "type": "number"
+          },
+          "geoCity": {
+            "description": "Geocoded city name",
+            "type": "string"
+          },
+          "geoCounty": {
+            "description": "Geocoded county name",
+            "type": "string"
+          },
+          "geoPostalCode": {
+            "description": "Geocoded postal code",
+            "type": "string"
+          },
+          "geoState": {
+            "description": "Geocoded state",
+            "type": "string"
+          },
+          "stateSalesTax": {
+            "description": "State sales tax rate",
+            "format": "float",
+            "type": "number"
+          },
+          "stateUseTax": {
+            "description": "State use tax rate",
+            "format": "float",
+            "type": "number"
+          },
+          "taxSales": {
+            "description": "Total sales tax rate",
+            "format": "float",
+            "type": "number"
+          },
+          "taxUse": {
+            "description": "Total use tax rate",
+            "format": "float",
+            "type": "number"
+          },
+          "txbFreight": {
+            "description": "Freight taxability",
+            "type": "string"
+          },
+          "txbService": {
+            "description": "Service taxability",
+            "type": "string"
+          }
+        },
+        "required": [
+          "stateSalesTax",
+          "stateUseTax",
+          "citySalesTax",
+          "cityUseTax",
+          "cityTaxCode",
+          "countySalesTax",
+          "countyUseTax",
+          "countyTaxCode",
+          "geoPostalCode",
+          "geoCity",
+          "geoCounty",
+          "geoState",
+          "taxSales",
+          "taxUse",
+          "txbService",
+          "txbFreight"
+        ],
+        "type": "object"
+      },
+      "V40Response": {
+        "additionalProperties": false,
+        "properties": {
+          "rCode": {
+            "description": "Response code (100=success)",
+            "format": "int64",
+            "type": "integer"
+          },
+          "results": {
+            "description": "Tax rate results",
+            "items": {
+              "$ref": "#/components/schemas/V40TaxResult"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "version": {
+            "description": "API version",
+            "type": "string"
+          }
+        },
+        "required": [
+          "version",
+          "rCode",
+          "results"
+        ],
+        "type": "object"
+      },
+      "V40TaxResult": {
+        "additionalProperties": false,
+        "properties": {
+          "citySalesTax": {
+            "description": "City sales tax rate",
+            "format": "float",
+            "type": "number"
+          },
+          "cityTaxCode": {
+            "description": "City tax code",
+            "type": "string"
+          },
+          "cityUseTax": {
+            "description": "City use tax rate",
+            "format": "float",
+            "type": "number"
+          },
+          "countySalesTax": {
+            "description": "County sales tax rate",
+            "format": "float",
+            "type": "number"
+          },
+          "countyTaxCode": {
+            "description": "County tax code",
+            "type": "string"
+          },
+          "countyUseTax": {
+            "description": "County use tax rate",
+            "format": "float",
+            "type": "number"
+          },
+          "district1Code": {
+            "description": "District 1 code",
+            "type": "string"
+          },
+          "district1SalesTax": {
+            "description": "District 1 sales tax",
+            "format": "float",
+            "type": "number"
+          },
+          "district1UseTax": {
+            "description": "District 1 use tax",
+            "format": "float",
+            "type": "number"
+          },
+          "districtSalesTax": {
+            "description": "Total district sales tax",
+            "format": "float",
+            "type": "number"
+          },
+          "districtUseTax": {
+            "description": "Total district use tax",
+            "format": "float",
+            "type": "number"
+          },
+          "geoCity": {
+            "description": "Geocoded city name",
+            "type": "string"
+          },
+          "geoCounty": {
+            "description": "Geocoded county name",
+            "type": "string"
+          },
+          "geoPostalCode": {
+            "description": "Geocoded postal code",
+            "type": "string"
+          },
+          "geoState": {
+            "description": "Geocoded state",
+            "type": "string"
+          },
+          "stateSalesTax": {
+            "description": "State sales tax rate",
+            "format": "float",
+            "type": "number"
+          },
+          "stateUseTax": {
+            "description": "State use tax rate",
+            "format": "float",
+            "type": "number"
+          },
+          "taxSales": {
+            "description": "Total sales tax rate",
+            "format": "float",
+            "type": "number"
+          },
+          "taxUse": {
+            "description": "Total use tax rate",
+            "format": "float",
+            "type": "number"
+          },
+          "txbFreight": {
+            "description": "Freight taxability",
+            "type": "string"
+          },
+          "txbService": {
+            "description": "Service taxability",
+            "type": "string"
+          }
+        },
+        "required": [
+          "districtSalesTax",
+          "districtUseTax",
+          "district1Code",
+          "district1SalesTax",
+          "district1UseTax",
+          "stateSalesTax",
+          "stateUseTax",
+          "citySalesTax",
+          "cityUseTax",
+          "cityTaxCode",
+          "countySalesTax",
+          "countyUseTax",
+          "countyTaxCode",
+          "geoPostalCode",
+          "geoCity",
+          "geoCounty",
+          "geoState",
+          "taxSales",
+          "taxUse",
+          "txbService",
+          "txbFreight"
+        ],
+        "type": "object"
+      },
+      "V50AddressDetail": {
+        "additionalProperties": false,
+        "properties": {
+          "geoLat": {
+            "description": "Geocoded latitude",
+            "format": "double",
+            "type": "number"
+          },
+          "geoLng": {
+            "description": "Geocoded longitude",
+            "format": "double",
+            "type": "number"
+          },
+          "incorporated": {
+            "description": "Incorporation status",
+            "type": "string"
+          },
+          "normalizedAddress": {
+            "description": "Normalized address",
+            "type": "string"
+          }
+        },
+        "required": [
+          "normalizedAddress",
+          "incorporated",
+          "geoLat",
+          "geoLng"
+        ],
+        "type": "object"
+      },
+      "V50Response": {
+        "additionalProperties": false,
+        "properties": {
+          "addressDetail": {
+            "$ref": "#/components/schemas/V50AddressDetail",
+            "description": "Address details"
+          },
+          "rCode": {
+            "description": "Response code (100=success)",
+            "format": "int64",
+            "type": "integer"
+          },
+          "results": {
+            "description": "Tax rate results",
+            "items": {
+              "$ref": "#/components/schemas/V50TaxResult"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "satTaxDetail": {
+            "$ref": "#/components/schemas/V50SingleArticleTax",
+            "description": "Tennessee Single Article Tax details"
+          },
+          "version": {
+            "description": "API version",
+            "type": "string"
+          }
+        },
+        "required": [
+          "version",
+          "rCode",
+          "results",
+          "addressDetail"
+        ],
+        "type": "object"
+      },
+      "V50SingleArticleTax": {
+        "additionalProperties": false,
+        "properties": {
+          "appliedTotal": {
+            "description": "Applied total amount",
+            "type": "string"
+          },
+          "countyTaxRate": {
+            "description": "County tax rate",
+            "type": "string"
+          },
+          "localTaxLimit": {
+            "description": "Local tax limit",
+            "type": "string"
+          },
+          "localTaxTotal": {
+            "description": "Local tax total",
+            "type": "string"
+          },
+          "stateAdditionalTaxTotal": {
+            "description": "State additional tax total",
+            "type": "string"
+          }
+        },
+        "required": [
+          "appliedTotal",
+          "countyTaxRate",
+          "localTaxLimit",
+          "localTaxTotal",
+          "stateAdditionalTaxTotal"
+        ],
+        "type": "object"
+      },
+      "V50TaxResult": {
+        "additionalProperties": false,
+        "properties": {
+          "citySalesTax": {
+            "description": "City sales tax rate",
+            "format": "float",
+            "type": "number"
+          },
+          "cityTaxCode": {
+            "description": "City tax code",
+            "type": "string"
+          },
+          "cityUseTax": {
+            "description": "City use tax rate",
+            "format": "float",
+            "type": "number"
+          },
+          "countySalesTax": {
+            "description": "County sales tax rate",
+            "format": "float",
+            "type": "number"
+          },
+          "countyTaxCode": {
+            "description": "County tax code",
+            "type": "string"
+          },
+          "countyUseTax": {
+            "description": "County use tax rate",
+            "format": "float",
+            "type": "number"
+          },
+          "district1Code": {
+            "description": "District 1 code",
+            "type": "string"
+          },
+          "district1SalesTax": {
+            "description": "District 1 sales tax",
+            "format": "float",
+            "type": "number"
+          },
+          "district1UseTax": {
+            "description": "District 1 use tax",
+            "format": "float",
+            "type": "number"
+          },
+          "district2Code": {
+            "description": "District 2 code",
+            "type": "string"
+          },
+          "district2SalesTax": {
+            "description": "District 2 sales tax",
+            "format": "double",
+            "type": "number"
+          },
+          "district2UseTax": {
+            "description": "District 2 use tax",
+            "format": "double",
+            "type": "number"
+          },
+          "district3Code": {
+            "description": "District 3 code",
+            "type": "string"
+          },
+          "district3SalesTax": {
+            "description": "District 3 sales tax",
+            "format": "double",
+            "type": "number"
+          },
+          "district3UseTax": {
+            "description": "District 3 use tax",
+            "format": "double",
+            "type": "number"
+          },
+          "district4Code": {
+            "description": "District 4 code",
+            "type": "string"
+          },
+          "district4SalesTax": {
+            "description": "District 4 sales tax",
+            "format": "double",
+            "type": "number"
+          },
+          "district4UseTax": {
+            "description": "District 4 use tax",
+            "format": "double",
+            "type": "number"
+          },
+          "district5Code": {
+            "description": "District 5 code",
+            "type": "string"
+          },
+          "district5SalesTax": {
+            "description": "District 5 sales tax",
+            "format": "double",
+            "type": "number"
+          },
+          "district5UseTax": {
+            "description": "District 5 use tax",
+            "format": "double",
+            "type": "number"
+          },
+          "districtSalesTax": {
+            "description": "Total district sales tax",
+            "format": "float",
+            "type": "number"
+          },
+          "districtUseTax": {
+            "description": "Total district use tax",
+            "format": "float",
+            "type": "number"
+          },
+          "geoCity": {
+            "description": "Geocoded city name",
+            "type": "string"
+          },
+          "geoCounty": {
+            "description": "Geocoded county name",
+            "type": "string"
+          },
+          "geoPostalCode": {
+            "description": "Geocoded postal code",
+            "type": "string"
+          },
+          "geoState": {
+            "description": "Geocoded state",
+            "type": "string"
+          },
+          "originDestination": {
+            "description": "Origin or destination based",
+            "type": "string"
+          },
+          "stateSalesTax": {
+            "description": "State sales tax rate",
+            "format": "float",
+            "type": "number"
+          },
+          "stateUseTax": {
+            "description": "State use tax rate",
+            "format": "float",
+            "type": "number"
+          },
+          "taxSales": {
+            "description": "Total sales tax rate",
+            "format": "float",
+            "type": "number"
+          },
+          "taxUse": {
+            "description": "Total use tax rate",
+            "format": "float",
+            "type": "number"
+          },
+          "txbFreight": {
+            "description": "Freight taxability",
+            "type": "string"
+          },
+          "txbService": {
+            "description": "Service taxability",
+            "type": "string"
+          }
+        },
+        "required": [
+          "district2Code",
+          "district2SalesTax",
+          "district2UseTax",
+          "district3Code",
+          "district3SalesTax",
+          "district3UseTax",
+          "district4Code",
+          "district4SalesTax",
+          "district4UseTax",
+          "district5Code",
+          "district5SalesTax",
+          "district5UseTax",
+          "originDestination",
+          "districtSalesTax",
+          "districtUseTax",
+          "district1Code",
+          "district1SalesTax",
+          "district1UseTax",
+          "stateSalesTax",
+          "stateUseTax",
+          "citySalesTax",
+          "cityUseTax",
+          "cityTaxCode",
+          "countySalesTax",
+          "countyUseTax",
+          "countyTaxCode",
+          "geoPostalCode",
+          "geoCity",
+          "geoCounty",
+          "geoState",
+          "taxSales",
+          "taxUse",
+          "txbService",
+          "txbFreight"
+        ],
+        "type": "object"
+      },
+      "V60AddressDetail": {
+        "additionalProperties": false,
+        "properties": {
+          "geoLat": {
+            "description": "Geocoded latitude",
+            "format": "float",
+            "type": "number"
+          },
+          "geoLng": {
+            "description": "Geocoded longitude",
+            "format": "float",
+            "type": "number"
+          },
+          "incorporated": {
+            "description": "Incorporation status",
+            "enum": [
+              "true",
+              "false"
+            ],
+            "type": "string"
+          },
+          "normalizedAddress": {
+            "description": "Normalized address",
+            "type": "string"
+          }
+        },
+        "required": [
+          "normalizedAddress",
+          "incorporated",
+          "geoLat",
+          "geoLng"
+        ],
+        "type": "object"
+      },
+      "V60BaseRate": {
+        "additionalProperties": false,
+        "properties": {
+          "jur_description": {
+            "description": "Jurisdiction description",
+            "type": "string"
+          },
+          "jur_name": {
+            "description": "Jurisdiction name",
+            "enum": [
+              "US_STATE",
+              "US_COUNTY",
+              "US_CITY",
+              "US_DISTRICT"
+            ],
+            "type": "string"
+          },
+          "jur_tax_code": {
+            "description": "Tax code for jurisdiction",
+            "type": "string"
+          },
+          "jur_type": {
+            "description": "Jurisdiction type",
             "enum": [
               "US_STATE_SALES_TAX",
               "US_STATE_USE_TAX",
@@ -478,413 +1036,1801 @@
               "US_CITY_USE_TAX",
               "US_DISTRICT_SALES_TAX",
               "US_DISTRICT_USE_TAX"
-            ]
-          },
-          "jurName": {
-            "type": "string",
-            "description": "Jurisdiction level name",
-            "enum": [
-              "US_STATE",
-              "US_COUNTY",
-              "US_CITY",
-              "US_DISTRICT"
-            ]
-          },
-          "jurDescription": {
-            "type": "string",
-            "description": "Human-readable jurisdiction description"
-          },
-          "jurTaxCode": {
-            "type": [
-              "string",
-              "null"
             ],
-            "description": "Tax code for the jurisdiction. Null when no specific code applies."
+            "type": "string"
+          },
+          "rate": {
+            "description": "Tax rate",
+            "format": "float",
+            "type": "number"
+          },
+          "rate_id": {
+            "description": "Rate identifier from tax table",
+            "type": "string"
           }
-        }
-      },
-      "ServiceV60": {
-        "type": "object",
-        "description": "Service (labor) taxability for the jurisdiction",
+        },
         "required": [
-          "adjustmentType",
-          "taxable",
-          "description"
+          "rate",
+          "rate_id",
+          "jur_type",
+          "jur_name",
+          "jur_description",
+          "jur_tax_code"
         ],
+        "type": "object"
+      },
+      "V60Metadata": {
+        "additionalProperties": false,
         "properties": {
-          "adjustmentType": {
-            "type": "string",
-            "description": "Adjustment type identifier",
+          "rCode": {
+            "description": "Response code (100=success)",
             "examples": [
-              "SERVICE_TAXABLE"
-            ]
+              100
+            ],
+            "format": "int64",
+            "type": "integer"
           },
-          "taxable": {
-            "type": "string",
-            "description": "Whether services are taxable",
-            "enum": [
-              "Y",
-              "N"
-            ]
-          },
-          "description": {
-            "type": "string",
-            "description": "Human-readable taxability description"
-          }
-        }
-      },
-      "ShippingV60": {
-        "type": "object",
-        "description": "Shipping/freight taxability for the jurisdiction",
-        "required": [
-          "adjustmentType",
-          "taxable",
-          "description"
-        ],
-        "properties": {
-          "adjustmentType": {
-            "type": "string",
-            "description": "Adjustment type identifier",
+          "version": {
+            "description": "API version",
             "examples": [
-              "FREIGHT_TAXABLE"
-            ]
-          },
-          "taxable": {
-            "type": "string",
-            "description": "Whether shipping is taxable",
-            "enum": [
-              "Y",
-              "N"
-            ]
-          },
-          "description": {
-            "type": "string",
-            "description": "Human-readable taxability description"
+              "v60"
+            ],
+            "type": "string"
           }
-        }
-      },
-      "OriginDestinationV60": {
-        "type": "object",
-        "description": "Sourcing rules indicating origin-based or destination-based taxation",
+        },
         "required": [
-          "adjustmentType",
-          "description",
-          "value"
+          "version",
+          "rCode"
         ],
+        "type": "object"
+      },
+      "V60OriginDestination": {
+        "additionalProperties": false,
         "properties": {
-          "adjustmentType": {
-            "type": "string",
-            "description": "Adjustment type identifier",
+          "adjustment_type": {
+            "description": "Origin/destination type",
             "examples": [
               "ORIGIN_DESTINATION"
-            ]
+            ],
+            "type": "string"
           },
           "description": {
-            "type": "string",
-            "description": "Human-readable sourcing rule description"
+            "description": "Origin/destination description",
+            "type": "string"
           },
           "value": {
-            "type": "string",
-            "description": "O = Origin-based, D = Destination-based",
+            "description": "Origin/destination value",
             "enum": [
               "O",
               "D"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "adjustment_type",
+          "description",
+          "value"
+        ],
+        "type": "object"
+      },
+      "V60Response": {
+        "additionalProperties": false,
+        "properties": {
+          "addressDetail": {
+            "$ref": "#/components/schemas/V60AddressDetail",
+            "description": "Address details"
+          },
+          "base_rates": {
+            "description": "Base tax rates by jurisdiction",
+            "items": {
+              "$ref": "#/components/schemas/V60BaseRate"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "metadata": {
+            "$ref": "#/components/schemas/V60Metadata",
+            "description": "Response metadata"
+          },
+          "origin_destination": {
+            "$ref": "#/components/schemas/V60OriginDestination",
+            "description": "Origin/destination taxation info"
+          },
+          "service": {
+            "$ref": "#/components/schemas/V60Service",
+            "description": "Service taxability information"
+          },
+          "shipping": {
+            "$ref": "#/components/schemas/V60Shipping",
+            "description": "Shipping taxability information"
+          },
+          "tax_summaries": {
+            "description": "Tax rate summaries",
+            "items": {
+              "$ref": "#/components/schemas/V60TaxSummary"
+            },
+            "type": [
+              "array",
+              "null"
             ]
           }
-        }
-      },
-      "TaxSummaryV60": {
-        "type": "object",
-        "description": "Aggregated tax rate summary (e.g. total sales tax, total use tax)",
+        },
         "required": [
-          "rate",
-          "taxType",
-          "summaryName",
-          "displayRates"
+          "metadata",
+          "base_rates",
+          "service",
+          "shipping",
+          "origin_destination",
+          "tax_summaries",
+          "addressDetail"
         ],
+        "type": "object"
+      },
+      "V60Service": {
+        "additionalProperties": false,
+        "properties": {
+          "adjustment_type": {
+            "description": "Service adjustment type",
+            "examples": [
+              "SERVICE_TAXABLE"
+            ],
+            "type": "string"
+          },
+          "description": {
+            "description": "Service description",
+            "type": "string"
+          },
+          "taxable": {
+            "description": "Taxability indicator",
+            "enum": [
+              "Y",
+              "N"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "adjustment_type",
+          "taxable",
+          "description"
+        ],
+        "type": "object"
+      },
+      "V60Shipping": {
+        "additionalProperties": false,
+        "properties": {
+          "adjustment_type": {
+            "description": "Shipping adjustment type",
+            "examples": [
+              "FREIGHT_TAXABLE"
+            ],
+            "type": "string"
+          },
+          "description": {
+            "description": "Shipping description",
+            "type": "string"
+          },
+          "taxable": {
+            "description": "Taxability indicator",
+            "enum": [
+              "Y",
+              "N"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "adjustment_type",
+          "taxable",
+          "description"
+        ],
+        "type": "object"
+      },
+      "V60TaxSummary": {
+        "additionalProperties": false,
         "properties": {
           "rate": {
-            "type": "number",
+            "description": "Summary tax rate",
             "format": "float",
-            "description": "Combined tax rate for this summary"
+            "type": "number"
           },
-          "taxType": {
-            "type": "string",
-            "description": "Tax type category",
+          "summary_name": {
+            "description": "Summary description",
+            "type": "string"
+          },
+          "tax_type": {
+            "description": "Tax type",
             "enum": [
               "SALES_TAX",
               "USE_TAX"
-            ]
-          },
-          "summaryName": {
-            "type": "string",
-            "description": "Human-readable summary label"
-          },
-          "displayRates": {
-            "type": "array",
-            "description": "Breakdown of individual rates contributing to this summary",
-            "items": {
-              "$ref": "#/components/schemas/DisplayRate"
-            }
+            ],
+            "type": "string"
           }
-        }
-      },
-      "DisplayRate": {
-        "type": "object",
-        "description": "Individual rate contributing to a tax summary",
+        },
         "required": [
-          "name",
-          "rate"
+          "rate",
+          "tax_type",
+          "summary_name"
         ],
-        "properties": {
-          "name": {
-            "type": "string",
-            "description": "Jurisdiction label (e.g. \"State\", \"County\", \"District\")"
-          },
-          "rate": {
-            "type": "number",
-            "format": "float",
-            "description": "Tax rate as a decimal"
-          }
-        }
+        "type": "object"
+      }
+    },
+    "securitySchemes": {
+      "ApiKeyHeader": {
+        "description": "API key in header",
+        "in": "header",
+        "name": "X-API-KEY",
+        "type": "apiKey"
       },
-      "AddressDetailV60": {
-        "type": "object",
-        "description": "Geocoded address information for the resolved location",
-        "required": [
-          "normalizedAddress",
-          "incorporated",
-          "geoLat",
-          "geoLng"
-        ],
-        "properties": {
-          "normalizedAddress": {
-            "type": "string",
-            "description": "Normalized full address returned by the geocoder"
-          },
-          "incorporated": {
-            "type": "string",
-            "description": "Whether the location is within an incorporated area",
-            "enum": [
-              "true",
-              "false"
-            ]
-          },
-          "geoLat": {
-            "type": "number",
-            "format": "float",
-            "description": "Geocoded latitude"
-          },
-          "geoLng": {
-            "type": "number",
-            "format": "float",
-            "description": "Geocoded longitude"
-          },
-          "address": {
-            "$ref": "#/components/schemas/AddressComponentsV60",
-            "description": "Extended address components. Present only when `addressDetailExtended=true` is passed in the request."
-          }
-        }
-      },
-      "AddressComponentsV60": {
-        "type": "object",
-        "description": "Individual address components parsed from the geocoded result",
-        "required": [
-          "countryCode",
-          "countryName",
-          "stateCode",
-          "state",
-          "county",
-          "city",
-          "street",
-          "postalCode",
-          "houseNumber"
-        ],
-        "properties": {
-          "countryCode": {
-            "type": "string",
-            "description": "ISO country code"
-          },
-          "countryName": {
-            "type": "string",
-            "description": "Full country name"
-          },
-          "stateCode": {
-            "type": "string",
-            "description": "Two-letter state abbreviation"
-          },
-          "state": {
-            "type": "string",
-            "description": "Full state name"
-          },
-          "county": {
-            "type": "string",
-            "description": "County name"
-          },
-          "city": {
-            "type": "string",
-            "description": "City name"
-          },
-          "street": {
-            "type": "string",
-            "description": "Street name"
-          },
-          "postalCode": {
-            "type": "string",
-            "description": "Postal code"
-          },
-          "houseNumber": {
-            "type": "string",
-            "description": "House or building number"
-          }
-        }
-      },
-      "ProductDetailV60": {
-        "type": "object",
-        "description": "Product-specific taxability information based on the requested taxability code",
-        "required": [
-          "taxabilityCode"
-        ],
-        "properties": {
-          "taxabilityCode": {
-            "$ref": "#/components/schemas/TaxabilityCodeV60"
-          }
-        }
-      },
-      "TaxabilityCodeV60": {
-        "type": "object",
-        "description": "Taxability code details and rate rules",
-        "required": [
-          "id",
-          "stateFIPS",
-          "countyFIPS",
-          "title",
-          "label",
-          "rateActionCode",
-          "rateActionMessage",
-          "rateRules"
-        ],
-        "properties": {
-          "id": {
-            "type": "string",
-            "description": "Taxability code identifier"
-          },
-          "stateFIPS": {
-            "type": "string",
-            "description": "State FIPS code"
-          },
-          "countyFIPS": {
-            "type": "string",
-            "description": "County FIPS code"
-          },
-          "title": {
-            "type": "string",
-            "description": "Taxability code title"
-          },
-          "label": {
-            "type": "string",
-            "description": "Taxability code label"
-          },
-          "rateActionCode": {
-            "type": "string",
-            "description": "Rate action code indicating how the rate should be applied"
-          },
-          "rateActionMessage": {
-            "type": "string",
-            "description": "Human-readable rate action description"
-          },
-          "rateRules": {
-            "type": "array",
-            "description": "Jurisdiction-specific rate rules for this taxability code",
-            "items": {
-              "$ref": "#/components/schemas/RateRuleV60"
-            }
-          }
-        }
-      },
-      "RateRuleV60": {
-        "type": "object",
-        "description": "Individual rate rule for a taxability code within a jurisdiction",
-        "properties": {
-          "jurTaxCode": {
-            "type": [
-              "string",
-              "null"
-            ],
-            "description": "Jurisdiction tax code"
-          },
-          "effectiveDt": {
-            "type": [
-              "integer",
-              "null"
-            ],
-            "format": "int64",
-            "description": "Effective date as Unix timestamp"
-          },
-          "expiresDt": {
-            "type": [
-              "integer",
-              "null"
-            ],
-            "format": "int64",
-            "description": "Expiration date as Unix timestamp"
-          },
-          "effectiveTaxRate": {
-            "type": [
-              "number",
-              "null"
-            ],
-            "format": "float",
-            "description": "Effective tax rate for this rule"
-          },
-          "percentTaxable": {
-            "type": [
-              "number",
-              "null"
-            ],
-            "format": "float",
-            "description": "Percentage of the item that is taxable"
-          },
-          "exemptUnder": {
-            "type": [
-              "number",
-              "null"
-            ],
-            "format": "float",
-            "description": "Exempt if item total is under this amount"
-          },
-          "exemptOver": {
-            "type": [
-              "number",
-              "null"
-            ],
-            "format": "float",
-            "description": "Exempt if item total is over this amount"
-          },
-          "taxablePortionOver": {
-            "type": [
-              "number",
-              "null"
-            ],
-            "format": "float",
-            "description": "Only the portion of the item over this amount is taxable"
-          },
-          "isDestinationTaxType": {
-            "type": [
-              "boolean",
-              "null"
-            ],
-            "description": "Whether this rule applies under destination-based sourcing"
-          },
-          "isFoodDrug": {
-            "type": [
-              "boolean",
-              "null"
-            ],
-            "description": "Whether this rule applies to food and drug items"
-          }
-        }
+      "ApiKeyQuery": {
+        "description": "API key for authentication",
+        "in": "query",
+        "name": "key",
+        "type": "apiKey"
       }
     }
-  }
+  },
+  "info": {
+    "contact": {
+      "email": "support@ziptax.com",
+      "name": "ZipTax Support",
+      "url": "https://ziptax.com"
+    },
+    "description": "Production-ready RESTful service for US and Canadian sales tax data lookup",
+    "title": "ZipTax API",
+    "version": "5.0.0"
+  },
+  "openapi": "3.1.0",
+  "paths": {
+    "/account/metrics": {
+      "get": {
+        "description": "Returns usage metrics for the authenticated account",
+        "operationId": "getAccountMetrics",
+        "parameters": [
+          {
+            "description": "API key for authentication",
+            "explode": false,
+            "in": "query",
+            "name": "key",
+            "schema": {
+              "description": "API key for authentication",
+              "maxLength": 100,
+              "minLength": 10,
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MetricsResponse"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "401": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorModel"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "422": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorModel"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          },
+          "500": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorModel"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          }
+        },
+        "security": [
+          {
+            "ApiKeyQuery": []
+          },
+          {
+            "ApiKeyHeader": []
+          }
+        ],
+        "summary": "Get Account Metrics",
+        "tags": [
+          "Account"
+        ],
+        "x-fern-audiences": [
+          "v10",
+          "v20",
+          "v30",
+          "v40",
+          "v50",
+          "v60"
+        ]
+      }
+    },
+    "/data/tic": {
+      "get": {
+        "description": "Returns Taxability Information Code (TIC) data",
+        "operationId": "getTICData",
+        "parameters": [
+          {
+            "description": "Response format",
+            "explode": false,
+            "in": "query",
+            "name": "format",
+            "schema": {
+              "default": "json",
+              "description": "Response format",
+              "enum": [
+                "json",
+                "xml"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TICResponse"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorModel"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Get TIC Codes",
+        "tags": [
+          "Data"
+        ],
+        "x-fern-audiences": [
+          "v10",
+          "v20",
+          "v30",
+          "v40",
+          "v50",
+          "v60"
+        ]
+      }
+    },
+    "/request/v10": {
+      "get": {
+        "description": "Returns basic tax rate information with 8 fields including combined rates",
+        "operationId": "getTaxRatesV10",
+        "parameters": [
+          {
+            "description": "API key for authentication",
+            "example": "your-api-key",
+            "explode": false,
+            "in": "query",
+            "name": "key",
+            "schema": {
+              "description": "API key for authentication",
+              "examples": [
+                "your-api-key"
+              ],
+              "maxLength": 100,
+              "minLength": 10,
+              "type": "string"
+            }
+          },
+          {
+            "description": "Response format",
+            "explode": false,
+            "in": "query",
+            "name": "format",
+            "schema": {
+              "default": "json",
+              "description": "Response format",
+              "enum": [
+                "json",
+                "xml"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "5-digit postal code",
+            "example": "90210",
+            "explode": false,
+            "in": "query",
+            "name": "postalcode",
+            "schema": {
+              "description": "5-digit postal code",
+              "examples": [
+                "90210"
+              ],
+              "maxLength": 5,
+              "minLength": 5,
+              "pattern": "^[0-9]{5}$",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Street address for geocoding",
+            "example": "123 Main St",
+            "explode": false,
+            "in": "query",
+            "name": "address",
+            "schema": {
+              "description": "Street address for geocoding",
+              "examples": [
+                "123 Main St"
+              ],
+              "maxLength": 100,
+              "type": "string"
+            }
+          },
+          {
+            "description": "State abbreviation",
+            "example": "CA",
+            "explode": false,
+            "in": "query",
+            "name": "state",
+            "schema": {
+              "description": "State abbreviation",
+              "examples": [
+                "CA"
+              ],
+              "maxLength": 2,
+              "minLength": 2,
+              "pattern": "^[A-Z]{2}$",
+              "type": "string"
+            }
+          },
+          {
+            "description": "City name",
+            "example": "Beverly Hills",
+            "explode": false,
+            "in": "query",
+            "name": "city",
+            "schema": {
+              "description": "City name",
+              "examples": [
+                "Beverly Hills"
+              ],
+              "maxLength": 50,
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/V10Response"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "400": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorModel"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "401": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorModel"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "422": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorModel"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          },
+          "429": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorModel"
+                }
+              }
+            },
+            "description": "Too Many Requests"
+          },
+          "500": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorModel"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          }
+        },
+        "security": [
+          {
+            "ApiKeyQuery": []
+          },
+          {
+            "ApiKeyHeader": []
+          }
+        ],
+        "summary": "Get Tax Rates (v1.0)",
+        "tags": [
+          "Tax Rates"
+        ],
+        "x-fern-audiences": [
+          "v10"
+        ]
+      }
+    },
+    "/request/v20": {
+      "get": {
+        "description": "Returns detailed tax breakdown with 16 fields including use tax rates",
+        "operationId": "getTaxRatesV20",
+        "parameters": [
+          {
+            "description": "API key for authentication",
+            "example": "your-api-key",
+            "explode": false,
+            "in": "query",
+            "name": "key",
+            "schema": {
+              "description": "API key for authentication",
+              "examples": [
+                "your-api-key"
+              ],
+              "maxLength": 100,
+              "minLength": 10,
+              "type": "string"
+            }
+          },
+          {
+            "description": "Response format",
+            "explode": false,
+            "in": "query",
+            "name": "format",
+            "schema": {
+              "default": "json",
+              "description": "Response format",
+              "enum": [
+                "json",
+                "xml"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "5-digit postal code",
+            "example": "90210",
+            "explode": false,
+            "in": "query",
+            "name": "postalcode",
+            "schema": {
+              "description": "5-digit postal code",
+              "examples": [
+                "90210"
+              ],
+              "maxLength": 5,
+              "minLength": 5,
+              "pattern": "^[0-9]{5}$",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Street address for geocoding",
+            "example": "123 Main St",
+            "explode": false,
+            "in": "query",
+            "name": "address",
+            "schema": {
+              "description": "Street address for geocoding",
+              "examples": [
+                "123 Main St"
+              ],
+              "maxLength": 100,
+              "type": "string"
+            }
+          },
+          {
+            "description": "State abbreviation",
+            "example": "CA",
+            "explode": false,
+            "in": "query",
+            "name": "state",
+            "schema": {
+              "description": "State abbreviation",
+              "examples": [
+                "CA"
+              ],
+              "maxLength": 2,
+              "minLength": 2,
+              "pattern": "^[A-Z]{2}$",
+              "type": "string"
+            }
+          },
+          {
+            "description": "City name",
+            "example": "Beverly Hills",
+            "explode": false,
+            "in": "query",
+            "name": "city",
+            "schema": {
+              "description": "City name",
+              "examples": [
+                "Beverly Hills"
+              ],
+              "maxLength": 50,
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/V20Response"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "400": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorModel"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "401": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorModel"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "422": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorModel"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          },
+          "429": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorModel"
+                }
+              }
+            },
+            "description": "Too Many Requests"
+          },
+          "500": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorModel"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          }
+        },
+        "security": [
+          {
+            "ApiKeyQuery": []
+          },
+          {
+            "ApiKeyHeader": []
+          }
+        ],
+        "summary": "Get Tax Rates (v2.0)",
+        "tags": [
+          "Tax Rates"
+        ],
+        "x-fern-audiences": [
+          "v20"
+        ]
+      }
+    },
+    "/request/v30": {
+      "get": {
+        "description": "Returns tax rates with same structure as v2.0 (compatibility version)",
+        "operationId": "getTaxRatesV30",
+        "parameters": [
+          {
+            "description": "API key for authentication",
+            "example": "your-api-key",
+            "explode": false,
+            "in": "query",
+            "name": "key",
+            "schema": {
+              "description": "API key for authentication",
+              "examples": [
+                "your-api-key"
+              ],
+              "maxLength": 100,
+              "minLength": 10,
+              "type": "string"
+            }
+          },
+          {
+            "description": "Response format",
+            "explode": false,
+            "in": "query",
+            "name": "format",
+            "schema": {
+              "default": "json",
+              "description": "Response format",
+              "enum": [
+                "json",
+                "xml"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "5-digit postal code",
+            "example": "90210",
+            "explode": false,
+            "in": "query",
+            "name": "postalcode",
+            "schema": {
+              "description": "5-digit postal code",
+              "examples": [
+                "90210"
+              ],
+              "maxLength": 5,
+              "minLength": 5,
+              "pattern": "^[0-9]{5}$",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Street address for geocoding",
+            "example": "123 Main St",
+            "explode": false,
+            "in": "query",
+            "name": "address",
+            "schema": {
+              "description": "Street address for geocoding",
+              "examples": [
+                "123 Main St"
+              ],
+              "maxLength": 100,
+              "type": "string"
+            }
+          },
+          {
+            "description": "State abbreviation",
+            "example": "CA",
+            "explode": false,
+            "in": "query",
+            "name": "state",
+            "schema": {
+              "description": "State abbreviation",
+              "examples": [
+                "CA"
+              ],
+              "maxLength": 2,
+              "minLength": 2,
+              "pattern": "^[A-Z]{2}$",
+              "type": "string"
+            }
+          },
+          {
+            "description": "City name",
+            "example": "Beverly Hills",
+            "explode": false,
+            "in": "query",
+            "name": "city",
+            "schema": {
+              "description": "City name",
+              "examples": [
+                "Beverly Hills"
+              ],
+              "maxLength": 50,
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/V20Response"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "400": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorModel"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "401": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorModel"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "422": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorModel"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          },
+          "429": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorModel"
+                }
+              }
+            },
+            "description": "Too Many Requests"
+          },
+          "500": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorModel"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          }
+        },
+        "security": [
+          {
+            "ApiKeyQuery": []
+          },
+          {
+            "ApiKeyHeader": []
+          }
+        ],
+        "summary": "Get Tax Rates (v3.0)",
+        "tags": [
+          "Tax Rates"
+        ],
+        "x-fern-audiences": [
+          "v30"
+        ]
+      }
+    },
+    "/request/v40": {
+      "get": {
+        "description": "Returns tax rates with multi-district support (22+ fields)",
+        "operationId": "getTaxRatesV40",
+        "parameters": [
+          {
+            "description": "API key for authentication",
+            "example": "your-api-key",
+            "explode": false,
+            "in": "query",
+            "name": "key",
+            "schema": {
+              "description": "API key for authentication",
+              "examples": [
+                "your-api-key"
+              ],
+              "maxLength": 100,
+              "minLength": 10,
+              "type": "string"
+            }
+          },
+          {
+            "description": "Response format",
+            "explode": false,
+            "in": "query",
+            "name": "format",
+            "schema": {
+              "default": "json",
+              "description": "Response format",
+              "enum": [
+                "json",
+                "xml"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "5-digit postal code",
+            "example": "90210",
+            "explode": false,
+            "in": "query",
+            "name": "postalcode",
+            "schema": {
+              "description": "5-digit postal code",
+              "examples": [
+                "90210"
+              ],
+              "maxLength": 5,
+              "minLength": 5,
+              "pattern": "^[0-9]{5}$",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Street address for geocoding",
+            "example": "123 Main St",
+            "explode": false,
+            "in": "query",
+            "name": "address",
+            "schema": {
+              "description": "Street address for geocoding",
+              "examples": [
+                "123 Main St"
+              ],
+              "maxLength": 100,
+              "type": "string"
+            }
+          },
+          {
+            "description": "State abbreviation",
+            "example": "CA",
+            "explode": false,
+            "in": "query",
+            "name": "state",
+            "schema": {
+              "description": "State abbreviation",
+              "examples": [
+                "CA"
+              ],
+              "maxLength": 2,
+              "minLength": 2,
+              "pattern": "^[A-Z]{2}$",
+              "type": "string"
+            }
+          },
+          {
+            "description": "City name",
+            "example": "Beverly Hills",
+            "explode": false,
+            "in": "query",
+            "name": "city",
+            "schema": {
+              "description": "City name",
+              "examples": [
+                "Beverly Hills"
+              ],
+              "maxLength": 50,
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/V40Response"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "400": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorModel"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "401": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorModel"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "422": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorModel"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          },
+          "429": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorModel"
+                }
+              }
+            },
+            "description": "Too Many Requests"
+          },
+          "500": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorModel"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          }
+        },
+        "security": [
+          {
+            "ApiKeyQuery": []
+          },
+          {
+            "ApiKeyHeader": []
+          }
+        ],
+        "summary": "Get Tax Rates (v4.0)",
+        "tags": [
+          "Tax Rates"
+        ],
+        "x-fern-audiences": [
+          "v40"
+        ]
+      }
+    },
+    "/request/v40/activate": {
+      "get": {
+        "description": "Activates v4.0 features for the account",
+        "operationId": "activateV40",
+        "parameters": [
+          {
+            "description": "API key for authentication",
+            "explode": false,
+            "in": "query",
+            "name": "key",
+            "schema": {
+              "description": "API key for authentication",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": {},
+                  "type": "object"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorModel"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "ApiKeyQuery": []
+          },
+          {
+            "ApiKeyHeader": []
+          }
+        ],
+        "summary": "Activate v4.0 Features",
+        "tags": [
+          "Tax Rates"
+        ],
+        "x-fern-audiences": [
+          "v40"
+        ]
+      }
+    },
+    "/request/v50": {
+      "get": {
+        "description": "Returns comprehensive tax rates with geocoding support, multi-district breakdown,\n\t\t\tand Tennessee Single Article Tax calculations. Supports both USA and Canada.",
+        "operationId": "getTaxRatesV50",
+        "parameters": [
+          {
+            "description": "API key for authentication",
+            "example": "your-api-key",
+            "explode": false,
+            "in": "query",
+            "name": "key",
+            "schema": {
+              "description": "API key for authentication",
+              "examples": [
+                "your-api-key"
+              ],
+              "maxLength": 100,
+              "minLength": 10,
+              "type": "string"
+            }
+          },
+          {
+            "description": "Response format",
+            "explode": false,
+            "in": "query",
+            "name": "format",
+            "schema": {
+              "default": "json",
+              "description": "Response format",
+              "enum": [
+                "json",
+                "xml"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Country code (USA/CAN)",
+            "explode": false,
+            "in": "query",
+            "name": "countryCode",
+            "schema": {
+              "default": "USA",
+              "description": "Country code (USA/CAN)",
+              "enum": [
+                "USA",
+                "CAN"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "5-digit postal code",
+            "explode": false,
+            "in": "query",
+            "name": "postalcode",
+            "schema": {
+              "description": "5-digit postal code",
+              "maxLength": 5,
+              "minLength": 5,
+              "pattern": "^[0-9]{5}$",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Street address for geocoding",
+            "explode": false,
+            "in": "query",
+            "name": "address",
+            "schema": {
+              "description": "Street address for geocoding",
+              "maxLength": 100,
+              "type": "string"
+            }
+          },
+          {
+            "description": "State name or abbreviation",
+            "explode": false,
+            "in": "query",
+            "name": "state",
+            "schema": {
+              "description": "State name or abbreviation",
+              "maxLength": 50,
+              "type": "string"
+            }
+          },
+          {
+            "description": "State code",
+            "explode": false,
+            "in": "query",
+            "name": "stateCode",
+            "schema": {
+              "description": "State code",
+              "maxLength": 2,
+              "minLength": 2,
+              "pattern": "^[A-Z]{2}$",
+              "type": "string"
+            }
+          },
+          {
+            "description": "City name",
+            "explode": false,
+            "in": "query",
+            "name": "city",
+            "schema": {
+              "description": "City name",
+              "maxLength": 50,
+              "type": "string"
+            }
+          },
+          {
+            "description": "County name",
+            "explode": false,
+            "in": "query",
+            "name": "county",
+            "schema": {
+              "description": "County name",
+              "maxLength": 50,
+              "type": "string"
+            }
+          },
+          {
+            "description": "Latitude coordinate",
+            "explode": false,
+            "in": "query",
+            "name": "lat",
+            "schema": {
+              "description": "Latitude coordinate",
+              "format": "double",
+              "maximum": 90,
+              "minimum": -90,
+              "type": "number"
+            }
+          },
+          {
+            "description": "Longitude coordinate",
+            "explode": false,
+            "in": "query",
+            "name": "lng",
+            "schema": {
+              "description": "Longitude coordinate",
+              "format": "double",
+              "maximum": 180,
+              "minimum": -180,
+              "type": "number"
+            }
+          },
+          {
+            "description": "Address adjustment parameter",
+            "explode": false,
+            "in": "query",
+            "name": "adjustment",
+            "schema": {
+              "description": "Address adjustment parameter",
+              "maxLength": 100,
+              "type": "string"
+            }
+          },
+          {
+            "description": "Single Article Tax item total for Tennessee",
+            "explode": false,
+            "in": "query",
+            "name": "sat_item_total",
+            "schema": {
+              "description": "Single Article Tax item total for Tennessee",
+              "format": "double",
+              "minimum": 0,
+              "type": "number"
+            }
+          },
+          {
+            "description": "Historical date for rates",
+            "explode": false,
+            "in": "query",
+            "name": "historical",
+            "schema": {
+              "description": "Historical date for rates",
+              "format": "date",
+              "pattern": "^[0-9]{4}-[0-9]{2}$",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/V50Response"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "400": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorModel"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "401": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorModel"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "422": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorModel"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          },
+          "429": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorModel"
+                }
+              }
+            },
+            "description": "Too Many Requests"
+          },
+          "500": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorModel"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          }
+        },
+        "security": [
+          {
+            "ApiKeyQuery": []
+          },
+          {
+            "ApiKeyHeader": []
+          }
+        ],
+        "summary": "Get Tax Rates (v5.0)",
+        "tags": [
+          "Tax Rates"
+        ],
+        "x-fern-audiences": [
+          "v50"
+        ]
+      }
+    },
+    "/request/v60": {
+      "get": {
+        "description": "Returns tax rates in a new structured format with separate base rates,\n\t\t\tservice/shipping taxability, and tax summaries. Built on v5.0 data but with enhanced organization",
+        "operationId": "getTaxRatesV60",
+        "parameters": [
+          {
+            "description": "API key for authentication",
+            "example": "your-api-key",
+            "explode": false,
+            "in": "query",
+            "name": "key",
+            "schema": {
+              "description": "API key for authentication",
+              "examples": [
+                "your-api-key"
+              ],
+              "maxLength": 100,
+              "minLength": 10,
+              "type": "string"
+            }
+          },
+          {
+            "description": "Response format",
+            "explode": false,
+            "in": "query",
+            "name": "format",
+            "schema": {
+              "default": "json",
+              "description": "Response format",
+              "enum": [
+                "json",
+                "xml"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Country code (USA/CAN)",
+            "explode": false,
+            "in": "query",
+            "name": "countryCode",
+            "schema": {
+              "default": "USA",
+              "description": "Country code (USA/CAN)",
+              "enum": [
+                "USA",
+                "CAN"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "5-digit postal code",
+            "explode": false,
+            "in": "query",
+            "name": "postalcode",
+            "schema": {
+              "description": "5-digit postal code",
+              "maxLength": 5,
+              "minLength": 5,
+              "pattern": "^[0-9]{5}$",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Street address for geocoding",
+            "explode": false,
+            "in": "query",
+            "name": "address",
+            "schema": {
+              "description": "Street address for geocoding",
+              "maxLength": 100,
+              "type": "string"
+            }
+          },
+          {
+            "description": "State name or abbreviation",
+            "explode": false,
+            "in": "query",
+            "name": "state",
+            "schema": {
+              "description": "State name or abbreviation",
+              "maxLength": 50,
+              "type": "string"
+            }
+          },
+          {
+            "description": "State code",
+            "explode": false,
+            "in": "query",
+            "name": "stateCode",
+            "schema": {
+              "description": "State code",
+              "maxLength": 2,
+              "minLength": 2,
+              "pattern": "^[A-Z]{2}$",
+              "type": "string"
+            }
+          },
+          {
+            "description": "City name",
+            "explode": false,
+            "in": "query",
+            "name": "city",
+            "schema": {
+              "description": "City name",
+              "maxLength": 50,
+              "type": "string"
+            }
+          },
+          {
+            "description": "County name",
+            "explode": false,
+            "in": "query",
+            "name": "county",
+            "schema": {
+              "description": "County name",
+              "maxLength": 50,
+              "type": "string"
+            }
+          },
+          {
+            "description": "Latitude coordinate",
+            "explode": false,
+            "in": "query",
+            "name": "lat",
+            "schema": {
+              "description": "Latitude coordinate",
+              "format": "double",
+              "maximum": 90,
+              "minimum": -90,
+              "type": "number"
+            }
+          },
+          {
+            "description": "Longitude coordinate",
+            "explode": false,
+            "in": "query",
+            "name": "lng",
+            "schema": {
+              "description": "Longitude coordinate",
+              "format": "double",
+              "maximum": 180,
+              "minimum": -180,
+              "type": "number"
+            }
+          },
+          {
+            "description": "Address adjustment parameter",
+            "explode": false,
+            "in": "query",
+            "name": "adjustment",
+            "schema": {
+              "description": "Address adjustment parameter",
+              "maxLength": 100,
+              "type": "string"
+            }
+          },
+          {
+            "description": "Single Article Tax item total for Tennessee",
+            "explode": false,
+            "in": "query",
+            "name": "sat_item_total",
+            "schema": {
+              "description": "Single Article Tax item total for Tennessee",
+              "format": "double",
+              "minimum": 0,
+              "type": "number"
+            }
+          },
+          {
+            "description": "Historical date for rates",
+            "explode": false,
+            "in": "query",
+            "name": "historical",
+            "schema": {
+              "description": "Historical date for rates",
+              "format": "date",
+              "pattern": "^[0-9]{4}-[0-9]{2}$",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/V60Response"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "400": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorModel"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "401": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorModel"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "422": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorModel"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          },
+          "429": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorModel"
+                }
+              }
+            },
+            "description": "Too Many Requests"
+          },
+          "500": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorModel"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          }
+        },
+        "security": [
+          {
+            "ApiKeyQuery": []
+          },
+          {
+            "ApiKeyHeader": []
+          }
+        ],
+        "summary": "Get Tax Rates (v6.0)",
+        "tags": [
+          "Tax Rates"
+        ],
+        "x-fern-audiences": [
+          "v60"
+        ]
+      }
+    },
+    "/system/health": {
+      "get": {
+        "description": "Returns the health status of the API and its components",
+        "operationId": "getHealth",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HealthResponse"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorModel"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Health Check",
+        "tags": [
+          "System"
+        ],
+        "x-fern-audiences": [
+          "v10",
+          "v20",
+          "v30",
+          "v40",
+          "v50",
+          "v60"
+        ]
+      }
+    },
+    "/system/metadata": {
+      "get": {
+        "description": "Returns system metadata including version and environment information",
+        "operationId": "getMetadata",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MetadataResponse"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorModel"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Get System Metadata",
+        "tags": [
+          "System"
+        ],
+        "x-fern-audiences": [
+          "v10",
+          "v20",
+          "v30",
+          "v40",
+          "v50",
+          "v60"
+        ]
+      }
+    }
+  },
+  "servers": [
+    {
+      "description": "Production Server",
+      "url": "https://api.ziptax.com"
+    },
+    {
+      "description": "Local Development Server",
+      "url": "http://localhost:8080"
+    }
+  ],
+  "tags": [
+    {
+      "description": "Sales tax rate lookup operations",
+      "name": "Tax Rates"
+    },
+    {
+      "description": "System health and metadata operations",
+      "name": "System"
+    },
+    {
+      "description": "Account management and metrics",
+      "name": "Account"
+    },
+    {
+      "description": "Tax data and TIC code operations",
+      "name": "Data"
+    }
+  ]
 }
