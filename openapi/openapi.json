@@ -2609,17 +2609,6 @@
             }
           },
           {
-            "description": "Address adjustment parameter",
-            "explode": false,
-            "in": "query",
-            "name": "adjustment",
-            "schema": {
-              "description": "Address adjustment parameter",
-              "maxLength": 100,
-              "type": "string"
-            }
-          },
-          {
             "description": "Single Article Tax item total for Tennessee",
             "explode": false,
             "in": "query",
@@ -2640,6 +2629,28 @@
               "description": "Historical date for rates",
               "pattern": "^[0-9]{6}$",
               "type": "string"
+            }
+          },
+          {
+            "description": "When true, returns a full geocoding object in the response broken into address parts (street, city, postal code, etc.). Defaults to false.",
+            "explode": false,
+            "in": "query",
+            "name": "addressDetailExtended",
+            "schema": {
+              "default": false,
+              "description": "When true, returns a full geocoding object in the response broken into address parts (street, city, postal code, etc.). Defaults to false.",
+              "type": "boolean"
+            }
+          },
+          {
+            "description": "When true, returns a detailed shipping object to help navigate collection complexity. The GENERAL_RULE value will be one of: EXEMPT, EXEMPT_WHEN_SEPARATELY_STATED, ITEM_SPECIFIC, CONDITIONAL, or TAXABLE. For EXEMPT_WHEN_SEPARATELY_STATED, the response includes a boolean flag, and a natural-language description is included for clarity. Defaults to false.",
+            "explode": false,
+            "in": "query",
+            "name": "shippingExtended",
+            "schema": {
+              "default": false,
+              "description": "When true, returns a detailed shipping object to help navigate collection complexity. The GENERAL_RULE value will be one of: EXEMPT, EXEMPT_WHEN_SEPARATELY_STATED, ITEM_SPECIFIC, CONDITIONAL, or TAXABLE. For EXEMPT_WHEN_SEPARATELY_STATED, the response includes a boolean flag, and a natural-language description is included for clarity. Defaults to false.",
+              "type": "boolean"
             }
           }
         ],
