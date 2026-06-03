@@ -23,6 +23,144 @@
         ],
         "type": "object"
       },
+      "CreateMerchantRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "contact_email": {
+            "description": "Primary contact email",
+            "type": "string"
+          },
+          "contact_first": {
+            "description": "Primary contact first name",
+            "type": "string"
+          },
+          "contact_last": {
+            "description": "Primary contact last name",
+            "type": "string"
+          },
+          "id": {
+            "description": "External identifier for the merchant",
+            "type": "string"
+          },
+          "is_txc": {
+            "description": "Merchant lifecycle status. 'taxcloud_invited' = a TaxCloud merchant that has been created/invited but not yet connected; 'taxcloud_connected' = connected (TaxCloud credentials stored, mirrors txc_connected=true); 'external_compliance' = handles sales-tax compliance outside TaxCloud. Defaults to 'external_compliance' when omitted. Also accepts legacy boolean true (= taxcloud_invited) / false (= external_compliance). Only the TaxCloud-vs-external distinction is stored; connected is derived once credentials exist.",
+            "enum": [
+              "taxcloud_invited",
+              "taxcloud_connected",
+              "external_compliance"
+            ],
+            "type": "string"
+          },
+          "name": {
+            "description": "Merchant display name",
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "contact_first",
+          "contact_last",
+          "contact_email",
+          "is_txc",
+          "id"
+        ],
+        "type": "object"
+      },
+      "CreateMerchantResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "merchantId": {
+            "description": "UUID of the created merchant",
+            "type": "string"
+          },
+          "message": {
+            "description": "Human-readable result message",
+            "type": "string"
+          },
+          "status": {
+            "description": "Operation status",
+            "type": "string"
+          }
+        },
+        "required": [
+          "status",
+          "message",
+          "merchantId"
+        ],
+        "type": "object"
+      },
+      "DeleteMerchantCredentialsRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "merchantId": {
+            "description": "UUID of the merchant",
+            "type": "string"
+          }
+        },
+        "required": [
+          "merchantId"
+        ],
+        "type": "object"
+      },
+      "DeleteMerchantCredentialsResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "merchantId": {
+            "description": "UUID of the merchant",
+            "type": "string"
+          },
+          "message": {
+            "description": "Human-readable result message",
+            "type": "string"
+          },
+          "status": {
+            "description": "Operation status",
+            "type": "string"
+          }
+        },
+        "required": [
+          "status",
+          "message",
+          "merchantId"
+        ],
+        "type": "object"
+      },
+      "DeleteMerchantRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "merchantId": {
+            "description": "UUID of the merchant to delete",
+            "type": "string"
+          }
+        },
+        "required": [
+          "merchantId"
+        ],
+        "type": "object"
+      },
+      "DeleteMerchantResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "merchantId": {
+            "description": "UUID of the deleted merchant",
+            "type": "string"
+          },
+          "message": {
+            "description": "Human-readable result message",
+            "type": "string"
+          },
+          "status": {
+            "description": "Operation status",
+            "type": "string"
+          }
+        },
+        "required": [
+          "status",
+          "message",
+          "merchantId"
+        ],
+        "type": "object"
+      },
       "ErrorDetail": {
         "additionalProperties": false,
         "properties": {
@@ -93,6 +231,37 @@
             "type": "string"
           }
         },
+        "type": "object"
+      },
+      "GetMerchantCredentialsRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "merchantId": {
+            "description": "UUID of the merchant",
+            "type": "string"
+          }
+        },
+        "required": [
+          "merchantId"
+        ],
+        "type": "object"
+      },
+      "GetMerchantCredentialsResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "apiKey": {
+            "description": "TaxCloud API key",
+            "type": "string"
+          },
+          "connectionId": {
+            "description": "TaxCloud connection ID",
+            "type": "string"
+          }
+        },
+        "required": [
+          "apiKey",
+          "connectionId"
+        ],
         "type": "object"
       },
       "HealthResponse": {
@@ -236,6 +405,52 @@
         ],
         "type": "object"
       },
+      "SetMerchantCredentialsRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "apiKey": {
+            "description": "TaxCloud API key",
+            "type": "string"
+          },
+          "connectionId": {
+            "description": "TaxCloud connection ID",
+            "type": "string"
+          },
+          "merchantId": {
+            "description": "UUID of the merchant",
+            "type": "string"
+          }
+        },
+        "required": [
+          "merchantId",
+          "apiKey",
+          "connectionId"
+        ],
+        "type": "object"
+      },
+      "SetMerchantCredentialsResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "merchantId": {
+            "description": "UUID of the merchant",
+            "type": "string"
+          },
+          "message": {
+            "description": "Human-readable result message",
+            "type": "string"
+          },
+          "status": {
+            "description": "Operation status",
+            "type": "string"
+          }
+        },
+        "required": [
+          "status",
+          "message",
+          "merchantId"
+        ],
+        "type": "object"
+      },
       "TICData": {
         "additionalProperties": false,
         "properties": {
@@ -303,6 +518,90 @@
         },
         "required": [
           "tic_list"
+        ],
+        "type": "object"
+      },
+      "UpdateMerchantRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "merchantId": {
+            "description": "UUID of the merchant to update",
+            "type": "string"
+          },
+          "update": {
+            "$ref": "#/components/schemas/UpdateStruct",
+            "description": "New field values for the merchant"
+          }
+        },
+        "required": [
+          "merchantId",
+          "update"
+        ],
+        "type": "object"
+      },
+      "UpdateMerchantResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "merchantId": {
+            "description": "UUID of the updated merchant",
+            "type": "string"
+          },
+          "message": {
+            "description": "Human-readable result message",
+            "type": "string"
+          },
+          "status": {
+            "description": "Operation status",
+            "type": "string"
+          }
+        },
+        "required": [
+          "status",
+          "message",
+          "merchantId"
+        ],
+        "type": "object"
+      },
+      "UpdateStruct": {
+        "additionalProperties": false,
+        "properties": {
+          "contact_email": {
+            "description": "Primary contact email",
+            "type": "string"
+          },
+          "contact_first": {
+            "description": "Primary contact first name",
+            "type": "string"
+          },
+          "contact_last": {
+            "description": "Primary contact last name",
+            "type": "string"
+          },
+          "id": {
+            "description": "External identifier for the merchant",
+            "type": "string"
+          },
+          "is_txc": {
+            "description": "Merchant lifecycle status. 'taxcloud_invited' = a TaxCloud merchant that has been created/invited but not yet connected; 'taxcloud_connected' = connected (TaxCloud credentials stored, mirrors txc_connected=true); 'external_compliance' = handles sales-tax compliance outside TaxCloud. When omitted on update, the merchant's existing status is preserved. Only the TaxCloud-vs-external distinction is stored; connected is derived from whether credentials exist.",
+            "enum": [
+              "taxcloud_invited",
+              "taxcloud_connected",
+              "external_compliance"
+            ],
+            "type": "string"
+          },
+          "name": {
+            "description": "Merchant display name",
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "contact_first",
+          "contact_last",
+          "contact_email",
+          "is_txc",
+          "id"
         ],
         "type": "object"
       },
@@ -1413,6 +1712,626 @@
         "summary": "Get TIC Codes",
         "tags": [
           "Data"
+        ],
+        "x-fern-audiences": [
+          "v10",
+          "v20",
+          "v30",
+          "v40",
+          "v50",
+          "v60"
+        ]
+      }
+    },
+    "/merchant/create": {
+      "post": {
+        "description": "Creates a new merchant under the authenticated account. Requires X-API-KEY header.",
+        "operationId": "createMerchant",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateMerchantRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateMerchantResponse"
+                }
+              }
+            },
+            "description": "Created"
+          },
+          "400": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorModel"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "401": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorModel"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "409": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorModel"
+                }
+              }
+            },
+            "description": "Conflict"
+          },
+          "422": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorModel"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          },
+          "500": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorModel"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          }
+        },
+        "security": [
+          {
+            "ApiKeyHeader": []
+          }
+        ],
+        "summary": "Create Merchant",
+        "tags": [
+          "Merchant"
+        ],
+        "x-fern-audiences": [
+          "v10",
+          "v20",
+          "v30",
+          "v40",
+          "v50",
+          "v60"
+        ]
+      }
+    },
+    "/merchant/credentials/delete": {
+      "post": {
+        "description": "Deletes TaxCloud credentials for a merchant. The caller must own the merchant.",
+        "operationId": "deleteMerchantCredentials",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DeleteMerchantCredentialsRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DeleteMerchantCredentialsResponse"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "400": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorModel"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "401": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorModel"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "403": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorModel"
+                }
+              }
+            },
+            "description": "Forbidden"
+          },
+          "404": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorModel"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "422": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorModel"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          },
+          "500": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorModel"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          }
+        },
+        "security": [
+          {
+            "ApiKeyHeader": []
+          }
+        ],
+        "summary": "Delete Merchant Credentials",
+        "tags": [
+          "Merchant"
+        ],
+        "x-fern-audiences": [
+          "v10",
+          "v20",
+          "v30",
+          "v40",
+          "v50",
+          "v60"
+        ]
+      }
+    },
+    "/merchant/credentials/get": {
+      "post": {
+        "description": "Retrieves TaxCloud credentials for a merchant. The caller must own the merchant.",
+        "operationId": "getMerchantCredentials",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GetMerchantCredentialsRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetMerchantCredentialsResponse"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "400": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorModel"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "401": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorModel"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "403": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorModel"
+                }
+              }
+            },
+            "description": "Forbidden"
+          },
+          "404": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorModel"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "422": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorModel"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          },
+          "500": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorModel"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          }
+        },
+        "security": [
+          {
+            "ApiKeyHeader": []
+          }
+        ],
+        "summary": "Get Merchant Credentials",
+        "tags": [
+          "Merchant"
+        ],
+        "x-fern-audiences": [
+          "v10",
+          "v20",
+          "v30",
+          "v40",
+          "v50",
+          "v60"
+        ]
+      }
+    },
+    "/merchant/credentials/set": {
+      "post": {
+        "description": "Sets or updates TaxCloud credentials for a merchant. Credentials are encrypted at rest with AES-256-GCM. On success an asynchronous webhook notification is sent to the configured endpoint.",
+        "operationId": "setMerchantCredentials",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SetMerchantCredentialsRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SetMerchantCredentialsResponse"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "400": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorModel"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "401": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorModel"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "403": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorModel"
+                }
+              }
+            },
+            "description": "Forbidden"
+          },
+          "422": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorModel"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          },
+          "500": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorModel"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          }
+        },
+        "security": [
+          {
+            "ApiKeyHeader": []
+          }
+        ],
+        "summary": "Set Merchant Credentials",
+        "tags": [
+          "Merchant"
+        ],
+        "x-fern-audiences": [
+          "v10",
+          "v20",
+          "v30",
+          "v40",
+          "v50",
+          "v60"
+        ]
+      }
+    },
+    "/merchant/delete": {
+      "post": {
+        "description": "Soft-deletes a merchant. The caller must own the merchant.",
+        "operationId": "deleteMerchant",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DeleteMerchantRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DeleteMerchantResponse"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "400": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorModel"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "401": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorModel"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "403": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorModel"
+                }
+              }
+            },
+            "description": "Forbidden"
+          },
+          "404": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorModel"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "422": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorModel"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          },
+          "500": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorModel"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          }
+        },
+        "security": [
+          {
+            "ApiKeyHeader": []
+          }
+        ],
+        "summary": "Delete Merchant",
+        "tags": [
+          "Merchant"
+        ],
+        "x-fern-audiences": [
+          "v10",
+          "v20",
+          "v30",
+          "v40",
+          "v50",
+          "v60"
+        ]
+      }
+    },
+    "/merchant/update": {
+      "post": {
+        "description": "Updates an existing merchant. The caller must own the merchant. Cross-account modification is blocked.",
+        "operationId": "updateMerchant",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateMerchantRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UpdateMerchantResponse"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "400": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorModel"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "401": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorModel"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "403": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorModel"
+                }
+              }
+            },
+            "description": "Forbidden"
+          },
+          "404": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorModel"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "409": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorModel"
+                }
+              }
+            },
+            "description": "Conflict"
+          },
+          "422": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorModel"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          },
+          "500": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorModel"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          }
+        },
+        "security": [
+          {
+            "ApiKeyHeader": []
+          }
+        ],
+        "summary": "Update Merchant",
+        "tags": [
+          "Merchant"
         ],
         "x-fern-audiences": [
           "v10",
@@ -2840,6 +3759,10 @@
     {
       "description": "Tax data and TIC code operations",
       "name": "Data"
+    },
+    {
+      "description": "Merchant management and credential operations",
+      "name": "Merchant"
     }
   ]
 }
