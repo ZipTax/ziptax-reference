@@ -50,6 +50,11 @@
             "description": "Integrator-supplied external identifier for the merchant.",
             "maxLength": 255,
             "type": "string"
+          },
+          "reference_id": {
+            "description": "Optional integrator-supplied identifier stored in account_merchants.reference_id",
+            "maxLength": 255,
+            "type": "string"
           }
         },
         "required": [
@@ -366,6 +371,68 @@
         ],
         "type": "object"
       },
+      "GetMerchantRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "merchantId": {
+            "description": "UUID of the merchant to retrieve",
+            "type": "string"
+          }
+        },
+        "required": [
+          "merchantId"
+        ],
+        "type": "object"
+      },
+      "GetMerchantResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "contact_email": {
+            "description": "Primary contact email",
+            "type": "string"
+          },
+          "contact_first": {
+            "description": "Primary contact first name",
+            "type": "string"
+          },
+          "contact_last": {
+            "description": "Primary contact last name",
+            "type": "string"
+          },
+          "merchantId": {
+            "description": "UUID of the merchant",
+            "type": "string"
+          },
+          "name": {
+            "description": "Merchant display name",
+            "type": "string"
+          },
+          "reference_id": {
+            "description": "Integrator-supplied identifier",
+            "type": "string"
+          },
+          "status": {
+            "description": "Derived lifecycle status",
+            "enum": [
+              "taxcloud_invite_sent",
+              "taxcloud_connected",
+              "taxcloud_disconnected",
+              "external_compliance"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "merchantId",
+          "name",
+          "contact_first",
+          "contact_last",
+          "contact_email",
+          "status",
+          "reference_id"
+        ],
+        "type": "object"
+      },
       "HealthResponse": {
         "additionalProperties": false,
         "properties": {
@@ -400,6 +467,55 @@
           "version",
           "timestamp",
           "components"
+        ],
+        "type": "object"
+      },
+      "Item": {
+        "additionalProperties": false,
+        "properties": {
+          "contact_email": {
+            "description": "Primary contact email",
+            "type": "string"
+          },
+          "contact_first": {
+            "description": "Primary contact first name",
+            "type": "string"
+          },
+          "contact_last": {
+            "description": "Primary contact last name",
+            "type": "string"
+          },
+          "merchantId": {
+            "description": "UUID of the merchant",
+            "type": "string"
+          },
+          "name": {
+            "description": "Merchant display name",
+            "type": "string"
+          },
+          "reference_id": {
+            "description": "Integrator-supplied identifier",
+            "type": "string"
+          },
+          "status": {
+            "description": "Derived lifecycle status",
+            "enum": [
+              "taxcloud_invite_sent",
+              "taxcloud_connected",
+              "taxcloud_disconnected",
+              "external_compliance"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "merchantId",
+          "name",
+          "contact_first",
+          "contact_last",
+          "contact_email",
+          "status",
+          "reference_id"
         ],
         "type": "object"
       },
@@ -689,6 +805,11 @@
           },
           "reference_id": {
             "description": "Integrator-supplied external identifier for the merchant.",
+            "maxLength": 255,
+            "type": "string"
+          },
+          "reference_id": {
+            "description": "Integrator-supplied identifier",
             "maxLength": 255,
             "type": "string"
           }
