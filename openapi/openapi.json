@@ -26,8 +26,8 @@
       "CreateMerchantRequest": {
         "additionalProperties": false,
         "properties": {
-          "contact_email": {
-            "description": "Primary contact email",
+          "name": {
+            "description": "Merchant display name",
             "type": "string"
           },
           "contact_first": {
@@ -38,31 +38,22 @@
             "description": "Primary contact last name",
             "type": "string"
           },
-          "id": {
-            "description": "External identifier for the merchant",
+          "contact_email": {
+            "description": "Primary contact email",
             "type": "string"
           },
-          "is_txc": {
-            "description": "Merchant lifecycle status. 'taxcloud_invited' = a TaxCloud merchant that has been created/invited but not yet connected; 'taxcloud_connected' = connected (TaxCloud credentials stored, mirrors txc_connected=true); 'external_compliance' = handles sales-tax compliance outside TaxCloud. Defaults to 'external_compliance' when omitted. Also accepts legacy boolean true (= taxcloud_invited) / false (= external_compliance). Only the TaxCloud-vs-external distinction is stored; connected is derived once credentials exist.",
-            "enum": [
-              "taxcloud_invited",
-              "taxcloud_connected",
-              "external_compliance"
-            ],
-            "type": "string"
+          "activate_taxcloud": {
+            "description": "When true the merchant is placed on the TaxCloud compliance path and receives an invite email (if contact_email is set). Defaults to false when omitted.",
+            "type": "boolean"
           },
-          "name": {
-            "description": "Merchant display name",
+          "reference_id": {
+            "description": "Integrator-supplied external identifier for the merchant.",
+            "maxLength": 255,
             "type": "string"
           }
         },
         "required": [
-          "name",
-          "contact_first",
-          "contact_last",
-          "contact_email",
-          "is_txc",
-          "id"
+          "name"
         ],
         "type": "object"
       },
@@ -231,6 +222,117 @@
             "type": "string"
           }
         },
+        "type": "object"
+      },
+      "GetMerchantRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "merchantId": {
+            "description": "UUID of the merchant to retrieve",
+            "type": "string"
+          }
+        },
+        "required": [
+          "merchantId"
+        ],
+        "type": "object"
+      },
+      "GetMerchantResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "merchantId": {
+            "description": "UUID of the merchant",
+            "type": "string"
+          },
+          "name": {
+            "description": "Merchant display name",
+            "type": "string"
+          },
+          "contact_first": {
+            "description": "Primary contact first name",
+            "type": "string"
+          },
+          "contact_last": {
+            "description": "Primary contact last name",
+            "type": "string"
+          },
+          "contact_email": {
+            "description": "Primary contact email",
+            "type": "string"
+          },
+          "status": {
+            "description": "Derived lifecycle status of the merchant",
+            "enum": [
+              "taxcloud_invite_sent",
+              "taxcloud_connected",
+              "taxcloud_disconnected",
+              "external_compliance"
+            ],
+            "type": "string"
+          },
+          "reference_id": {
+            "description": "Integrator-supplied external identifier",
+            "type": "string"
+          }
+        },
+        "required": [
+          "merchantId",
+          "name",
+          "contact_first",
+          "contact_last",
+          "contact_email",
+          "status",
+          "reference_id"
+        ],
+        "type": "object"
+      },
+      "MerchantListItemResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "merchantId": {
+            "description": "UUID of the merchant",
+            "type": "string"
+          },
+          "name": {
+            "description": "Merchant display name",
+            "type": "string"
+          },
+          "contact_first": {
+            "description": "Primary contact first name",
+            "type": "string"
+          },
+          "contact_last": {
+            "description": "Primary contact last name",
+            "type": "string"
+          },
+          "contact_email": {
+            "description": "Primary contact email",
+            "type": "string"
+          },
+          "status": {
+            "description": "Derived lifecycle status of the merchant",
+            "enum": [
+              "taxcloud_invite_sent",
+              "taxcloud_connected",
+              "taxcloud_disconnected",
+              "external_compliance"
+            ],
+            "type": "string"
+          },
+          "reference_id": {
+            "description": "Integrator-supplied external identifier",
+            "type": "string"
+          }
+        },
+        "required": [
+          "merchantId",
+          "name",
+          "contact_first",
+          "contact_last",
+          "contact_email",
+          "status",
+          "reference_id"
+        ],
         "type": "object"
       },
       "GetMerchantCredentialsRequest": {
@@ -565,8 +667,8 @@
       "UpdateStruct": {
         "additionalProperties": false,
         "properties": {
-          "contact_email": {
-            "description": "Primary contact email",
+          "name": {
+            "description": "Merchant display name",
             "type": "string"
           },
           "contact_first": {
@@ -577,31 +679,22 @@
             "description": "Primary contact last name",
             "type": "string"
           },
-          "id": {
-            "description": "External identifier for the merchant",
+          "contact_email": {
+            "description": "Primary contact email",
             "type": "string"
           },
-          "is_txc": {
-            "description": "Merchant lifecycle status. 'taxcloud_invited' = a TaxCloud merchant that has been created/invited but not yet connected; 'taxcloud_connected' = connected (TaxCloud credentials stored, mirrors txc_connected=true); 'external_compliance' = handles sales-tax compliance outside TaxCloud. When omitted on update, the merchant's existing status is preserved. Only the TaxCloud-vs-external distinction is stored; connected is derived from whether credentials exist.",
-            "enum": [
-              "taxcloud_invited",
-              "taxcloud_connected",
-              "external_compliance"
-            ],
-            "type": "string"
+          "activate_taxcloud": {
+            "description": "When true the merchant is placed on the TaxCloud compliance path. When omitted on update the existing value is preserved.",
+            "type": "boolean"
           },
-          "name": {
-            "description": "Merchant display name",
+          "reference_id": {
+            "description": "Integrator-supplied external identifier for the merchant.",
+            "maxLength": 255,
             "type": "string"
           }
         },
         "required": [
-          "name",
-          "contact_first",
-          "contact_last",
-          "contact_email",
-          "is_txc",
-          "id"
+          "name"
         ],
         "type": "object"
       },
@@ -2215,6 +2308,160 @@
           }
         ],
         "summary": "Delete Merchant",
+        "tags": [
+          "Merchant"
+        ],
+        "x-fern-audiences": [
+          "v10",
+          "v20",
+          "v30",
+          "v40",
+          "v50",
+          "v60"
+        ]
+      }
+    },
+    "/merchant/get": {
+      "post": {
+        "description": "Retrieves a single merchant by ID. The caller must own the merchant.",
+        "operationId": "getMerchant",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GetMerchantRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetMerchantResponse"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "400": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorModel"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "401": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorModel"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "404": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorModel"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "422": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorModel"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          },
+          "500": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorModel"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          }
+        },
+        "security": [
+          {
+            "ApiKeyHeader": []
+          }
+        ],
+        "summary": "Get Merchant",
+        "tags": [
+          "Merchant"
+        ],
+        "x-fern-audiences": [
+          "v10",
+          "v20",
+          "v30",
+          "v40",
+          "v50",
+          "v60"
+        ]
+      }
+    },
+    "/merchant/list": {
+      "get": {
+        "description": "Returns all non-deleted merchants owned by the authenticated account.",
+        "operationId": "listMerchants",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/MerchantListItemResponse"
+                  }
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "401": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorModel"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "500": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorModel"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          }
+        },
+        "security": [
+          {
+            "ApiKeyHeader": []
+          }
+        ],
+        "summary": "List Merchants",
         "tags": [
           "Merchant"
         ],
