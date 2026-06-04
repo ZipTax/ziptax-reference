@@ -263,7 +263,7 @@
           "status": {
             "description": "Derived lifecycle status of the merchant",
             "enum": [
-              "taxcloud_invite_sent",
+              "taxcloud_invited",
               "taxcloud_connected",
               "taxcloud_disconnected",
               "external_compliance"
@@ -312,7 +312,7 @@
           "status": {
             "description": "Derived lifecycle status of the merchant",
             "enum": [
-              "taxcloud_invite_sent",
+              "taxcloud_invited",
               "taxcloud_connected",
               "taxcloud_disconnected",
               "external_compliance"
