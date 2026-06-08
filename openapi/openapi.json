@@ -39,18 +39,18 @@
             "type": "string"
           },
           "merchant_name": {
-            "description": "Merchant display name",
+            "description": "Merchant business name",
             "maxLength": 255,
             "minLength": 1,
             "type": "string"
           },
           "reference_id": {
-            "description": "Optional integrator-supplied identifier stored in account_merchants.reference_id",
+            "description": "The ID you use in your own system to identify this merchant.",
             "maxLength": 255,
             "type": "string"
           },
           "send_taxcloud_invite": {
-            "description": "When false, skips sending the TaxCloud invite email. Defaults to true when omitted. All merchants are created as TaxCloud customers regardless.",
+            "description": "Sends invite to set up and connect a TaxCloud account to a merchant who does not already use TaxCloud. To connect a TaxCloud account for a merchant who already uses TaxCloud, use the \"Set Merchant Credentials\" function.",
             "type": [
               "boolean",
               "null"
@@ -298,11 +298,11 @@
             "type": "string"
           },
           "merchant_name": {
-            "description": "Merchant display name",
+            "description": "Merchant business name",
             "type": "string"
           },
           "reference_id": {
-            "description": "Integrator-supplied identifier",
+            "description": "The ID you use in your own system to identify this merchant.",
             "type": "string"
           },
           "status": {
@@ -384,11 +384,11 @@
             "type": "string"
           },
           "merchant_name": {
-            "description": "Merchant display name",
+            "description": "Merchant business name",
             "type": "string"
           },
           "reference_id": {
-            "description": "Integrator-supplied identifier",
+            "description": "The ID you use in your own system to identify this merchant.",
             "type": "string"
           },
           "status": {
@@ -690,13 +690,13 @@
             "type": "string"
           },
           "merchant_name": {
-            "description": "Merchant display name",
+            "description": "Merchant business name",
             "maxLength": 255,
             "minLength": 1,
             "type": "string"
           },
           "reference_id": {
-            "description": "Integrator-supplied identifier",
+            "description": "The ID you use in your own system to identify this merchant.",
             "maxLength": 255,
             "type": "string"
           }
