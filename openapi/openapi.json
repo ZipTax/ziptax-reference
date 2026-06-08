@@ -26,30 +26,30 @@
       "CreateMerchantRequest": {
         "additionalProperties": false,
         "properties": {
-          "contact_email": {
+          "contactEmail": {
             "description": "Primary contact email",
             "type": "string"
           },
-          "contact_first": {
+          "contactFirst": {
             "description": "Primary contact first name",
             "type": "string"
           },
-          "contact_last": {
+          "contactLast": {
             "description": "Primary contact last name",
             "type": "string"
           },
-          "merchant_name": {
+          "merchantName": {
             "description": "Merchant business name",
             "maxLength": 255,
             "minLength": 1,
             "type": "string"
           },
-          "reference_id": {
+          "referenceId": {
             "description": "The ID you use in your own system to identify this merchant.",
             "maxLength": 255,
             "type": "string"
           },
-          "send_taxcloud_invite": {
+          "sendTaxcloudInvite": {
             "description": "Sends invite to set up and connect a TaxCloud account to a merchant who does not already use TaxCloud. To connect a TaxCloud account for a merchant who already uses TaxCloud, use the \"Set Merchant Credentials\" function.",
             "type": [
               "boolean",
@@ -58,12 +58,11 @@
           }
         },
         "required": [
-          "merchant_name",
-          "contact_first",
-          "contact_last",
-          "contact_email",
-          "send_taxcloud_invite",
-          "reference_id"
+          "merchantName",
+          "contactFirst",
+          "contactLast",
+          "contactEmail",
+          "sendTaxcloudInvite"
         ],
         "type": "object"
       },
@@ -281,15 +280,15 @@
       "GetMerchantResponse": {
         "additionalProperties": false,
         "properties": {
-          "contact_email": {
+          "contactEmail": {
             "description": "Primary contact email",
             "type": "string"
           },
-          "contact_first": {
+          "contactFirst": {
             "description": "Primary contact first name",
             "type": "string"
           },
-          "contact_last": {
+          "contactLast": {
             "description": "Primary contact last name",
             "type": "string"
           },
@@ -297,11 +296,11 @@
             "description": "UUID of the merchant",
             "type": "string"
           },
-          "merchant_name": {
+          "merchantName": {
             "description": "Merchant business name",
             "type": "string"
           },
-          "reference_id": {
+          "referenceId": {
             "description": "The ID you use in your own system to identify this merchant.",
             "type": "string"
           },
@@ -318,12 +317,11 @@
         },
         "required": [
           "merchantId",
-          "merchant_name",
-          "contact_first",
-          "contact_last",
-          "contact_email",
-          "status",
-          "reference_id"
+          "merchantName",
+          "contactFirst",
+          "contactLast",
+          "contactEmail",
+          "status"
         ],
         "type": "object"
       },
@@ -367,15 +365,15 @@
       "Item": {
         "additionalProperties": false,
         "properties": {
-          "contact_email": {
+          "contactEmail": {
             "description": "Primary contact email",
             "type": "string"
           },
-          "contact_first": {
+          "contactFirst": {
             "description": "Primary contact first name",
             "type": "string"
           },
-          "contact_last": {
+          "contactLast": {
             "description": "Primary contact last name",
             "type": "string"
           },
@@ -383,11 +381,11 @@
             "description": "UUID of the merchant",
             "type": "string"
           },
-          "merchant_name": {
+          "merchantName": {
             "description": "Merchant business name",
             "type": "string"
           },
-          "reference_id": {
+          "referenceId": {
             "description": "The ID you use in your own system to identify this merchant.",
             "type": "string"
           },
@@ -404,12 +402,11 @@
         },
         "required": [
           "merchantId",
-          "merchant_name",
-          "contact_first",
-          "contact_last",
-          "contact_email",
-          "status",
-          "reference_id"
+          "merchantName",
+          "contactFirst",
+          "contactLast",
+          "contactEmail",
+          "status"
         ],
         "type": "object"
       },
@@ -677,36 +674,35 @@
       "UpdateStruct": {
         "additionalProperties": false,
         "properties": {
-          "contact_email": {
+          "contactEmail": {
             "description": "Primary contact email",
             "type": "string"
           },
-          "contact_first": {
+          "contactFirst": {
             "description": "Primary contact first name",
             "type": "string"
           },
-          "contact_last": {
+          "contactLast": {
             "description": "Primary contact last name",
             "type": "string"
           },
-          "merchant_name": {
+          "merchantName": {
             "description": "Merchant business name",
             "maxLength": 255,
             "minLength": 1,
             "type": "string"
           },
-          "reference_id": {
+          "referenceId": {
             "description": "The ID you use in your own system to identify this merchant.",
             "maxLength": 255,
             "type": "string"
           }
         },
         "required": [
-          "merchant_name",
-          "contact_first",
-          "contact_last",
-          "contact_email",
-          "reference_id"
+          "merchantName",
+          "contactFirst",
+          "contactLast",
+          "contactEmail"
         ],
         "type": "object"
       },
