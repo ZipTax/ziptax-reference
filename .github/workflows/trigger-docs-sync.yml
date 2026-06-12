@@ -1,0 +1,31 @@
+name: Trigger Docs Sync
+
+# When the OpenAPI spec changes on main, notify ZipTax/ziptax-docs to pull the
+# new spec and republish. This is the middle link in the auto-publish chain:
+#
+#   ziptax-api@main  ->  (Publish OpenAPI Spec) merges spec here
+#   ziptax-reference@main  ->  THIS workflow dispatches ziptax-docs
+#   ziptax-docs  ->  (Sync OpenAPI Spec) pushes spec to main -> (publish-docs)
+#
+# Requires the ZIPTAX_DOCS_DISPATCH_TOKEN repo secret: a fine-grained GitHub
+# PAT scoped to ZipTax/ziptax-docs with "Contents: read and write" permission
+# (the repository_dispatch endpoint requires write access to the target repo).
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'openapi/**'
+  workflow_dispatch:
+
+jobs:
+  notify-docs:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Dispatch openapi-updated event to ziptax-docs
+        env:
+          GH_TOKEN: ${{ secrets.ZIPTAX_DOCS_DISPATCH_TOKEN }}
+        run: |
+          gh api repos/ZipTax/ziptax-docs/dispatches \
+            -f event_type=openapi-updated
