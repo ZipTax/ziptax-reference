@@ -26,8 +26,10 @@
       "CreateMerchantRequest": {
         "additionalProperties": false,
         "properties": {
-          "contactEmail": {
-            "description": "Primary contact email",
+          "merchantName": {
+            "description": "Merchant business name",
+            "maxLength": 255,
+            "minLength": 1,
             "type": "string"
           },
           "contactFirst": {
@@ -38,15 +40,8 @@
             "description": "Primary contact last name",
             "type": "string"
           },
-          "merchantName": {
-            "description": "Merchant business name",
-            "maxLength": 255,
-            "minLength": 1,
-            "type": "string"
-          },
-          "referenceId": {
-            "description": "The ID you use in your own system to identify this merchant.",
-            "maxLength": 255,
+          "contactEmail": {
+            "description": "Primary contact email",
             "type": "string"
           },
           "sendTaxcloudInvite": {
@@ -55,6 +50,11 @@
               "boolean",
               "null"
             ]
+          },
+          "referenceId": {
+            "description": "The ID you use in your own system to identify this merchant.",
+            "maxLength": 255,
+            "type": "string"
           }
         },
         "required": [
@@ -611,6 +611,91 @@
         ],
         "type": "object"
       },
+      "TICRecommendPrediction": {
+        "additionalProperties": false,
+        "properties": {
+          "error": {
+            "description": "Error string formatted as \"\u003ccode\u003e - \u003cmessage\u003e\" on failure; null on success",
+            "type": "string"
+          },
+          "label": {
+            "description": "Label for the recommended TIC",
+            "type": "string"
+          },
+          "naturalLabel": {
+            "description": "Natural-language label for the recommended TIC",
+            "type": "string"
+          },
+          "product_description": {
+            "description": "Normalized product description used for matching",
+            "type": "string"
+          },
+          "status": {
+            "description": "Prediction status",
+            "enum": [
+              "success",
+              "fail"
+            ],
+            "examples": [
+              "success"
+            ],
+            "type": "string"
+          },
+          "ticId": {
+            "description": "Recommended Taxability Information Code (TIC)",
+            "examples": [
+              20010
+            ],
+            "format": "int64",
+            "type": "integer"
+          },
+          "tic_description": {
+            "description": "Description of the recommended TIC",
+            "type": "string"
+          }
+        },
+        "required": [
+          "status"
+        ],
+        "type": "object"
+      },
+      "TICRecommendRequestBody": {
+        "additionalProperties": false,
+        "properties": {
+          "query": {
+            "description": "Free-text product description to get a recommended TIC for",
+            "examples": [
+              "wireless bluetooth headphones"
+            ],
+            "maxLength": 1024,
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "required": [
+          "query"
+        ],
+        "type": "object"
+      },
+      "TICRecommendResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "predictions": {
+            "description": "Recommended TIC predictions",
+            "items": {
+              "$ref": "#/components/schemas/TICRecommendPrediction"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "predictions"
+        ],
+        "type": "object"
+      },
       "TICResponse": {
         "additionalProperties": false,
         "properties": {
@@ -627,6 +712,89 @@
         },
         "required": [
           "tic_list"
+        ],
+        "type": "object"
+      },
+      "TICSearchRequestBody": {
+        "additionalProperties": false,
+        "properties": {
+          "query": {
+            "description": "Free-text product description to match against TIC codes",
+            "examples": [
+              "Ceramic \u0026 Pottery Kilns"
+            ],
+            "maxLength": 1024,
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "required": [
+          "query"
+        ],
+        "type": "object"
+      },
+      "TICSearchResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "$schema": {
+            "description": "URL to the JSON Schema for this response",
+            "format": "uri",
+            "type": "string"
+          },
+          "nextCursor": {
+            "description": "Cursor for retrieving the next page of results",
+            "type": "string"
+          },
+          "query": {
+            "description": "Echo of the input query",
+            "examples": [
+              "Ceramic \u0026 Pottery Kilns"
+            ],
+            "type": "string"
+          },
+          "results": {
+            "description": "Ranked TIC results (most relevant first)",
+            "items": {
+              "$ref": "#/components/schemas/TICSearchResult"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "$schema",
+          "query",
+          "results"
+        ],
+        "type": "object"
+      },
+      "TICSearchResult": {
+        "additionalProperties": false,
+        "properties": {
+          "label": {
+            "description": "Descriptive label for the TIC, when available",
+            "type": "string"
+          },
+          "name": {
+            "description": "Human-readable label for the matched TIC",
+            "examples": [
+              "Computers"
+            ],
+            "type": "string"
+          },
+          "tic": {
+            "description": "Matched Taxability Information Code (TIC)",
+            "examples": [
+              "20010"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "tic",
+          "name"
         ],
         "type": "object"
       },
@@ -2236,7 +2404,7 @@
     },
     "/merchant/delete": {
       "post": {
-        "description": "Soft-deletes a merchant. The caller must own the merchant.",
+        "description": "Soft-deletes a merchant by setting deleted_at to now. The caller must own the merchant. If the merchant is already soft-deleted (deleted_at \u003c= now), returns 404 — the merchant does not exist.",
         "operationId": "deleteMerchant",
         "requestBody": {
           "content": {
@@ -2341,7 +2509,7 @@
     },
     "/merchant/get": {
       "post": {
-        "description": "Returns a single merchant by UUID. The caller must own the merchant. Cross-account reads are blocked.",
+        "description": "Returns a single merchant by UUID. The caller must own the merchant. Cross-account reads are blocked. Soft-deleted merchants (deleted_at \u003c= now) are treated as non-existent and return 404.",
         "operationId": "getMerchant",
         "requestBody": {
           "content": {
@@ -2436,7 +2604,7 @@
     },
     "/merchant/list": {
       "get": {
-        "description": "Returns every non-deleted merchant owned by the calling account.",
+        "description": "Returns every active merchant owned by the calling account. A merchant is considered active when its deleted_at is NULL or set to a future date. Soft-deleted merchants (deleted_at \u003c= now) are excluded from results.",
         "operationId": "listMerchants",
         "responses": {
           "200": {
@@ -2497,7 +2665,7 @@
     },
     "/merchant/update": {
       "post": {
-        "description": "Updates an existing merchant. The caller must own the merchant. Cross-account modification is blocked.",
+        "description": "Updates an existing merchant. The caller must own the merchant. Cross-account modification is blocked. Soft-deleted merchants (deleted_at \u003c= now) are treated as non-existent and cannot be updated.",
         "operationId": "updateMerchant",
         "requestBody": {
           "content": {
@@ -3915,6 +4083,232 @@
           "Tax Rates"
         ],
         "x-fern-audiences": [
+          "v60"
+        ]
+      }
+    },
+    "/search/tic": {
+      "post": {
+        "description": "Searches Taxability Information Codes (TIC) by free-text product description and returns ranked matches. Requires authentication via the X-API-KEY header or key query parameter.",
+        "operationId": "searchTIC",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TICSearchRequestBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TICSearchResponse"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "400": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorModel"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "401": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorModel"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "422": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorModel"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          },
+          "429": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorModel"
+                }
+              }
+            },
+            "description": "Too Many Requests"
+          },
+          "500": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorModel"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          },
+          "502": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorModel"
+                }
+              }
+            },
+            "description": "Bad Gateway"
+          }
+        },
+        "security": [
+          {
+            "ApiKeyHeader": []
+          },
+          {
+            "ApiKeyQuery": []
+          }
+        ],
+        "summary": "Search TIC Codes",
+        "tags": [
+          "Search"
+        ],
+        "x-fern-audiences": [
+          "v10",
+          "v20",
+          "v30",
+          "v40",
+          "v50",
+          "v60"
+        ]
+      }
+    },
+    "/search/tic/recommend": {
+      "post": {
+        "description": "Returns a recommended Taxability Information Code (TIC) for a free-text product description using a machine-learning model. Requires authentication via the X-API-KEY header or key query parameter.",
+        "operationId": "recommendTIC",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TICRecommendRequestBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TICRecommendResponse"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "400": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorModel"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "401": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorModel"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "422": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorModel"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          },
+          "429": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorModel"
+                }
+              }
+            },
+            "description": "Too Many Requests"
+          },
+          "500": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorModel"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          },
+          "502": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorModel"
+                }
+              }
+            },
+            "description": "Bad Gateway"
+          },
+          "504": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorModel"
+                }
+              }
+            },
+            "description": "Gateway Timeout"
+          }
+        },
+        "security": [
+          {
+            "ApiKeyHeader": []
+          },
+          {
+            "ApiKeyQuery": []
+          }
+        ],
+        "summary": "Recommend TIC Code",
+        "tags": [
+          "Search"
+        ],
+        "x-fern-audiences": [
+          "v10",
+          "v20",
+          "v30",
+          "v40",
+          "v50",
           "v60"
         ]
       }
