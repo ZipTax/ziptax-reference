@@ -5,11 +5,11 @@
         "additionalProperties": false,
         "properties": {
           "message": {
-            "description": "Optional status message",
+            "description": "Optional human-readable detail about the component's status; typically present only when degraded or unhealthy.",
             "type": "string"
           },
           "status": {
-            "description": "Component status",
+            "description": "Health of this individual component: 'healthy', 'degraded', or 'unhealthy'.",
             "enum": [
               "healthy",
               "degraded",
@@ -27,21 +27,21 @@
         "additionalProperties": false,
         "properties": {
           "merchantName": {
-            "description": "Merchant business name",
+            "description": "Legal or trading name of the merchant business. Required; must be 1–255 characters.",
             "maxLength": 255,
             "minLength": 1,
             "type": "string"
           },
           "contactFirst": {
-            "description": "Primary contact first name",
+            "description": "First name of the merchant's primary contact. Optional.",
             "type": "string"
           },
           "contactLast": {
-            "description": "Primary contact last name",
+            "description": "Last name of the merchant's primary contact. Optional.",
             "type": "string"
           },
           "contactEmail": {
-            "description": "Primary contact email",
+            "description": "Email address of the merchant's primary contact; used for TaxCloud invitations and notifications. Optional.",
             "type": "string"
           },
           "sendTaxcloudInvite": {
@@ -70,15 +70,15 @@
         "additionalProperties": false,
         "properties": {
           "merchantId": {
-            "description": "UUID of the created merchant",
+            "description": "UUID assigned to the newly created merchant; use it in subsequent merchant operations.",
             "type": "string"
           },
           "message": {
-            "description": "Human-readable result message",
+            "description": "Human-readable description of the result.",
             "type": "string"
           },
           "status": {
-            "description": "Operation status",
+            "description": "Result status of the operation (e.g. 'success').",
             "type": "string"
           }
         },
@@ -93,7 +93,7 @@
         "additionalProperties": false,
         "properties": {
           "merchantId": {
-            "description": "UUID of the merchant",
+            "description": "UUID of the merchant whose TaxCloud credentials are being deleted. The merchant must be owned by the calling account.",
             "type": "string"
           }
         },
@@ -106,15 +106,15 @@
         "additionalProperties": false,
         "properties": {
           "merchantId": {
-            "description": "UUID of the merchant",
+            "description": "UUID of the merchant whose credentials were deleted.",
             "type": "string"
           },
           "message": {
-            "description": "Human-readable result message",
+            "description": "Human-readable description of the result.",
             "type": "string"
           },
           "status": {
-            "description": "Operation status",
+            "description": "Result status of the operation (e.g. 'success').",
             "type": "string"
           }
         },
@@ -129,7 +129,7 @@
         "additionalProperties": false,
         "properties": {
           "merchantId": {
-            "description": "UUID of the merchant to delete",
+            "description": "UUID of the merchant to soft-delete. The merchant must be owned by the calling account.",
             "type": "string"
           }
         },
@@ -142,15 +142,15 @@
         "additionalProperties": false,
         "properties": {
           "merchantId": {
-            "description": "UUID of the deleted merchant",
+            "description": "UUID of the deleted merchant.",
             "type": "string"
           },
           "message": {
-            "description": "Human-readable result message",
+            "description": "Human-readable description of the result.",
             "type": "string"
           },
           "status": {
-            "description": "Operation status",
+            "description": "Result status of the operation (e.g. 'success').",
             "type": "string"
           }
         },
@@ -237,7 +237,7 @@
         "additionalProperties": false,
         "properties": {
           "merchantId": {
-            "description": "UUID of the merchant",
+            "description": "UUID of the merchant whose TaxCloud credentials are being retrieved. The merchant must be owned by the calling account.",
             "type": "string"
           }
         },
@@ -250,11 +250,11 @@
         "additionalProperties": false,
         "properties": {
           "apiKey": {
-            "description": "TaxCloud API key",
+            "description": "TaxCloud API key currently associated with the merchant.",
             "type": "string"
           },
           "connectionId": {
-            "description": "TaxCloud connection ID",
+            "description": "TaxCloud connection ID currently associated with the merchant.",
             "type": "string"
           }
         },
@@ -268,7 +268,7 @@
         "additionalProperties": false,
         "properties": {
           "merchantId": {
-            "description": "UUID of the merchant to retrieve",
+            "description": "UUID of the merchant to retrieve. The merchant must be owned by the calling account.",
             "type": "string"
           }
         },
@@ -281,23 +281,23 @@
         "additionalProperties": false,
         "properties": {
           "contactEmail": {
-            "description": "Primary contact email",
+            "description": "Email address of the merchant's primary contact.",
             "type": "string"
           },
           "contactFirst": {
-            "description": "Primary contact first name",
+            "description": "First name of the merchant's primary contact.",
             "type": "string"
           },
           "contactLast": {
-            "description": "Primary contact last name",
+            "description": "Last name of the merchant's primary contact.",
             "type": "string"
           },
           "merchantId": {
-            "description": "UUID of the merchant",
+            "description": "UUID of the merchant.",
             "type": "string"
           },
           "merchantName": {
-            "description": "Merchant business name",
+            "description": "Legal or trading name of the merchant business.",
             "type": "string"
           },
           "referenceId": {
@@ -305,7 +305,7 @@
             "type": "string"
           },
           "status": {
-            "description": "Derived lifecycle status",
+            "description": "Derived TaxCloud lifecycle status: 'taxcloud_invited' (invite sent, not yet accepted), 'taxcloud_connected' (TaxCloud credentials set and active), 'taxcloud_disconnected' (previously connected, now disconnected), or 'external_compliance' (managed outside TaxCloud).",
             "enum": [
               "taxcloud_invited",
               "taxcloud_connected",
@@ -332,11 +332,11 @@
             "additionalProperties": {
               "$ref": "#/components/schemas/Component"
             },
-            "description": "Component health statuses",
+            "description": "Per-component health, keyed by component name (e.g. database, cache, geocoding).",
             "type": "object"
           },
           "status": {
-            "description": "Overall system status",
+            "description": "Overall health of the API: 'healthy' (all components OK), 'degraded' (one or more non-critical components impaired), or 'unhealthy' (a critical component is failing).",
             "enum": [
               "healthy",
               "degraded",
@@ -345,12 +345,12 @@
             "type": "string"
           },
           "timestamp": {
-            "description": "Health check timestamp",
+            "description": "Time at which the health check was evaluated (RFC 3339).",
             "format": "date-time",
             "type": "string"
           },
           "version": {
-            "description": "API version",
+            "description": "Running API version.",
             "type": "string"
           }
         },
@@ -366,23 +366,23 @@
         "additionalProperties": false,
         "properties": {
           "contactEmail": {
-            "description": "Primary contact email",
+            "description": "Email address of the merchant's primary contact.",
             "type": "string"
           },
           "contactFirst": {
-            "description": "Primary contact first name",
+            "description": "First name of the merchant's primary contact.",
             "type": "string"
           },
           "contactLast": {
-            "description": "Primary contact last name",
+            "description": "Last name of the merchant's primary contact.",
             "type": "string"
           },
           "merchantId": {
-            "description": "UUID of the merchant",
+            "description": "UUID of the merchant.",
             "type": "string"
           },
           "merchantName": {
-            "description": "Merchant business name",
+            "description": "Legal or trading name of the merchant business.",
             "type": "string"
           },
           "referenceId": {
@@ -390,7 +390,7 @@
             "type": "string"
           },
           "status": {
-            "description": "Derived lifecycle status",
+            "description": "Derived TaxCloud lifecycle status: 'taxcloud_invited' (invite sent, not yet accepted), 'taxcloud_connected' (TaxCloud credentials set and active), 'taxcloud_disconnected' (previously connected, now disconnected), or 'external_compliance' (managed outside TaxCloud).",
             "enum": [
               "taxcloud_invited",
               "taxcloud_connected",
@@ -414,33 +414,33 @@
         "additionalProperties": false,
         "properties": {
           "buildTime": {
-            "description": "Build timestamp",
+            "description": "Timestamp the running binary was built.",
             "type": "string"
           },
           "environment": {
-            "description": "Environment name",
+            "description": "Deployment environment the API is running in (e.g. production, staging).",
             "type": "string"
           },
           "features": {
             "additionalProperties": {
               "type": "boolean"
             },
-            "description": "Enabled features",
+            "description": "Map of feature flags to whether they are enabled in this deployment.",
             "type": "object"
           },
           "gitCommit": {
-            "description": "Git commit hash",
+            "description": "Git commit hash the running binary was built from.",
             "type": "string"
           },
           "metadata": {
             "additionalProperties": {
               "type": "string"
             },
-            "description": "Additional metadata",
+            "description": "Additional free-form key/value metadata about the deployment.",
             "type": "object"
           },
           "version": {
-            "description": "API version",
+            "description": "Running API version.",
             "type": "string"
           }
         },
@@ -458,45 +458,45 @@
         "additionalProperties": false,
         "properties": {
           "core_request_count": {
-            "description": "Core request count",
+            "description": "Number of core (tax lookup) requests the account has consumed in the current billing period.",
             "format": "int64",
             "type": "integer"
           },
           "core_request_limit": {
-            "description": "Core request limit",
+            "description": "Maximum core requests allowed for the account in the current period, from the account's entitlement.",
             "format": "int64",
             "type": "integer"
           },
           "core_usage_percent": {
-            "description": "Core usage percentage",
+            "description": "Core request usage as a percentage of the limit (0–100).",
             "format": "double",
             "type": "number"
           },
           "geo_enabled": {
-            "description": "Geo features enabled",
+            "description": "Whether the account has the geocoding (geo_enabled) entitlement that allows address and coordinate lookups.",
             "type": "boolean"
           },
           "geo_request_count": {
-            "description": "Geo request count",
+            "description": "Number of geocoding requests the account has consumed in the current period.",
             "format": "int64",
             "type": "integer"
           },
           "geo_request_limit": {
-            "description": "Geo request limit",
+            "description": "Maximum geocoding requests allowed for the account in the current period.",
             "format": "int64",
             "type": "integer"
           },
           "geo_usage_percent": {
-            "description": "Geo usage percentage",
+            "description": "Geocoding request usage as a percentage of the limit (0–100).",
             "format": "double",
             "type": "number"
           },
           "is_active": {
-            "description": "Account active status",
+            "description": "Whether the account is currently active and able to make requests.",
             "type": "boolean"
           },
           "last_updated": {
-            "description": "Last update timestamp",
+            "description": "Time the usage counters were last updated (RFC 3339).",
             "format": "date-time",
             "type": "string"
           }
@@ -518,15 +518,15 @@
         "additionalProperties": false,
         "properties": {
           "apiKey": {
-            "description": "TaxCloud API key",
+            "description": "TaxCloud API key to associate with the merchant. Stored encrypted at rest with AES-256-GCM.",
             "type": "string"
           },
           "connectionId": {
-            "description": "TaxCloud connection ID",
+            "description": "TaxCloud connection ID that pairs with the API key to identify the merchant's TaxCloud integration.",
             "type": "string"
           },
           "merchantId": {
-            "description": "UUID of the merchant",
+            "description": "UUID of the merchant whose TaxCloud credentials are being set. The merchant must be owned by the calling account.",
             "type": "string"
           }
         },
@@ -541,15 +541,15 @@
         "additionalProperties": false,
         "properties": {
           "merchantId": {
-            "description": "UUID of the merchant",
+            "description": "UUID of the merchant whose credentials were set.",
             "type": "string"
           },
           "message": {
-            "description": "Human-readable result message",
+            "description": "Human-readable description of the result.",
             "type": "string"
           },
           "status": {
-            "description": "Operation status",
+            "description": "Result status of the operation (e.g. 'success').",
             "type": "string"
           }
         },
@@ -564,27 +564,27 @@
         "additionalProperties": false,
         "properties": {
           "id": {
-            "description": "TIC code",
+            "description": "Taxability Information Code (TIC) identifier (numeric string).",
             "type": "string"
           },
           "label": {
-            "description": "TIC description",
+            "description": "Longer, localized description of what the TIC category covers.",
             "type": "string"
           },
           "nl_label": {
-            "description": "Non-localized TIC description",
+            "description": "Non-localized (base English) description of the TIC category, independent of locale.",
             "type": "string"
           },
           "nl_title": {
-            "description": "Non-localized TIC title",
+            "description": "Non-localized (base English) title of the TIC category, independent of locale.",
             "type": "string"
           },
           "parent": {
-            "description": "Parent TIC code",
+            "description": "TIC code of this code's parent category in the TIC hierarchy; empty for top-level categories.",
             "type": "string"
           },
           "title": {
-            "description": "TIC title",
+            "description": "Short, localized human-readable title of the TIC category.",
             "type": "string"
           }
         },
@@ -603,7 +603,7 @@
         "properties": {
           "tic": {
             "$ref": "#/components/schemas/TICData",
-            "description": "TIC record"
+            "description": "A single TIC record."
           }
         },
         "required": [
@@ -700,7 +700,7 @@
         "additionalProperties": false,
         "properties": {
           "tic_list": {
-            "description": "List of TIC codes",
+            "description": "Full list of Taxability Information Codes (TICs) available to the account.",
             "items": {
               "$ref": "#/components/schemas/TICEntry"
             },
@@ -802,7 +802,7 @@
         "additionalProperties": false,
         "properties": {
           "merchantId": {
-            "description": "UUID of the merchant to update",
+            "description": "UUID of the merchant to update. The merchant must be owned by the calling account.",
             "type": "string"
           },
           "update": {
@@ -820,15 +820,15 @@
         "additionalProperties": false,
         "properties": {
           "merchantId": {
-            "description": "UUID of the updated merchant",
+            "description": "UUID of the updated merchant.",
             "type": "string"
           },
           "message": {
-            "description": "Human-readable result message",
+            "description": "Human-readable description of the result.",
             "type": "string"
           },
           "status": {
-            "description": "Operation status",
+            "description": "Result status of the operation (e.g. 'success').",
             "type": "string"
           }
         },
@@ -843,19 +843,19 @@
         "additionalProperties": false,
         "properties": {
           "contactEmail": {
-            "description": "Primary contact email",
+            "description": "Updated email address of the merchant's primary contact. Optional.",
             "type": "string"
           },
           "contactFirst": {
-            "description": "Primary contact first name",
+            "description": "Updated first name of the merchant's primary contact. Optional.",
             "type": "string"
           },
           "contactLast": {
-            "description": "Primary contact last name",
+            "description": "Updated last name of the merchant's primary contact. Optional.",
             "type": "string"
           },
           "merchantName": {
-            "description": "Merchant business name",
+            "description": "New legal or trading name of the merchant business. Required; must be 1–255 characters.",
             "maxLength": 255,
             "minLength": 1,
             "type": "string"
@@ -878,7 +878,7 @@
         "additionalProperties": false,
         "properties": {
           "rCode": {
-            "description": "Response code (100=success)",
+            "description": "Numeric status of the request. 100 = success; 101 = invalid/unknown API key; 102 = invalid state; 103 = invalid city; 104 = invalid postal code; 105 = invalid query string; 106 = unknown API error; 107 = feature/version not enabled for the plan; 108 = request rate limit exceeded; 109 = missing/incomplete/invalid address; 110 = valid request but no result found; 111 = invalid historical parameter; 112 = Canadian (international) rates not enabled; 113 = product rate rules not enabled.",
             "examples": [
               100
             ],
@@ -886,7 +886,7 @@
             "type": "integer"
           },
           "results": {
-            "description": "Tax rate results",
+            "description": "Tax rate results for the request. Postal-code-only lookups can return multiple entries (one per overlapping jurisdiction); address and coordinate lookups return a single entry. Empty when no rate is found (response code 110).",
             "items": {
               "$ref": "#/components/schemas/V10TaxResult"
             },
@@ -896,7 +896,7 @@
             ]
           },
           "version": {
-            "description": "API version",
+            "description": "Schema version of the response payload (e.g. 'v10').",
             "type": "string"
           }
         },
@@ -911,37 +911,45 @@
         "additionalProperties": false,
         "properties": {
           "geoCity": {
-            "description": "Geocoded city name",
+            "description": "Uppercase city name of the matched location, as resolved by geocoding.",
             "type": "string"
           },
           "geoCounty": {
-            "description": "Geocoded county name",
+            "description": "Uppercase county name of the matched location.",
             "type": "string"
           },
           "geoPostalCode": {
-            "description": "Geocoded postal code",
+            "description": "5-digit postal code of the matched jurisdiction, as resolved by geocoding.",
             "type": "string"
           },
           "geoState": {
-            "description": "Geocoded state",
+            "description": "Two-letter uppercase USPS state code of the matched location.",
             "type": "string"
           },
           "taxSales": {
-            "description": "Total sales tax rate",
+            "description": "Combined sales tax rate for the location as a decimal fraction (e.g. 0.095 = 9.5%). Sum of the applicable state, county, city, and district sales tax rates.",
             "format": "float",
             "type": "number"
           },
           "taxUse": {
-            "description": "Total use tax rate",
+            "description": "Combined use tax rate for the location as a decimal fraction (e.g. 0.095 = 9.5%). Sum of the applicable state, county, city, and district use tax rates.",
             "format": "float",
             "type": "number"
           },
           "txbFreight": {
-            "description": "Freight taxability",
+            "description": "Whether freight/shipping is taxable in this jurisdiction. 'Y' = taxable, 'N' = not taxable.",
+            "enum": [
+              "Y",
+              "N"
+            ],
             "type": "string"
           },
           "txbService": {
-            "description": "Service taxability",
+            "description": "Whether services/labor are taxable in this jurisdiction. 'Y' = taxable, 'N' = not taxable.",
+            "enum": [
+              "Y",
+              "N"
+            ],
             "type": "string"
           }
         },
@@ -961,12 +969,12 @@
         "additionalProperties": false,
         "properties": {
           "rCode": {
-            "description": "Response code (100=success)",
+            "description": "Numeric status of the request. 100 = success; 101 = invalid/unknown API key; 102 = invalid state; 103 = invalid city; 104 = invalid postal code; 105 = invalid query string; 106 = unknown API error; 107 = feature/version not enabled for the plan; 108 = request rate limit exceeded; 109 = missing/incomplete/invalid address; 110 = valid request but no result found; 111 = invalid historical parameter; 112 = Canadian (international) rates not enabled; 113 = product rate rules not enabled.",
             "format": "int64",
             "type": "integer"
           },
           "results": {
-            "description": "Tax rate results",
+            "description": "Tax rate results for the request, each with a state/county/city breakdown. Empty when no rate is found (response code 110).",
             "items": {
               "$ref": "#/components/schemas/V20TaxResult"
             },
@@ -976,7 +984,7 @@
             ]
           },
           "version": {
-            "description": "API version",
+            "description": "Schema version of the response payload (e.g. 'v20').",
             "type": "string"
           }
         },
@@ -991,75 +999,83 @@
         "additionalProperties": false,
         "properties": {
           "citySalesTax": {
-            "description": "City sales tax rate",
+            "description": "City-level portion of the sales tax rate, as a decimal fraction. 0 when the location has no city-level tax.",
             "format": "float",
             "type": "number"
           },
           "cityTaxCode": {
-            "description": "City tax code",
+            "description": "Tax code (jurisdiction identifier) for the city; empty when the location has no city-level tax.",
             "type": "string"
           },
           "cityUseTax": {
-            "description": "City use tax rate",
+            "description": "City-level portion of the use tax rate, as a decimal fraction. 0 when the location has no city-level tax.",
             "format": "float",
             "type": "number"
           },
           "countySalesTax": {
-            "description": "County sales tax rate",
+            "description": "County-level portion of the sales tax rate, as a decimal fraction.",
             "format": "float",
             "type": "number"
           },
           "countyTaxCode": {
-            "description": "County tax code",
+            "description": "Tax code (jurisdiction identifier) for the county; empty when the location has no county-level tax.",
             "type": "string"
           },
           "countyUseTax": {
-            "description": "County use tax rate",
+            "description": "County-level portion of the use tax rate, as a decimal fraction.",
             "format": "float",
             "type": "number"
           },
           "geoCity": {
-            "description": "Geocoded city name",
+            "description": "Uppercase city name of the matched location, as resolved by geocoding.",
             "type": "string"
           },
           "geoCounty": {
-            "description": "Geocoded county name",
+            "description": "Uppercase county name of the matched location.",
             "type": "string"
           },
           "geoPostalCode": {
-            "description": "Geocoded postal code",
+            "description": "5-digit postal code of the matched jurisdiction, as resolved by geocoding.",
             "type": "string"
           },
           "geoState": {
-            "description": "Geocoded state",
+            "description": "Two-letter uppercase USPS state code of the matched location.",
             "type": "string"
           },
           "stateSalesTax": {
-            "description": "State sales tax rate",
+            "description": "State-level portion of the sales tax rate, as a decimal fraction.",
             "format": "float",
             "type": "number"
           },
           "stateUseTax": {
-            "description": "State use tax rate",
+            "description": "State-level portion of the use tax rate, as a decimal fraction.",
             "format": "float",
             "type": "number"
           },
           "taxSales": {
-            "description": "Total sales tax rate",
+            "description": "Combined sales tax rate for the location as a decimal fraction (e.g. 0.095 = 9.5%). Sum of the applicable state, county, city, and district sales tax rates.",
             "format": "float",
             "type": "number"
           },
           "taxUse": {
-            "description": "Total use tax rate",
+            "description": "Combined use tax rate for the location as a decimal fraction (e.g. 0.095 = 9.5%). Sum of the applicable state, county, city, and district use tax rates.",
             "format": "float",
             "type": "number"
           },
           "txbFreight": {
-            "description": "Freight taxability",
+            "description": "Whether freight/shipping is taxable in this jurisdiction. 'Y' = taxable, 'N' = not taxable.",
+            "enum": [
+              "Y",
+              "N"
+            ],
             "type": "string"
           },
           "txbService": {
-            "description": "Service taxability",
+            "description": "Whether services/labor are taxable in this jurisdiction. 'Y' = taxable, 'N' = not taxable.",
+            "enum": [
+              "Y",
+              "N"
+            ],
             "type": "string"
           }
         },
@@ -1087,12 +1103,12 @@
         "additionalProperties": false,
         "properties": {
           "rCode": {
-            "description": "Response code (100=success)",
+            "description": "Numeric status of the request. 100 = success; 101 = invalid/unknown API key; 102 = invalid state; 103 = invalid city; 104 = invalid postal code; 105 = invalid query string; 106 = unknown API error; 107 = feature/version not enabled for the plan; 108 = request rate limit exceeded; 109 = missing/incomplete/invalid address; 110 = valid request but no result found; 111 = invalid historical parameter; 112 = Canadian (international) rates not enabled; 113 = product rate rules not enabled.",
             "format": "int64",
             "type": "integer"
           },
           "results": {
-            "description": "Tax rate results",
+            "description": "Tax rate results for the request, each with a state/county/city breakdown plus up to five special districts. Empty when no rate is found (response code 110).",
             "items": {
               "$ref": "#/components/schemas/V40TaxResult"
             },
@@ -1102,7 +1118,7 @@
             ]
           },
           "version": {
-            "description": "API version",
+            "description": "Schema version of the response payload (e.g. 'v40').",
             "type": "string"
           }
         },
@@ -1117,99 +1133,107 @@
         "additionalProperties": false,
         "properties": {
           "citySalesTax": {
-            "description": "City sales tax rate",
+            "description": "City-level portion of the sales tax rate, as a decimal fraction. 0 when the location has no city-level tax.",
             "format": "float",
             "type": "number"
           },
           "cityTaxCode": {
-            "description": "City tax code",
+            "description": "Tax code (jurisdiction identifier) for the city; empty when the location has no city-level tax.",
             "type": "string"
           },
           "cityUseTax": {
-            "description": "City use tax rate",
+            "description": "City-level portion of the use tax rate, as a decimal fraction. 0 when the location has no city-level tax.",
             "format": "float",
             "type": "number"
           },
           "countySalesTax": {
-            "description": "County sales tax rate",
+            "description": "County-level portion of the sales tax rate, as a decimal fraction.",
             "format": "float",
             "type": "number"
           },
           "countyTaxCode": {
-            "description": "County tax code",
+            "description": "Tax code (jurisdiction identifier) for the county; empty when the location has no county-level tax.",
             "type": "string"
           },
           "countyUseTax": {
-            "description": "County use tax rate",
+            "description": "County-level portion of the use tax rate, as a decimal fraction.",
             "format": "float",
             "type": "number"
           },
           "district1Code": {
-            "description": "District 1 code",
+            "description": "Tax code (jurisdiction identifier) of the first special tax district applied to this location; empty when no first district applies.",
             "type": "string"
           },
           "district1SalesTax": {
-            "description": "District 1 sales tax",
+            "description": "Sales tax rate of the first special district, as a decimal fraction.",
             "format": "float",
             "type": "number"
           },
           "district1UseTax": {
-            "description": "District 1 use tax",
+            "description": "Use tax rate of the first special district, as a decimal fraction.",
             "format": "float",
             "type": "number"
           },
           "districtSalesTax": {
-            "description": "Total district sales tax",
+            "description": "Combined special-district sales tax rate (sum of the district1–district5 sales rates), as a decimal fraction. Special districts include transit authorities and other sub-county taxing areas.",
             "format": "float",
             "type": "number"
           },
           "districtUseTax": {
-            "description": "Total district use tax",
+            "description": "Combined special-district use tax rate (sum of the district1–district5 use rates), as a decimal fraction.",
             "format": "float",
             "type": "number"
           },
           "geoCity": {
-            "description": "Geocoded city name",
+            "description": "Uppercase city name of the matched location, as resolved by geocoding.",
             "type": "string"
           },
           "geoCounty": {
-            "description": "Geocoded county name",
+            "description": "Uppercase county name of the matched location.",
             "type": "string"
           },
           "geoPostalCode": {
-            "description": "Geocoded postal code",
+            "description": "5-digit postal code of the matched jurisdiction, as resolved by geocoding.",
             "type": "string"
           },
           "geoState": {
-            "description": "Geocoded state",
+            "description": "Two-letter uppercase USPS state code of the matched location.",
             "type": "string"
           },
           "stateSalesTax": {
-            "description": "State sales tax rate",
+            "description": "State-level portion of the sales tax rate, as a decimal fraction.",
             "format": "float",
             "type": "number"
           },
           "stateUseTax": {
-            "description": "State use tax rate",
+            "description": "State-level portion of the use tax rate, as a decimal fraction.",
             "format": "float",
             "type": "number"
           },
           "taxSales": {
-            "description": "Total sales tax rate",
+            "description": "Combined sales tax rate for the location as a decimal fraction (e.g. 0.095 = 9.5%). Sum of the applicable state, county, city, and district sales tax rates.",
             "format": "float",
             "type": "number"
           },
           "taxUse": {
-            "description": "Total use tax rate",
+            "description": "Combined use tax rate for the location as a decimal fraction (e.g. 0.095 = 9.5%). Sum of the applicable state, county, city, and district use tax rates.",
             "format": "float",
             "type": "number"
           },
           "txbFreight": {
-            "description": "Freight taxability",
+            "description": "Whether freight/shipping is taxable in this jurisdiction. 'Y' = taxable, 'N' = not taxable.",
+            "enum": [
+              "Y",
+              "N"
+            ],
             "type": "string"
           },
           "txbService": {
-            "description": "Service taxability",
+            "description": "Whether services/labor are taxable in this jurisdiction. 'Y' = taxable, 'N' = not taxable.",
+            "enum": [
+              "Y",
+              "N"
+            ],
             "type": "string"
           }
         },
@@ -1242,21 +1266,21 @@
         "additionalProperties": false,
         "properties": {
           "geoLat": {
-            "description": "Geocoded latitude",
+            "description": "Latitude of the geocoded location, or 0 when the location was not geocoded.",
             "format": "double",
             "type": "number"
           },
           "geoLng": {
-            "description": "Geocoded longitude",
+            "description": "Longitude of the geocoded location, or 0 when the location was not geocoded.",
             "format": "double",
             "type": "number"
           },
           "incorporated": {
-            "description": "Incorporation status",
+            "description": "Whether the geocoded point falls within incorporated city limits, as the string 'true' or 'false'.",
             "type": "string"
           },
           "normalizedAddress": {
-            "description": "Normalized address",
+            "description": "Standardized address returned by the geocoder, or empty when the location was not geocoded (e.g. postal-code-only lookups).",
             "type": "string"
           }
         },
@@ -1273,15 +1297,15 @@
         "properties": {
           "addressDetail": {
             "$ref": "#/components/schemas/V50AddressDetail",
-            "description": "Address details"
+            "description": "Normalized and geocoded address details used for the lookup."
           },
           "rCode": {
-            "description": "Response code (100=success)",
+            "description": "Numeric status of the request. 100 = success; 101 = invalid/unknown API key; 102 = invalid state; 103 = invalid city; 104 = invalid postal code; 105 = invalid query string; 106 = unknown API error; 107 = feature/version not enabled for the plan; 108 = request rate limit exceeded; 109 = missing/incomplete/invalid address; 110 = valid request but no result found; 111 = invalid historical parameter; 112 = Canadian (international) rates not enabled; 113 = product rate rules not enabled.",
             "format": "int64",
             "type": "integer"
           },
           "results": {
-            "description": "Tax rate results",
+            "description": "Tax rate results for the request, each with a full state/county/city/district breakdown and sourcing model. Empty when no rate is found (response code 110).",
             "items": {
               "$ref": "#/components/schemas/V50TaxResult"
             },
@@ -1292,10 +1316,10 @@
           },
           "satTaxDetail": {
             "$ref": "#/components/schemas/V50SingleArticleTax",
-            "description": "Tennessee Single Article Tax details"
+            "description": "Tennessee Single Article Tax breakdown. Present only when sat_item_total is supplied and the resolved location is in Tennessee."
           },
           "version": {
-            "description": "API version",
+            "description": "Schema version of the response payload (e.g. 'v50').",
             "type": "string"
           }
         },
@@ -1311,23 +1335,23 @@
         "additionalProperties": false,
         "properties": {
           "appliedTotal": {
-            "description": "Applied total amount",
+            "description": "Item total (dollars, formatted as a string) used as the basis for the Tennessee Single Article Tax calculation; echoes the sat_item_total request parameter.",
             "type": "string"
           },
           "countyTaxRate": {
-            "description": "County tax rate",
+            "description": "County tax rate (formatted as a string) applied in the single-article tax calculation.",
             "type": "string"
           },
           "localTaxLimit": {
-            "description": "Local tax limit",
+            "description": "Maximum dollar amount of a single article that is subject to local tax under Tennessee SAT rules (formatted as a string).",
             "type": "string"
           },
           "localTaxTotal": {
-            "description": "Local tax total",
+            "description": "Total local tax (dollars, formatted as a string) computed for the single article up to the local tax limit.",
             "type": "string"
           },
           "stateAdditionalTaxTotal": {
-            "description": "State additional tax total",
+            "description": "Additional state single-article tax (dollars, formatted as a string) applied to the portion of the item above the local tax limit.",
             "type": "string"
           }
         },
@@ -1344,159 +1368,171 @@
         "additionalProperties": false,
         "properties": {
           "citySalesTax": {
-            "description": "City sales tax rate",
+            "description": "City-level portion of the sales tax rate, as a decimal fraction. 0 when the location has no city-level tax.",
             "format": "float",
             "type": "number"
           },
           "cityTaxCode": {
-            "description": "City tax code",
+            "description": "Tax code (jurisdiction identifier) for the city; empty when the location has no city-level tax.",
             "type": "string"
           },
           "cityUseTax": {
-            "description": "City use tax rate",
+            "description": "City-level portion of the use tax rate, as a decimal fraction. 0 when the location has no city-level tax.",
             "format": "float",
             "type": "number"
           },
           "countySalesTax": {
-            "description": "County sales tax rate",
+            "description": "County-level portion of the sales tax rate, as a decimal fraction.",
             "format": "float",
             "type": "number"
           },
           "countyTaxCode": {
-            "description": "County tax code",
+            "description": "Tax code (jurisdiction identifier) for the county; empty when the location has no county-level tax.",
             "type": "string"
           },
           "countyUseTax": {
-            "description": "County use tax rate",
+            "description": "County-level portion of the use tax rate, as a decimal fraction.",
             "format": "float",
             "type": "number"
           },
           "district1Code": {
-            "description": "District 1 code",
+            "description": "Tax code (jurisdiction identifier) of the first special tax district applied to this location; empty when no first district applies.",
             "type": "string"
           },
           "district1SalesTax": {
-            "description": "District 1 sales tax",
+            "description": "Sales tax rate of the first special district, as a decimal fraction.",
             "format": "float",
             "type": "number"
           },
           "district1UseTax": {
-            "description": "District 1 use tax",
+            "description": "Use tax rate of the first special district, as a decimal fraction.",
             "format": "float",
             "type": "number"
           },
           "district2Code": {
-            "description": "District 2 code",
+            "description": "Tax code (jurisdiction identifier) of the second special tax district; empty when no second district applies.",
             "type": "string"
           },
           "district2SalesTax": {
-            "description": "District 2 sales tax",
+            "description": "Sales tax rate of the second special district, as a decimal fraction.",
             "format": "double",
             "type": "number"
           },
           "district2UseTax": {
-            "description": "District 2 use tax",
+            "description": "Use tax rate of the second special district, as a decimal fraction.",
             "format": "double",
             "type": "number"
           },
           "district3Code": {
-            "description": "District 3 code",
+            "description": "Tax code (jurisdiction identifier) of the third special tax district; empty when no third district applies.",
             "type": "string"
           },
           "district3SalesTax": {
-            "description": "District 3 sales tax",
+            "description": "Sales tax rate of the third special district, as a decimal fraction.",
             "format": "double",
             "type": "number"
           },
           "district3UseTax": {
-            "description": "District 3 use tax",
+            "description": "Use tax rate of the third special district, as a decimal fraction.",
             "format": "double",
             "type": "number"
           },
           "district4Code": {
-            "description": "District 4 code",
+            "description": "Tax code (jurisdiction identifier) of the fourth special tax district; empty when no fourth district applies.",
             "type": "string"
           },
           "district4SalesTax": {
-            "description": "District 4 sales tax",
+            "description": "Sales tax rate of the fourth special district, as a decimal fraction.",
             "format": "double",
             "type": "number"
           },
           "district4UseTax": {
-            "description": "District 4 use tax",
+            "description": "Use tax rate of the fourth special district, as a decimal fraction.",
             "format": "double",
             "type": "number"
           },
           "district5Code": {
-            "description": "District 5 code",
+            "description": "Tax code (jurisdiction identifier) of the fifth special tax district; empty when no fifth district applies.",
             "type": "string"
           },
           "district5SalesTax": {
-            "description": "District 5 sales tax",
+            "description": "Sales tax rate of the fifth special district, as a decimal fraction.",
             "format": "double",
             "type": "number"
           },
           "district5UseTax": {
-            "description": "District 5 use tax",
+            "description": "Use tax rate of the fifth special district, as a decimal fraction.",
             "format": "double",
             "type": "number"
           },
           "districtSalesTax": {
-            "description": "Total district sales tax",
+            "description": "Combined special-district sales tax rate (sum of the district1–district5 sales rates), as a decimal fraction. Special districts include transit authorities and other sub-county taxing areas.",
             "format": "float",
             "type": "number"
           },
           "districtUseTax": {
-            "description": "Total district use tax",
+            "description": "Combined special-district use tax rate (sum of the district1–district5 use rates), as a decimal fraction.",
             "format": "float",
             "type": "number"
           },
           "geoCity": {
-            "description": "Geocoded city name",
+            "description": "Uppercase city name of the matched location, as resolved by geocoding.",
             "type": "string"
           },
           "geoCounty": {
-            "description": "Geocoded county name",
+            "description": "Uppercase county name of the matched location.",
             "type": "string"
           },
           "geoPostalCode": {
-            "description": "Geocoded postal code",
+            "description": "5-digit postal code of the matched jurisdiction, as resolved by geocoding.",
             "type": "string"
           },
           "geoState": {
-            "description": "Geocoded state",
+            "description": "Two-letter uppercase USPS state code of the matched location.",
             "type": "string"
           },
           "originDestination": {
-            "description": "Origin or destination based",
+            "description": "Sourcing model used for this location: 'D' = destination-based (rate of the ship-to address), 'O' = origin-based (rate of the ship-from address).",
+            "enum": [
+              "D",
+              "O"
+            ],
             "type": "string"
           },
           "stateSalesTax": {
-            "description": "State sales tax rate",
+            "description": "State-level portion of the sales tax rate, as a decimal fraction.",
             "format": "float",
             "type": "number"
           },
           "stateUseTax": {
-            "description": "State use tax rate",
+            "description": "State-level portion of the use tax rate, as a decimal fraction.",
             "format": "float",
             "type": "number"
           },
           "taxSales": {
-            "description": "Total sales tax rate",
+            "description": "Combined sales tax rate for the location as a decimal fraction (e.g. 0.095 = 9.5%). Sum of the applicable state, county, city, and district sales tax rates.",
             "format": "float",
             "type": "number"
           },
           "taxUse": {
-            "description": "Total use tax rate",
+            "description": "Combined use tax rate for the location as a decimal fraction (e.g. 0.095 = 9.5%). Sum of the applicable state, county, city, and district use tax rates.",
             "format": "float",
             "type": "number"
           },
           "txbFreight": {
-            "description": "Freight taxability",
+            "description": "Whether freight/shipping is taxable in this jurisdiction. 'Y' = taxable, 'N' = not taxable.",
+            "enum": [
+              "Y",
+              "N"
+            ],
             "type": "string"
           },
           "txbService": {
-            "description": "Service taxability",
+            "description": "Whether services/labor are taxable in this jurisdiction. 'Y' = taxable, 'N' = not taxable.",
+            "enum": [
+              "Y",
+              "N"
+            ],
             "type": "string"
           }
         },
@@ -1542,17 +1578,17 @@
         "additionalProperties": false,
         "properties": {
           "geoLat": {
-            "description": "Geocoded latitude",
+            "description": "Latitude of the geocoded location, or 0 when the location was not geocoded.",
             "format": "float",
             "type": "number"
           },
           "geoLng": {
-            "description": "Geocoded longitude",
+            "description": "Longitude of the geocoded location, or 0 when the location was not geocoded.",
             "format": "float",
             "type": "number"
           },
           "incorporated": {
-            "description": "Incorporation status",
+            "description": "Whether the location falls within incorporated city limits, as the string 'true' or 'false'.",
             "enum": [
               "true",
               "false"
@@ -1560,7 +1596,7 @@
             "type": "string"
           },
           "normalizedAddress": {
-            "description": "Normalized address",
+            "description": "Standardized address returned by the geocoder, or empty when the location was not geocoded (e.g. postal-code-only lookups).",
             "type": "string"
           }
         },
@@ -1576,11 +1612,11 @@
         "additionalProperties": false,
         "properties": {
           "jur_description": {
-            "description": "Jurisdiction description",
+            "description": "Human-readable label combining the jurisdiction and tax type (e.g. 'US State Sales Tax').",
             "type": "string"
           },
           "jur_name": {
-            "description": "Jurisdiction name",
+            "description": "Name or code of the jurisdiction: state alpha code, county/city name, or district label (e.g. 'CA', 'ORANGE', 'Local District: 37').",
             "enum": [
               "US_STATE",
               "US_COUNTY",
@@ -1590,11 +1626,11 @@
             "type": "string"
           },
           "jur_tax_code": {
-            "description": "Tax code for jurisdiction",
+            "description": "FIPS-like tax code for the jurisdiction (state, county, city, or district). Empty when the jurisdiction has no associated code.",
             "type": "string"
           },
           "jur_type": {
-            "description": "Jurisdiction type",
+            "description": "Jurisdiction level combined with the tax kind (sales vs use) this component represents.",
             "enum": [
               "US_STATE_SALES_TAX",
               "US_STATE_USE_TAX",
@@ -1608,12 +1644,12 @@
             "type": "string"
           },
           "rate": {
-            "description": "Tax rate",
+            "description": "Tax rate for this jurisdiction/tax-type component, as a decimal fraction (e.g. 0.0625 = 6.25%).",
             "format": "float",
             "type": "number"
           },
           "rate_id": {
-            "description": "Rate identifier from tax table",
+            "description": "Identifier of the source rate row in the underlying tax table.",
             "type": "string"
           }
         },
@@ -1631,7 +1667,7 @@
         "additionalProperties": false,
         "properties": {
           "rCode": {
-            "description": "Response code (100=success)",
+            "description": "Numeric status of the request. 100 = success; 101 = invalid/unknown API key; 102 = invalid state; 103 = invalid city; 104 = invalid postal code; 105 = invalid query string; 106 = unknown API error; 107 = feature/version not enabled for the plan; 108 = request rate limit exceeded; 109 = missing/incomplete/invalid address; 110 = valid request but no result found; 111 = invalid historical parameter; 112 = Canadian (international) rates not enabled; 113 = product rate rules not enabled.",
             "examples": [
               100
             ],
@@ -1639,7 +1675,7 @@
             "type": "integer"
           },
           "version": {
-            "description": "API version",
+            "description": "Schema version of the response payload.",
             "examples": [
               "v60"
             ],
@@ -1656,18 +1692,18 @@
         "additionalProperties": false,
         "properties": {
           "adjustment_type": {
-            "description": "Origin/destination type",
+            "description": "Sourcing ruleset name. Currently always 'ORIGIN_DESTINATION'.",
             "examples": [
               "ORIGIN_DESTINATION"
             ],
             "type": "string"
           },
           "description": {
-            "description": "Origin/destination description",
+            "description": "Human-readable description of the sourcing model applied (e.g. 'Destination Based Taxation').",
             "type": "string"
           },
           "value": {
-            "description": "Origin/destination value",
+            "description": "Sourcing basis for the location: 'O' = origin-based (ship-from rate), 'D' = destination-based (ship-to rate).",
             "enum": [
               "O",
               "D"
@@ -1682,15 +1718,146 @@
         ],
         "type": "object"
       },
+      "V60ProductDetail": {
+        "additionalProperties": false,
+        "properties": {
+          "taxabilityCode": {
+            "$ref": "#/components/schemas/V60TaxabilityCode",
+            "description": "Resolved taxability code details and the product rate rules that apply in this jurisdiction."
+          }
+        },
+        "required": [
+          "taxabilityCode"
+        ],
+        "type": "object"
+      },
+      "V60RateRule": {
+        "additionalProperties": false,
+        "properties": {
+          "effectiveDt": {
+            "description": "Date the rule takes effect, in YYYYMMDD format; null when not specified.",
+            "examples": [
+              20200101
+            ],
+            "format": "int64",
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "effectiveTaxRate": {
+            "description": "Decimal tax rate that applies to this product in this jurisdiction; null when not specified.",
+            "examples": [
+              0.0175
+            ],
+            "format": "float",
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "exemptOver": {
+            "description": "Amounts above this dollar value are exempt; null when not specified.",
+            "format": "float",
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "exemptUnder": {
+            "description": "Line-item exemption threshold; amounts below this dollar value are exempt; null when not specified.",
+            "format": "float",
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "expiresDt": {
+            "description": "Date the rule expires, in YYYYMMDD format; null means the rule is still in effect.",
+            "format": "int64",
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "isDestinationTaxType": {
+            "description": "Whether the rule follows destination-based sourcing; null when not specified.",
+            "type": [
+              "boolean",
+              "null"
+            ]
+          },
+          "isFoodDrug": {
+            "description": "Hint indicating the product falls under food/drug category classification; null when not specified.",
+            "type": [
+              "boolean",
+              "null"
+            ]
+          },
+          "jurTaxCode": {
+            "description": "FIPS-like code identifying the jurisdiction (state, county, or city) the rule applies to; null when not specified.",
+            "examples": [
+              "06"
+            ],
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "perVolumeTaxRate": {
+            "description": "Per-volume tax rate for volume-based TIC overrides (e.g., $0.05/mL); null when not applicable.",
+            "format": "float",
+            "type": "number"
+          },
+          "perVolumeUnit": {
+            "description": "Unit of measurement for perVolumeTaxRate (e.g., mL); null when not applicable.",
+            "type": "string"
+          },
+          "percentTaxable": {
+            "description": "Fraction of the sale that is taxable (for example, 0.5 means half-exempt); null when not specified.",
+            "format": "float",
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "rateCapPerUnit": {
+            "description": "Maximum tax rate cap per unit for capped TIC overrides (e.g., $0.30/cigar); null when not applicable.",
+            "format": "float",
+            "type": "number"
+          },
+          "taxablePortionOver": {
+            "description": "Only the amount over this threshold is taxed; null when not specified.",
+            "format": "float",
+            "type": [
+              "number",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "jurTaxCode",
+          "effectiveDt",
+          "expiresDt",
+          "effectiveTaxRate",
+          "percentTaxable",
+          "exemptUnder",
+          "exemptOver",
+          "taxablePortionOver",
+          "isDestinationTaxType",
+          "isFoodDrug"
+        ],
+        "type": "object"
+      },
       "V60Response": {
         "additionalProperties": false,
         "properties": {
           "addressDetail": {
             "$ref": "#/components/schemas/V60AddressDetail",
-            "description": "Address details"
+            "description": "Normalized and geocoded address details used for the lookup."
           },
           "base_rates": {
-            "description": "Base tax rates by jurisdiction",
+            "description": "Component tax rates broken out by jurisdiction level (state/county/city/district) and tax type (sales/use). Sum the relevant components to obtain a combined rate.",
             "items": {
               "$ref": "#/components/schemas/V60BaseRate"
             },
@@ -1701,22 +1868,26 @@
           },
           "metadata": {
             "$ref": "#/components/schemas/V60Metadata",
-            "description": "Response metadata"
+            "description": "Versioning and response-code metadata for the request."
           },
           "origin_destination": {
             "$ref": "#/components/schemas/V60OriginDestination",
-            "description": "Origin/destination taxation info"
+            "description": "Sourcing model (origin- vs destination-based) that applies to the resolved location."
+          },
+          "productDetail": {
+            "$ref": "#/components/schemas/V60ProductDetail",
+            "description": "Product-specific tax rules. Present only when a taxabilityCode is supplied on the request and the account carries the product_rates entitlement."
           },
           "service": {
             "$ref": "#/components/schemas/V60Service",
-            "description": "Service taxability information"
+            "description": "Whether services/labor are taxable in the resolved jurisdiction."
           },
           "shipping": {
             "$ref": "#/components/schemas/V60Shipping",
-            "description": "Shipping taxability information"
+            "description": "Whether freight/shipping is taxable in the resolved jurisdiction."
           },
           "tax_summaries": {
-            "description": "Tax rate summaries",
+            "description": "Aggregated sales and use tax rates for the location, summarizing the base rate components.",
             "items": {
               "$ref": "#/components/schemas/V60TaxSummary"
             },
@@ -1741,18 +1912,18 @@
         "additionalProperties": false,
         "properties": {
           "adjustment_type": {
-            "description": "Service adjustment type",
+            "description": "Service taxation classification. Currently always 'SERVICE_TAXABLE'.",
             "examples": [
               "SERVICE_TAXABLE"
             ],
             "type": "string"
           },
           "description": {
-            "description": "Service description",
+            "description": "Human-readable explanation of the service taxability determination.",
             "type": "string"
           },
           "taxable": {
-            "description": "Taxability indicator",
+            "description": "Whether services/labor are taxable in this jurisdiction. 'Y' = taxable, 'N' = not taxable.",
             "enum": [
               "Y",
               "N"
@@ -1771,18 +1942,18 @@
         "additionalProperties": false,
         "properties": {
           "adjustment_type": {
-            "description": "Shipping adjustment type",
+            "description": "Freight taxation classification. Currently always 'FREIGHT_TAXABLE'.",
             "examples": [
               "FREIGHT_TAXABLE"
             ],
             "type": "string"
           },
           "description": {
-            "description": "Shipping description",
+            "description": "Human-readable explanation of the freight/shipping taxability determination.",
             "type": "string"
           },
           "taxable": {
-            "description": "Taxability indicator",
+            "description": "Whether freight/shipping is taxable in this jurisdiction. 'Y' = taxable, 'N' = not taxable.",
             "enum": [
               "Y",
               "N"
@@ -1801,16 +1972,16 @@
         "additionalProperties": false,
         "properties": {
           "rate": {
-            "description": "Summary tax rate",
+            "description": "Aggregated tax rate for this summary line, as a decimal fraction (e.g. 0.0775 = 7.75%).",
             "format": "float",
             "type": "number"
           },
           "summary_name": {
-            "description": "Summary description",
+            "description": "Human-readable name of the summary grouping (e.g. 'Sales Tax').",
             "type": "string"
           },
           "tax_type": {
-            "description": "Tax type",
+            "description": "Tax kind this summary aggregates: 'SALES_TAX' or 'USE_TAX'.",
             "enum": [
               "SALES_TAX",
               "USE_TAX"
@@ -1822,6 +1993,87 @@
           "rate",
           "tax_type",
           "summary_name"
+        ],
+        "type": "object"
+      },
+      "V60TaxabilityCode": {
+        "additionalProperties": false,
+        "properties": {
+          "countyFIPS": {
+            "description": "County FIPS code resolved for the request location.",
+            "examples": [
+              "059"
+            ],
+            "type": "string"
+          },
+          "id": {
+            "description": "Taxability Information Code (TIC) supplied on the request.",
+            "examples": [
+              "20010"
+            ],
+            "type": "string"
+          },
+          "label": {
+            "description": "Longer description of the TIC.",
+            "examples": [
+              "Medications dispensed pursuant to a prescription"
+            ],
+            "type": "string"
+          },
+          "rateActionCode": {
+            "description": "Outcome of the TIC lookup: T00 (valid TIC, rules listed), T01 (valid TIC, no applicable rate rules), T02 (invalid TIC), T03 (invalid TIC format).",
+            "enum": [
+              "T00",
+              "T01",
+              "T02",
+              "T03"
+            ],
+            "examples": [
+              "T00"
+            ],
+            "type": "string"
+          },
+          "rateActionMessage": {
+            "description": "Human-readable explanation of the rateActionCode.",
+            "examples": [
+              "Valid tic, rules listed."
+            ],
+            "type": "string"
+          },
+          "rateRules": {
+            "description": "Product rate rules that apply to this TIC in the resolved jurisdiction, filtered to rules active on the current date.",
+            "items": {
+              "$ref": "#/components/schemas/V60RateRule"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "stateFIPS": {
+            "description": "State FIPS code resolved for the request location.",
+            "examples": [
+              "6"
+            ],
+            "type": "string"
+          },
+          "title": {
+            "description": "Short title of the TIC.",
+            "examples": [
+              "Prescription drugs"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "stateFIPS",
+          "countyFIPS",
+          "title",
+          "label",
+          "rateActionCode",
+          "rateActionMessage",
+          "rateRules"
         ],
         "type": "object"
       }
@@ -1859,12 +2111,12 @@
         "operationId": "getAccountMetrics",
         "parameters": [
           {
-            "description": "API key for authentication",
+            "description": "API key identifying the account whose usage metrics are returned. May be supplied as this query parameter or the X-API-KEY header.",
             "explode": false,
             "in": "query",
             "name": "key",
             "schema": {
-              "description": "API key for authentication",
+              "description": "API key identifying the account whose usage metrics are returned. May be supplied as this query parameter or the X-API-KEY header.",
               "maxLength": 100,
               "minLength": 10,
               "type": "string"
@@ -1941,13 +2193,13 @@
         "operationId": "getTICData",
         "parameters": [
           {
-            "description": "Response format",
+            "description": "Serialization format of the response body: 'json' (default) or 'xml'.",
             "explode": false,
             "in": "query",
             "name": "format",
             "schema": {
               "default": "json",
-              "description": "Response format",
+              "description": "Serialization format of the response body: 'json' (default) or 'xml'.",
               "enum": [
                 "json",
                 "xml"
@@ -2784,13 +3036,13 @@
         "operationId": "getTaxRatesV10",
         "parameters": [
           {
-            "description": "API key for authentication",
+            "description": "API key that authenticates the request and resolves the account's plan, entitlements, and rate limits. Supply it either as this query parameter or the X-API-KEY request header. A missing, malformed, or unknown key returns response code 101.",
             "example": "your-api-key",
             "explode": false,
             "in": "query",
             "name": "key",
             "schema": {
-              "description": "API key for authentication",
+              "description": "API key that authenticates the request and resolves the account's plan, entitlements, and rate limits. Supply it either as this query parameter or the X-API-KEY request header. A missing, malformed, or unknown key returns response code 101.",
               "examples": [
                 "your-api-key"
               ],
@@ -2800,13 +3052,13 @@
             }
           },
           {
-            "description": "Response format",
+            "description": "Serialization format of the response body. 'json' (default) returns a JSON object; 'xml' returns the same data as an XML document.",
             "explode": false,
             "in": "query",
             "name": "format",
             "schema": {
               "default": "json",
-              "description": "Response format",
+              "description": "Serialization format of the response body. 'json' (default) returns a JSON object; 'xml' returns the same data as an XML document.",
               "enum": [
                 "json",
                 "xml"
@@ -2815,13 +3067,13 @@
             }
           },
           {
-            "description": "5-digit postal code",
+            "description": "5-digit US ZIP code to look up. When supplied on its own (no street address), the response may contain multiple results — one per tax jurisdiction that overlaps the ZIP. An invalid format returns response code 104.",
             "example": "90210",
             "explode": false,
             "in": "query",
             "name": "postalcode",
             "schema": {
-              "description": "5-digit postal code",
+              "description": "5-digit US ZIP code to look up. When supplied on its own (no street address), the response may contain multiple results — one per tax jurisdiction that overlaps the ZIP. An invalid format returns response code 104.",
               "examples": [
                 "90210"
               ],
@@ -2832,13 +3084,13 @@
             }
           },
           {
-            "description": "Street address for geocoding",
+            "description": "Street address to geocode to a single rooftop-level jurisdiction. When supplied (typically alongside city/state or postal code) the API geocodes the address and returns the one applicable rate. An incomplete or ungeocodable address returns response code 109.",
             "example": "123 Main St",
             "explode": false,
             "in": "query",
             "name": "address",
             "schema": {
-              "description": "Street address for geocoding",
+              "description": "Street address to geocode to a single rooftop-level jurisdiction. When supplied (typically alongside city/state or postal code) the API geocodes the address and returns the one applicable rate. An incomplete or ungeocodable address returns response code 109.",
               "examples": [
                 "123 Main St"
               ],
@@ -2847,13 +3099,13 @@
             }
           },
           {
-            "description": "State abbreviation",
+            "description": "Two-letter USPS state abbreviation. Used together with city or postal code to disambiguate the location. An invalid format returns response code 102.",
             "example": "CA",
             "explode": false,
             "in": "query",
             "name": "state",
             "schema": {
-              "description": "State abbreviation",
+              "description": "Two-letter USPS state abbreviation. Used together with city or postal code to disambiguate the location. An invalid format returns response code 102.",
               "examples": [
                 "CA"
               ],
@@ -2864,13 +3116,13 @@
             }
           },
           {
-            "description": "City name",
+            "description": "City name used together with state to narrow the lookup when no street address is supplied. An invalid format returns response code 103.",
             "example": "Beverly Hills",
             "explode": false,
             "in": "query",
             "name": "city",
             "schema": {
-              "description": "City name",
+              "description": "City name used together with state to narrow the lookup when no street address is supplied. An invalid format returns response code 103.",
               "examples": [
                 "Beverly Hills"
               ],
@@ -2964,13 +3216,13 @@
         "operationId": "getTaxRatesV20",
         "parameters": [
           {
-            "description": "API key for authentication",
+            "description": "API key that authenticates the request and resolves the account's plan, entitlements, and rate limits. Supply it either as this query parameter or the X-API-KEY request header. A missing, malformed, or unknown key returns response code 101.",
             "example": "your-api-key",
             "explode": false,
             "in": "query",
             "name": "key",
             "schema": {
-              "description": "API key for authentication",
+              "description": "API key that authenticates the request and resolves the account's plan, entitlements, and rate limits. Supply it either as this query parameter or the X-API-KEY request header. A missing, malformed, or unknown key returns response code 101.",
               "examples": [
                 "your-api-key"
               ],
@@ -2980,13 +3232,13 @@
             }
           },
           {
-            "description": "Response format",
+            "description": "Serialization format of the response body. 'json' (default) returns a JSON object; 'xml' returns the same data as an XML document.",
             "explode": false,
             "in": "query",
             "name": "format",
             "schema": {
               "default": "json",
-              "description": "Response format",
+              "description": "Serialization format of the response body. 'json' (default) returns a JSON object; 'xml' returns the same data as an XML document.",
               "enum": [
                 "json",
                 "xml"
@@ -2995,13 +3247,13 @@
             }
           },
           {
-            "description": "5-digit postal code",
+            "description": "5-digit US ZIP code to look up. When supplied on its own (no street address), the response may contain multiple results — one per tax jurisdiction that overlaps the ZIP. An invalid format returns response code 104.",
             "example": "90210",
             "explode": false,
             "in": "query",
             "name": "postalcode",
             "schema": {
-              "description": "5-digit postal code",
+              "description": "5-digit US ZIP code to look up. When supplied on its own (no street address), the response may contain multiple results — one per tax jurisdiction that overlaps the ZIP. An invalid format returns response code 104.",
               "examples": [
                 "90210"
               ],
@@ -3012,13 +3264,13 @@
             }
           },
           {
-            "description": "Street address for geocoding",
+            "description": "Street address to geocode to a single rooftop-level jurisdiction. When supplied (typically alongside city/state or postal code) the API geocodes the address and returns the one applicable rate. An incomplete or ungeocodable address returns response code 109.",
             "example": "123 Main St",
             "explode": false,
             "in": "query",
             "name": "address",
             "schema": {
-              "description": "Street address for geocoding",
+              "description": "Street address to geocode to a single rooftop-level jurisdiction. When supplied (typically alongside city/state or postal code) the API geocodes the address and returns the one applicable rate. An incomplete or ungeocodable address returns response code 109.",
               "examples": [
                 "123 Main St"
               ],
@@ -3027,13 +3279,13 @@
             }
           },
           {
-            "description": "State abbreviation",
+            "description": "Two-letter USPS state abbreviation. Used together with city or postal code to disambiguate the location. An invalid format returns response code 102.",
             "example": "CA",
             "explode": false,
             "in": "query",
             "name": "state",
             "schema": {
-              "description": "State abbreviation",
+              "description": "Two-letter USPS state abbreviation. Used together with city or postal code to disambiguate the location. An invalid format returns response code 102.",
               "examples": [
                 "CA"
               ],
@@ -3044,13 +3296,13 @@
             }
           },
           {
-            "description": "City name",
+            "description": "City name used together with state to narrow the lookup when no street address is supplied. An invalid format returns response code 103.",
             "example": "Beverly Hills",
             "explode": false,
             "in": "query",
             "name": "city",
             "schema": {
-              "description": "City name",
+              "description": "City name used together with state to narrow the lookup when no street address is supplied. An invalid format returns response code 103.",
               "examples": [
                 "Beverly Hills"
               ],
@@ -3144,13 +3396,13 @@
         "operationId": "getTaxRatesV30",
         "parameters": [
           {
-            "description": "API key for authentication",
+            "description": "API key that authenticates the request and resolves the account's plan, entitlements, and rate limits. Supply it either as this query parameter or the X-API-KEY request header. A missing, malformed, or unknown key returns response code 101.",
             "example": "your-api-key",
             "explode": false,
             "in": "query",
             "name": "key",
             "schema": {
-              "description": "API key for authentication",
+              "description": "API key that authenticates the request and resolves the account's plan, entitlements, and rate limits. Supply it either as this query parameter or the X-API-KEY request header. A missing, malformed, or unknown key returns response code 101.",
               "examples": [
                 "your-api-key"
               ],
@@ -3160,13 +3412,13 @@
             }
           },
           {
-            "description": "Response format",
+            "description": "Serialization format of the response body. 'json' (default) returns a JSON object; 'xml' returns the same data as an XML document.",
             "explode": false,
             "in": "query",
             "name": "format",
             "schema": {
               "default": "json",
-              "description": "Response format",
+              "description": "Serialization format of the response body. 'json' (default) returns a JSON object; 'xml' returns the same data as an XML document.",
               "enum": [
                 "json",
                 "xml"
@@ -3175,13 +3427,13 @@
             }
           },
           {
-            "description": "5-digit postal code",
+            "description": "5-digit US ZIP code to look up. When supplied on its own (no street address), the response may contain multiple results — one per tax jurisdiction that overlaps the ZIP. An invalid format returns response code 104.",
             "example": "90210",
             "explode": false,
             "in": "query",
             "name": "postalcode",
             "schema": {
-              "description": "5-digit postal code",
+              "description": "5-digit US ZIP code to look up. When supplied on its own (no street address), the response may contain multiple results — one per tax jurisdiction that overlaps the ZIP. An invalid format returns response code 104.",
               "examples": [
                 "90210"
               ],
@@ -3192,13 +3444,13 @@
             }
           },
           {
-            "description": "Street address for geocoding",
+            "description": "Street address to geocode to a single rooftop-level jurisdiction. When supplied (typically alongside city/state or postal code) the API geocodes the address and returns the one applicable rate. An incomplete or ungeocodable address returns response code 109.",
             "example": "123 Main St",
             "explode": false,
             "in": "query",
             "name": "address",
             "schema": {
-              "description": "Street address for geocoding",
+              "description": "Street address to geocode to a single rooftop-level jurisdiction. When supplied (typically alongside city/state or postal code) the API geocodes the address and returns the one applicable rate. An incomplete or ungeocodable address returns response code 109.",
               "examples": [
                 "123 Main St"
               ],
@@ -3207,13 +3459,13 @@
             }
           },
           {
-            "description": "State abbreviation",
+            "description": "Two-letter USPS state abbreviation. Used together with city or postal code to disambiguate the location. An invalid format returns response code 102.",
             "example": "CA",
             "explode": false,
             "in": "query",
             "name": "state",
             "schema": {
-              "description": "State abbreviation",
+              "description": "Two-letter USPS state abbreviation. Used together with city or postal code to disambiguate the location. An invalid format returns response code 102.",
               "examples": [
                 "CA"
               ],
@@ -3224,13 +3476,13 @@
             }
           },
           {
-            "description": "City name",
+            "description": "City name used together with state to narrow the lookup when no street address is supplied. An invalid format returns response code 103.",
             "example": "Beverly Hills",
             "explode": false,
             "in": "query",
             "name": "city",
             "schema": {
-              "description": "City name",
+              "description": "City name used together with state to narrow the lookup when no street address is supplied. An invalid format returns response code 103.",
               "examples": [
                 "Beverly Hills"
               ],
@@ -3324,13 +3576,13 @@
         "operationId": "getTaxRatesV40",
         "parameters": [
           {
-            "description": "API key for authentication",
+            "description": "API key that authenticates the request and resolves the account's plan, entitlements, and rate limits. Supply it either as this query parameter or the X-API-KEY request header. A missing, malformed, or unknown key returns response code 101.",
             "example": "your-api-key",
             "explode": false,
             "in": "query",
             "name": "key",
             "schema": {
-              "description": "API key for authentication",
+              "description": "API key that authenticates the request and resolves the account's plan, entitlements, and rate limits. Supply it either as this query parameter or the X-API-KEY request header. A missing, malformed, or unknown key returns response code 101.",
               "examples": [
                 "your-api-key"
               ],
@@ -3340,13 +3592,13 @@
             }
           },
           {
-            "description": "Response format",
+            "description": "Serialization format of the response body. 'json' (default) returns a JSON object; 'xml' returns the same data as an XML document.",
             "explode": false,
             "in": "query",
             "name": "format",
             "schema": {
               "default": "json",
-              "description": "Response format",
+              "description": "Serialization format of the response body. 'json' (default) returns a JSON object; 'xml' returns the same data as an XML document.",
               "enum": [
                 "json",
                 "xml"
@@ -3355,13 +3607,13 @@
             }
           },
           {
-            "description": "5-digit postal code",
+            "description": "5-digit US ZIP code to look up. When supplied on its own (no street address), the response may contain multiple results — one per tax jurisdiction that overlaps the ZIP. An invalid format returns response code 104.",
             "example": "90210",
             "explode": false,
             "in": "query",
             "name": "postalcode",
             "schema": {
-              "description": "5-digit postal code",
+              "description": "5-digit US ZIP code to look up. When supplied on its own (no street address), the response may contain multiple results — one per tax jurisdiction that overlaps the ZIP. An invalid format returns response code 104.",
               "examples": [
                 "90210"
               ],
@@ -3372,13 +3624,13 @@
             }
           },
           {
-            "description": "Street address for geocoding",
+            "description": "Street address to geocode to a single rooftop-level jurisdiction. When supplied (typically alongside city/state or postal code) the API geocodes the address and returns the one applicable rate. An incomplete or ungeocodable address returns response code 109.",
             "example": "123 Main St",
             "explode": false,
             "in": "query",
             "name": "address",
             "schema": {
-              "description": "Street address for geocoding",
+              "description": "Street address to geocode to a single rooftop-level jurisdiction. When supplied (typically alongside city/state or postal code) the API geocodes the address and returns the one applicable rate. An incomplete or ungeocodable address returns response code 109.",
               "examples": [
                 "123 Main St"
               ],
@@ -3387,13 +3639,13 @@
             }
           },
           {
-            "description": "State abbreviation",
+            "description": "Two-letter USPS state abbreviation. Used together with city or postal code to disambiguate the location. An invalid format returns response code 102.",
             "example": "CA",
             "explode": false,
             "in": "query",
             "name": "state",
             "schema": {
-              "description": "State abbreviation",
+              "description": "Two-letter USPS state abbreviation. Used together with city or postal code to disambiguate the location. An invalid format returns response code 102.",
               "examples": [
                 "CA"
               ],
@@ -3404,13 +3656,13 @@
             }
           },
           {
-            "description": "City name",
+            "description": "City name used together with state to narrow the lookup when no street address is supplied. An invalid format returns response code 103.",
             "example": "Beverly Hills",
             "explode": false,
             "in": "query",
             "name": "city",
             "schema": {
-              "description": "City name",
+              "description": "City name used together with state to narrow the lookup when no street address is supplied. An invalid format returns response code 103.",
               "examples": [
                 "Beverly Hills"
               ],
@@ -3560,13 +3812,13 @@
         "operationId": "getTaxRatesV50",
         "parameters": [
           {
-            "description": "API key for authentication",
+            "description": "API key that authenticates the request and resolves the account's plan, entitlements, and rate limits. Supply it either as this query parameter or the X-API-KEY request header. A missing, malformed, or unknown key returns response code 101.",
             "example": "your-api-key",
             "explode": false,
             "in": "query",
             "name": "key",
             "schema": {
-              "description": "API key for authentication",
+              "description": "API key that authenticates the request and resolves the account's plan, entitlements, and rate limits. Supply it either as this query parameter or the X-API-KEY request header. A missing, malformed, or unknown key returns response code 101.",
               "examples": [
                 "your-api-key"
               ],
@@ -3576,13 +3828,13 @@
             }
           },
           {
-            "description": "Response format",
+            "description": "Serialization format of the response body. 'json' (default) returns a JSON object; 'xml' returns the same data as an XML document.",
             "explode": false,
             "in": "query",
             "name": "format",
             "schema": {
               "default": "json",
-              "description": "Response format",
+              "description": "Serialization format of the response body. 'json' (default) returns a JSON object; 'xml' returns the same data as an XML document.",
               "enum": [
                 "json",
                 "xml"
@@ -3591,13 +3843,13 @@
             }
           },
           {
-            "description": "Country code (USA/CAN)",
+            "description": "Country of the lookup: 'USA' (default) or 'CAN'. 'CAN' requires the Canadian rates (rate_loc_can) entitlement; otherwise the request returns response code 112.",
             "explode": false,
             "in": "query",
             "name": "countryCode",
             "schema": {
               "default": "USA",
-              "description": "Country code (USA/CAN)",
+              "description": "Country of the lookup: 'USA' (default) or 'CAN'. 'CAN' requires the Canadian rates (rate_loc_can) entitlement; otherwise the request returns response code 112.",
               "enum": [
                 "USA",
                 "CAN"
@@ -3606,12 +3858,12 @@
             }
           },
           {
-            "description": "5-digit postal code",
+            "description": "5-digit US ZIP code to look up. When supplied on its own the response may contain multiple results, one per overlapping jurisdiction. An invalid format returns response code 104.",
             "explode": false,
             "in": "query",
             "name": "postalcode",
             "schema": {
-              "description": "5-digit postal code",
+              "description": "5-digit US ZIP code to look up. When supplied on its own the response may contain multiple results, one per overlapping jurisdiction. An invalid format returns response code 104.",
               "maxLength": 5,
               "minLength": 5,
               "pattern": "^[0-9]{5}$",
@@ -3619,34 +3871,34 @@
             }
           },
           {
-            "description": "Street address for geocoding",
+            "description": "Street address to geocode to a single rooftop-level jurisdiction. Geocoding requires the geo_enabled entitlement; an incomplete or ungeocodable address returns response code 109.",
             "explode": false,
             "in": "query",
             "name": "address",
             "schema": {
-              "description": "Street address for geocoding",
+              "description": "Street address to geocode to a single rooftop-level jurisdiction. Geocoding requires the geo_enabled entitlement; an incomplete or ungeocodable address returns response code 109.",
               "maxLength": 100,
               "type": "string"
             }
           },
           {
-            "description": "State name or abbreviation",
+            "description": "State name or two-letter abbreviation. Used with city or postal code to disambiguate the location. An invalid format returns response code 102.",
             "explode": false,
             "in": "query",
             "name": "state",
             "schema": {
-              "description": "State name or abbreviation",
+              "description": "State name or two-letter abbreviation. Used with city or postal code to disambiguate the location. An invalid format returns response code 102.",
               "maxLength": 50,
               "type": "string"
             }
           },
           {
-            "description": "State code",
+            "description": "Two-letter state code (e.g. CA). Alternative to 'state' for supplying the state as a code rather than a name.",
             "explode": false,
             "in": "query",
             "name": "stateCode",
             "schema": {
-              "description": "State code",
+              "description": "Two-letter state code (e.g. CA). Alternative to 'state' for supplying the state as a code rather than a name.",
               "maxLength": 2,
               "minLength": 2,
               "pattern": "^[A-Z]{2}$",
@@ -3654,34 +3906,34 @@
             }
           },
           {
-            "description": "City name",
+            "description": "City name used together with state to narrow the lookup when no street address is supplied. An invalid format returns response code 103.",
             "explode": false,
             "in": "query",
             "name": "city",
             "schema": {
-              "description": "City name",
+              "description": "City name used together with state to narrow the lookup when no street address is supplied. An invalid format returns response code 103.",
               "maxLength": 50,
               "type": "string"
             }
           },
           {
-            "description": "County name",
+            "description": "County name used to refine the lookup when supplied without a street address.",
             "explode": false,
             "in": "query",
             "name": "county",
             "schema": {
-              "description": "County name",
+              "description": "County name used to refine the lookup when supplied without a street address.",
               "maxLength": 50,
               "type": "string"
             }
           },
           {
-            "description": "Latitude coordinate",
+            "description": "Latitude of a geographic point. When both lat and lng are supplied the API resolves the single jurisdiction containing that point (coordinate lookup).",
             "explode": false,
             "in": "query",
             "name": "lat",
             "schema": {
-              "description": "Latitude coordinate",
+              "description": "Latitude of a geographic point. When both lat and lng are supplied the API resolves the single jurisdiction containing that point (coordinate lookup).",
               "format": "double",
               "maximum": 90,
               "minimum": -90,
@@ -3689,12 +3941,12 @@
             }
           },
           {
-            "description": "Longitude coordinate",
+            "description": "Longitude of a geographic point. When both lat and lng are supplied the API resolves the single jurisdiction containing that point (coordinate lookup).",
             "explode": false,
             "in": "query",
             "name": "lng",
             "schema": {
-              "description": "Longitude coordinate",
+              "description": "Longitude of a geographic point. When both lat and lng are supplied the API resolves the single jurisdiction containing that point (coordinate lookup).",
               "format": "double",
               "maximum": 180,
               "minimum": -180,
@@ -3702,35 +3954,35 @@
             }
           },
           {
-            "description": "Address adjustment parameter",
+            "description": "Sourcing/unincorporated-area handling mode: 'auto' (default) lets the API determine the correct sourcing, 'origin' forces origin-based sourcing (ship-from rate), and 'destination' forces destination-based sourcing (ship-to rate).",
             "explode": false,
             "in": "query",
             "name": "adjustment",
             "schema": {
-              "description": "Address adjustment parameter",
+              "description": "Sourcing/unincorporated-area handling mode: 'auto' (default) lets the API determine the correct sourcing, 'origin' forces origin-based sourcing (ship-from rate), and 'destination' forces destination-based sourcing (ship-to rate).",
               "maxLength": 100,
               "type": "string"
             }
           },
           {
-            "description": "Single Article Tax item total for Tennessee",
+            "description": "Single-article item total in dollars used to compute Tennessee Single Article Tax (SAT). When greater than 0 and the location is in Tennessee, the response includes the satTaxDetail object describing the local tax limit and additional state tax on the single article.",
             "explode": false,
             "in": "query",
             "name": "sat_item_total",
             "schema": {
-              "description": "Single Article Tax item total for Tennessee",
+              "description": "Single-article item total in dollars used to compute Tennessee Single Article Tax (SAT). When greater than 0 and the location is in Tennessee, the response includes the satTaxDetail object describing the local tax limit and additional state tax on the single article.",
               "format": "double",
               "minimum": 0,
               "type": "number"
             }
           },
           {
-            "description": "Historical date for rates",
+            "description": "Historical period to price the lookup against, formatted YYYYMM (6 digits, e.g. 202401). Returns the rates that were in effect for that month. Requires historical data to be enabled; an invalid format returns response code 111.",
             "explode": false,
             "in": "query",
             "name": "historical",
             "schema": {
-              "description": "Historical date for rates",
+              "description": "Historical period to price the lookup against, formatted YYYYMM (6 digits, e.g. 202401). Returns the rates that were in effect for that month. Requires historical data to be enabled; an invalid format returns response code 111.",
               "pattern": "^[0-9]{6}$",
               "type": "string"
             }
@@ -3821,13 +4073,13 @@
         "operationId": "getTaxRatesV60",
         "parameters": [
           {
-            "description": "API key for authentication",
+            "description": "API key that authenticates the request and resolves the account's plan, entitlements, and rate limits. Supply it either as this query parameter or the X-API-KEY request header. A missing, malformed, or unknown key returns response code 101.",
             "example": "your-api-key",
             "explode": false,
             "in": "query",
             "name": "key",
             "schema": {
-              "description": "API key for authentication",
+              "description": "API key that authenticates the request and resolves the account's plan, entitlements, and rate limits. Supply it either as this query parameter or the X-API-KEY request header. A missing, malformed, or unknown key returns response code 101.",
               "examples": [
                 "your-api-key"
               ],
@@ -3837,13 +4089,13 @@
             }
           },
           {
-            "description": "Response format",
+            "description": "Serialization format of the response body. 'json' (default) returns a JSON object; 'xml' returns the same data as an XML document.",
             "explode": false,
             "in": "query",
             "name": "format",
             "schema": {
               "default": "json",
-              "description": "Response format",
+              "description": "Serialization format of the response body. 'json' (default) returns a JSON object; 'xml' returns the same data as an XML document.",
               "enum": [
                 "json",
                 "xml"
@@ -3852,13 +4104,13 @@
             }
           },
           {
-            "description": "Country code (USA/CAN)",
+            "description": "Country of the lookup: 'USA' (default) or 'CAN'. 'CAN' requires the Canadian rates (rate_loc_can) entitlement; otherwise the request returns response code 112.",
             "explode": false,
             "in": "query",
             "name": "countryCode",
             "schema": {
               "default": "USA",
-              "description": "Country code (USA/CAN)",
+              "description": "Country of the lookup: 'USA' (default) or 'CAN'. 'CAN' requires the Canadian rates (rate_loc_can) entitlement; otherwise the request returns response code 112.",
               "enum": [
                 "USA",
                 "CAN"
@@ -3867,12 +4119,12 @@
             }
           },
           {
-            "description": "5-digit postal code",
+            "description": "5-digit US ZIP code to look up. When supplied on its own the response may contain rates for multiple overlapping jurisdictions. An invalid format returns response code 104.",
             "explode": false,
             "in": "query",
             "name": "postalcode",
             "schema": {
-              "description": "5-digit postal code",
+              "description": "5-digit US ZIP code to look up. When supplied on its own the response may contain rates for multiple overlapping jurisdictions. An invalid format returns response code 104.",
               "maxLength": 5,
               "minLength": 5,
               "pattern": "^[0-9]{5}$",
@@ -3880,34 +4132,34 @@
             }
           },
           {
-            "description": "Street address for geocoding",
+            "description": "Street address to geocode to a single rooftop-level jurisdiction. Geocoding requires the geo_enabled entitlement; an incomplete or ungeocodable address returns response code 109.",
             "explode": false,
             "in": "query",
             "name": "address",
             "schema": {
-              "description": "Street address for geocoding",
+              "description": "Street address to geocode to a single rooftop-level jurisdiction. Geocoding requires the geo_enabled entitlement; an incomplete or ungeocodable address returns response code 109.",
               "maxLength": 100,
               "type": "string"
             }
           },
           {
-            "description": "State name or abbreviation",
+            "description": "State name or two-letter abbreviation. Used with city or postal code to disambiguate the location. An invalid format returns response code 102.",
             "explode": false,
             "in": "query",
             "name": "state",
             "schema": {
-              "description": "State name or abbreviation",
+              "description": "State name or two-letter abbreviation. Used with city or postal code to disambiguate the location. An invalid format returns response code 102.",
               "maxLength": 50,
               "type": "string"
             }
           },
           {
-            "description": "State code",
+            "description": "Two-letter state code (e.g. CA). Alternative to 'state' for supplying the state as a code rather than a name.",
             "explode": false,
             "in": "query",
             "name": "stateCode",
             "schema": {
-              "description": "State code",
+              "description": "Two-letter state code (e.g. CA). Alternative to 'state' for supplying the state as a code rather than a name.",
               "maxLength": 2,
               "minLength": 2,
               "pattern": "^[A-Z]{2}$",
@@ -3915,34 +4167,34 @@
             }
           },
           {
-            "description": "City name",
+            "description": "City name used together with state to narrow the lookup when no street address is supplied. An invalid format returns response code 103.",
             "explode": false,
             "in": "query",
             "name": "city",
             "schema": {
-              "description": "City name",
+              "description": "City name used together with state to narrow the lookup when no street address is supplied. An invalid format returns response code 103.",
               "maxLength": 50,
               "type": "string"
             }
           },
           {
-            "description": "County name",
+            "description": "County name used to refine the lookup when supplied without a street address.",
             "explode": false,
             "in": "query",
             "name": "county",
             "schema": {
-              "description": "County name",
+              "description": "County name used to refine the lookup when supplied without a street address.",
               "maxLength": 50,
               "type": "string"
             }
           },
           {
-            "description": "Latitude coordinate",
+            "description": "Latitude of a geographic point. When both lat and lng are supplied the API resolves the single jurisdiction containing that point (coordinate lookup).",
             "explode": false,
             "in": "query",
             "name": "lat",
             "schema": {
-              "description": "Latitude coordinate",
+              "description": "Latitude of a geographic point. When both lat and lng are supplied the API resolves the single jurisdiction containing that point (coordinate lookup).",
               "format": "double",
               "maximum": 90,
               "minimum": -90,
@@ -3950,12 +4202,12 @@
             }
           },
           {
-            "description": "Longitude coordinate",
+            "description": "Longitude of a geographic point. When both lat and lng are supplied the API resolves the single jurisdiction containing that point (coordinate lookup).",
             "explode": false,
             "in": "query",
             "name": "lng",
             "schema": {
-              "description": "Longitude coordinate",
+              "description": "Longitude of a geographic point. When both lat and lng are supplied the API resolves the single jurisdiction containing that point (coordinate lookup).",
               "format": "double",
               "maximum": 180,
               "minimum": -180,
@@ -3963,25 +4215,40 @@
             }
           },
           {
-            "description": "Single Article Tax item total for Tennessee",
+            "description": "Single-article item total in dollars used to compute Tennessee Single Article Tax (SAT). When greater than 0 and the resolved location is in Tennessee, the response reflects the single-article tax limits in the tax summaries.",
             "explode": false,
             "in": "query",
             "name": "sat_item_total",
             "schema": {
-              "description": "Single Article Tax item total for Tennessee",
+              "description": "Single-article item total in dollars used to compute Tennessee Single Article Tax (SAT). When greater than 0 and the resolved location is in Tennessee, the response reflects the single-article tax limits in the tax summaries.",
               "format": "double",
               "minimum": 0,
               "type": "number"
             }
           },
           {
-            "description": "Historical date for rates",
+            "description": "Historical period to price the lookup against, formatted YYYYMM (6 digits, e.g. 202401). Returns the rates that were in effect for that month. Requires historical data to be enabled; an invalid format returns response code 111.",
             "explode": false,
             "in": "query",
             "name": "historical",
             "schema": {
-              "description": "Historical date for rates",
+              "description": "Historical period to price the lookup against, formatted YYYYMM (6 digits, e.g. 202401). Returns the rates that were in effect for that month. Requires historical data to be enabled; an invalid format returns response code 111.",
               "pattern": "^[0-9]{6}$",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Product Taxability Information Code (TIC). When supplied, the response includes a productDetail object describing the rate rules that apply to that product category in the resolved jurisdiction. Accepts numeric standard TIC codes (e.g., 20010) or alphanumeric override codes (e.g., CIR00001). Requires the product_rates entitlement for standard codes.",
+            "example": "20010",
+            "explode": false,
+            "in": "query",
+            "name": "taxabilityCode",
+            "schema": {
+              "description": "Product Taxability Information Code (TIC). When supplied, the response includes a productDetail object describing the rate rules that apply to that product category in the resolved jurisdiction. Accepts numeric standard TIC codes (e.g., 20010) or alphanumeric override codes (e.g., CIR00001). Requires the product_rates entitlement for standard codes.",
+              "examples": [
+                "20010"
+              ],
+              "pattern": "^[A-Za-z0-9]{1,10}$",
               "type": "string"
             }
           },
@@ -4397,7 +4664,7 @@
   "servers": [
     {
       "description": "Production Server",
-      "url": "https://api.ziptax.com"
+      "url": "https://api.zip-tax.com"
     },
     {
       "description": "Local Development Server",
