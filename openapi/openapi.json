@@ -1574,9 +1574,74 @@
         ],
         "type": "object"
       },
+      "V60AddressComponents": {
+        "additionalProperties": false,
+        "properties": {
+          "countryCode": {
+            "description": "ISO-3 country code of the geocoded location (e.g. USA, CAN).",
+            "type": "string"
+          },
+          "countryName": {
+            "description": "Full country name of the geocoded location (e.g. United States, Canada).",
+            "type": "string"
+          },
+          "stateCode": {
+            "description": "State or province code (e.g. CA, ON).",
+            "type": "string"
+          },
+          "state": {
+            "description": "Full state or province name.",
+            "type": "string"
+          },
+          "county": {
+            "description": "County name, when available.",
+            "type": "string"
+          },
+          "city": {
+            "description": "City name.",
+            "type": "string"
+          },
+          "street": {
+            "description": "Street name.",
+            "type": "string"
+          },
+          "postalCode": {
+            "description": "Full postal code (ZIP+4 for US addresses when available; full Canadian postal code for Canadian addresses).",
+            "type": "string"
+          },
+          "houseNumber": {
+            "description": "House/street number, when available.",
+            "type": "string"
+          }
+        },
+        "required": [
+          "countryCode",
+          "countryName",
+          "stateCode",
+          "state",
+          "county",
+          "city",
+          "street",
+          "postalCode",
+          "houseNumber"
+        ],
+        "type": "object"
+      },
       "V60AddressDetail": {
         "additionalProperties": false,
         "properties": {
+          "normalizedAddress": {
+            "description": "Standardized address returned by the geocoder, or empty when the location was not geocoded (e.g. postal-code-only lookups).",
+            "type": "string"
+          },
+          "incorporated": {
+            "description": "Whether the location falls within incorporated city limits, as the string 'true' or 'false'.",
+            "enum": [
+              "true",
+              "false"
+            ],
+            "type": "string"
+          },
           "geoLat": {
             "description": "Latitude of the geocoded location, or 0 when the location was not geocoded.",
             "format": "float",
@@ -1587,17 +1652,9 @@
             "format": "float",
             "type": "number"
           },
-          "incorporated": {
-            "description": "Whether the location falls within incorporated city limits, as the string 'true' or 'false'.",
-            "enum": [
-              "true",
-              "false"
-            ],
-            "type": "string"
-          },
-          "normalizedAddress": {
-            "description": "Standardized address returned by the geocoder, or empty when the location was not geocoded (e.g. postal-code-only lookups).",
-            "type": "string"
+          "address": {
+            "$ref": "#/components/schemas/V60AddressComponents",
+            "description": "Extended address components from the geocoder. Present only when addressDetailExtended=true is supplied on a geocoded (address or lat/lng) lookup. Available for both USA and Canadian lookups."
           }
         },
         "required": [
