@@ -410,6 +410,175 @@
         ],
         "type": "object"
       },
+      "MerchantCartCalculateRequest": {
+        "additionalProperties": true,
+        "properties": {
+          "merchantId": {
+            "description": "UUID of the merchant whose TaxCloud connection is used. Must be owned by the calling account.",
+            "type": "string"
+          }
+        },
+        "required": [
+          "merchantId"
+        ],
+        "type": "object"
+      },
+      "MerchantCertCreateRequest": {
+        "additionalProperties": true,
+        "properties": {
+          "merchantId": {
+            "description": "UUID of the merchant. Must be owned by the calling account.",
+            "type": "string"
+          }
+        },
+        "required": [
+          "merchantId"
+        ],
+        "type": "object"
+      },
+      "MerchantCertDeleteRequest": {
+        "additionalProperties": true,
+        "properties": {
+          "certificateId": {
+            "description": "TaxCloud exemption certificate identifier to delete.",
+            "type": "string"
+          },
+          "merchantId": {
+            "description": "UUID of the merchant. Must be owned by the calling account.",
+            "type": "string"
+          }
+        },
+        "required": [
+          "merchantId",
+          "certificateId"
+        ],
+        "type": "object"
+      },
+      "MerchantCertGetRequest": {
+        "additionalProperties": true,
+        "properties": {
+          "certificateId": {
+            "description": "TaxCloud exemption certificate identifier to retrieve.",
+            "type": "string"
+          },
+          "merchantId": {
+            "description": "UUID of the merchant. Must be owned by the calling account.",
+            "type": "string"
+          }
+        },
+        "required": [
+          "merchantId",
+          "certificateId"
+        ],
+        "type": "object"
+      },
+      "MerchantCertListRequest": {
+        "additionalProperties": true,
+        "properties": {
+          "merchantId": {
+            "description": "UUID of the merchant. Must be owned by the calling account.",
+            "type": "string"
+          }
+        },
+        "required": [
+          "merchantId"
+        ],
+        "type": "object"
+      },
+      "MerchantOrderCreateFromCartRequest": {
+        "additionalProperties": true,
+        "properties": {
+          "cartId": {
+            "description": "TaxCloud cart identifier to convert to an order.",
+            "type": "string"
+          },
+          "merchantId": {
+            "description": "UUID of the merchant. Must be owned by the calling account.",
+            "type": "string"
+          },
+          "orderId": {
+            "description": "Integrator-defined order identifier to assign to the created order.",
+            "type": "string"
+          }
+        },
+        "required": [
+          "merchantId",
+          "cartId",
+          "orderId"
+        ],
+        "type": "object"
+      },
+      "MerchantOrderCreateRequest": {
+        "additionalProperties": true,
+        "properties": {
+          "merchantId": {
+            "description": "UUID of the merchant. Must be owned by the calling account.",
+            "type": "string"
+          }
+        },
+        "required": [
+          "merchantId"
+        ],
+        "type": "object"
+      },
+      "MerchantOrderGetRequest": {
+        "additionalProperties": true,
+        "properties": {
+          "expand": {
+            "description": "Optional TaxCloud expand parameter, forwarded as a query string.",
+            "type": "string"
+          },
+          "merchantId": {
+            "description": "UUID of the merchant. Must be owned by the calling account.",
+            "type": "string"
+          },
+          "orderId": {
+            "description": "TaxCloud order identifier to retrieve.",
+            "type": "string"
+          }
+        },
+        "required": [
+          "merchantId",
+          "orderId"
+        ],
+        "type": "object"
+      },
+      "MerchantOrderUpdateRequest": {
+        "additionalProperties": true,
+        "properties": {
+          "merchantId": {
+            "description": "UUID of the merchant. Must be owned by the calling account.",
+            "type": "string"
+          },
+          "orderId": {
+            "description": "TaxCloud order identifier to update.",
+            "type": "string"
+          }
+        },
+        "required": [
+          "merchantId",
+          "orderId"
+        ],
+        "type": "object"
+      },
+      "MerchantRefundCreateRequest": {
+        "additionalProperties": true,
+        "properties": {
+          "merchantId": {
+            "description": "UUID of the merchant. Must be owned by the calling account.",
+            "type": "string"
+          },
+          "orderId": {
+            "description": "TaxCloud order identifier to refund.",
+            "type": "string"
+          }
+        },
+        "required": [
+          "merchantId",
+          "orderId"
+        ],
+        "type": "object"
+      },
       "MetadataResponse": {
         "additionalProperties": false,
         "properties": {
@@ -1980,10 +2149,11 @@
             "type": "string"
           },
           "taxable": {
-            "description": "Whether services/labor are taxable in this jurisdiction. 'Y' = taxable, 'N' = not taxable.",
+            "description": "Whether services/labor are taxable in this jurisdiction. 'Y' = the service is fully taxable and must be separately stated on the invoice; 'N' = the service is not taxable and must be separately stated on the invoice; 'L' = the service is not taxable, but the labor portion is taxable and both must be separately stated on the invoice.",
             "enum": [
               "Y",
-              "N"
+              "N",
+              "L"
             ],
             "type": "string"
           }
@@ -2290,6 +2460,745 @@
         "summary": "Get TIC Codes",
         "tags": [
           "Data"
+        ],
+        "x-fern-audiences": [
+          "v10",
+          "v20",
+          "v30",
+          "v40",
+          "v50",
+          "v60"
+        ]
+      }
+    },
+    "/merchant/cart/calculate": {
+      "post": {
+        "description": "Forwards a cart to TaxCloud (POST /connections/{connectionId}/carts) using the merchant's stored credentials and returns TaxCloud's response verbatim. Additional cart fields (items, transactionDate, destination, ...) are relayed unchanged.",
+        "operationId": "merchantCartCalculate",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MerchantCartCalculateRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {}
+              }
+            },
+            "description": "TaxCloud response relayed verbatim. The body shape and content type are whatever the merchant's TaxCloud connection returns."
+          },
+          "201": {
+            "content": {
+              "*/*": {
+                "schema": {}
+              }
+            },
+            "description": "Resource created. TaxCloud's 201 response is relayed verbatim, including any Location header."
+          },
+          "400": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorModel"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "401": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorModel"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "403": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorModel"
+                }
+              }
+            },
+            "description": "Forbidden"
+          },
+          "404": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorModel"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "413": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorModel"
+                }
+              }
+            },
+            "description": "Request Entity Too Large"
+          },
+          "422": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorModel"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          },
+          "429": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorModel"
+                }
+              }
+            },
+            "description": "Too Many Requests"
+          },
+          "500": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorModel"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          },
+          "502": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorModel"
+                }
+              }
+            },
+            "description": "Bad Gateway"
+          },
+          "504": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorModel"
+                }
+              }
+            },
+            "description": "Gateway Timeout"
+          }
+        },
+        "security": [
+          {
+            "ApiKeyHeader": []
+          }
+        ],
+        "summary": "Calculate Cart Tax (TaxCloud)",
+        "tags": [
+          "Merchant TaxCloud"
+        ],
+        "x-fern-audiences": [
+          "v10",
+          "v20",
+          "v30",
+          "v40",
+          "v50",
+          "v60"
+        ]
+      }
+    },
+    "/merchant/cert/create": {
+      "post": {
+        "description": "Forwards to TaxCloud POST /connections/{connectionId}/exemption-certificates. All certificate fields other than merchantId are relayed unchanged.",
+        "operationId": "merchantCertCreate",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MerchantCertCreateRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {}
+              }
+            },
+            "description": "TaxCloud response relayed verbatim. The body shape and content type are whatever the merchant's TaxCloud connection returns."
+          },
+          "201": {
+            "content": {
+              "*/*": {
+                "schema": {}
+              }
+            },
+            "description": "Resource created. TaxCloud's 201 response is relayed verbatim, including any Location header."
+          },
+          "400": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorModel"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "401": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorModel"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "403": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorModel"
+                }
+              }
+            },
+            "description": "Forbidden"
+          },
+          "404": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorModel"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "413": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorModel"
+                }
+              }
+            },
+            "description": "Request Entity Too Large"
+          },
+          "422": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorModel"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          },
+          "429": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorModel"
+                }
+              }
+            },
+            "description": "Too Many Requests"
+          },
+          "500": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorModel"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          },
+          "502": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorModel"
+                }
+              }
+            },
+            "description": "Bad Gateway"
+          },
+          "504": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorModel"
+                }
+              }
+            },
+            "description": "Gateway Timeout"
+          }
+        },
+        "security": [
+          {
+            "ApiKeyHeader": []
+          }
+        ],
+        "summary": "Create Exemption Certificate (TaxCloud)",
+        "tags": [
+          "Merchant TaxCloud"
+        ],
+        "x-fern-audiences": [
+          "v10",
+          "v20",
+          "v30",
+          "v40",
+          "v50",
+          "v60"
+        ]
+      }
+    },
+    "/merchant/cert/delete": {
+      "post": {
+        "description": "Forwards to TaxCloud DELETE /connections/{connectionId}/exemption-certificates/{certificateId}. certificateId is a path identifier.",
+        "operationId": "merchantCertDelete",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MerchantCertDeleteRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {}
+              }
+            },
+            "description": "TaxCloud response relayed verbatim. The body shape and content type are whatever the merchant's TaxCloud connection returns."
+          },
+          "204": {
+            "content": {
+              "*/*": {
+                "schema": {}
+              }
+            },
+            "description": "Resource deleted. TaxCloud's 204 (no content) response is relayed verbatim."
+          },
+          "400": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorModel"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "401": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorModel"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "403": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorModel"
+                }
+              }
+            },
+            "description": "Forbidden"
+          },
+          "404": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorModel"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "413": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorModel"
+                }
+              }
+            },
+            "description": "Request Entity Too Large"
+          },
+          "422": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorModel"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          },
+          "429": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorModel"
+                }
+              }
+            },
+            "description": "Too Many Requests"
+          },
+          "500": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorModel"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          },
+          "502": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorModel"
+                }
+              }
+            },
+            "description": "Bad Gateway"
+          },
+          "504": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorModel"
+                }
+              }
+            },
+            "description": "Gateway Timeout"
+          }
+        },
+        "security": [
+          {
+            "ApiKeyHeader": []
+          }
+        ],
+        "summary": "Delete Exemption Certificate (TaxCloud)",
+        "tags": [
+          "Merchant TaxCloud"
+        ],
+        "x-fern-audiences": [
+          "v10",
+          "v20",
+          "v30",
+          "v40",
+          "v50",
+          "v60"
+        ]
+      }
+    },
+    "/merchant/cert/get": {
+      "post": {
+        "description": "Forwards to TaxCloud GET /connections/{connectionId}/exemption-certificates/{certificateId}. certificateId is a path identifier.",
+        "operationId": "merchantCertGet",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MerchantCertGetRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {}
+              }
+            },
+            "description": "TaxCloud response relayed verbatim. The body shape and content type are whatever the merchant's TaxCloud connection returns."
+          },
+          "400": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorModel"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "401": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorModel"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "403": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorModel"
+                }
+              }
+            },
+            "description": "Forbidden"
+          },
+          "404": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorModel"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "413": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorModel"
+                }
+              }
+            },
+            "description": "Request Entity Too Large"
+          },
+          "422": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorModel"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          },
+          "429": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorModel"
+                }
+              }
+            },
+            "description": "Too Many Requests"
+          },
+          "500": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorModel"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          },
+          "502": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorModel"
+                }
+              }
+            },
+            "description": "Bad Gateway"
+          },
+          "504": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorModel"
+                }
+              }
+            },
+            "description": "Gateway Timeout"
+          }
+        },
+        "security": [
+          {
+            "ApiKeyHeader": []
+          }
+        ],
+        "summary": "Get Exemption Certificate (TaxCloud)",
+        "tags": [
+          "Merchant TaxCloud"
+        ],
+        "x-fern-audiences": [
+          "v10",
+          "v20",
+          "v30",
+          "v40",
+          "v50",
+          "v60"
+        ]
+      }
+    },
+    "/merchant/cert/list": {
+      "post": {
+        "description": "Forwards to TaxCloud GET /exemption-certificates, scoped to the merchant's connection via a connectionId query filter, and returns the certificate collection verbatim.",
+        "operationId": "merchantCertList",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MerchantCertListRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {}
+              }
+            },
+            "description": "TaxCloud response relayed verbatim. The body shape and content type are whatever the merchant's TaxCloud connection returns."
+          },
+          "400": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorModel"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "401": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorModel"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "403": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorModel"
+                }
+              }
+            },
+            "description": "Forbidden"
+          },
+          "404": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorModel"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "413": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorModel"
+                }
+              }
+            },
+            "description": "Request Entity Too Large"
+          },
+          "422": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorModel"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          },
+          "429": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorModel"
+                }
+              }
+            },
+            "description": "Too Many Requests"
+          },
+          "500": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorModel"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          },
+          "502": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorModel"
+                }
+              }
+            },
+            "description": "Bad Gateway"
+          },
+          "504": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorModel"
+                }
+              }
+            },
+            "description": "Gateway Timeout"
+          }
+        },
+        "security": [
+          {
+            "ApiKeyHeader": []
+          }
+        ],
+        "summary": "List Exemption Certificates (TaxCloud)",
+        "tags": [
+          "Merchant TaxCloud"
         ],
         "x-fern-audiences": [
           "v10",
@@ -2961,6 +3870,745 @@
         "summary": "List Merchants",
         "tags": [
           "Merchant"
+        ],
+        "x-fern-audiences": [
+          "v10",
+          "v20",
+          "v30",
+          "v40",
+          "v50",
+          "v60"
+        ]
+      }
+    },
+    "/merchant/order/create": {
+      "post": {
+        "description": "Forwards to TaxCloud POST /connections/{connectionId}/orders to create an order directly. All order fields other than merchantId are relayed unchanged.",
+        "operationId": "merchantOrderCreate",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MerchantOrderCreateRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {}
+              }
+            },
+            "description": "TaxCloud response relayed verbatim. The body shape and content type are whatever the merchant's TaxCloud connection returns."
+          },
+          "201": {
+            "content": {
+              "*/*": {
+                "schema": {}
+              }
+            },
+            "description": "Resource created. TaxCloud's 201 response is relayed verbatim, including any Location header."
+          },
+          "400": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorModel"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "401": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorModel"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "403": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorModel"
+                }
+              }
+            },
+            "description": "Forbidden"
+          },
+          "404": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorModel"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "413": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorModel"
+                }
+              }
+            },
+            "description": "Request Entity Too Large"
+          },
+          "422": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorModel"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          },
+          "429": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorModel"
+                }
+              }
+            },
+            "description": "Too Many Requests"
+          },
+          "500": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorModel"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          },
+          "502": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorModel"
+                }
+              }
+            },
+            "description": "Bad Gateway"
+          },
+          "504": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorModel"
+                }
+              }
+            },
+            "description": "Gateway Timeout"
+          }
+        },
+        "security": [
+          {
+            "ApiKeyHeader": []
+          }
+        ],
+        "summary": "Create Order (TaxCloud)",
+        "tags": [
+          "Merchant TaxCloud"
+        ],
+        "x-fern-audiences": [
+          "v10",
+          "v20",
+          "v30",
+          "v40",
+          "v50",
+          "v60"
+        ]
+      }
+    },
+    "/merchant/order/create-from-cart": {
+      "post": {
+        "description": "Forwards to TaxCloud POST /connections/{connectionId}/carts/orders to capture a previously calculated cart as an order. cartId and orderId travel in the forwarded body.",
+        "operationId": "merchantOrderCreateFromCart",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MerchantOrderCreateFromCartRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {}
+              }
+            },
+            "description": "TaxCloud response relayed verbatim. The body shape and content type are whatever the merchant's TaxCloud connection returns."
+          },
+          "201": {
+            "content": {
+              "*/*": {
+                "schema": {}
+              }
+            },
+            "description": "Resource created. TaxCloud's 201 response is relayed verbatim, including any Location header."
+          },
+          "400": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorModel"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "401": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorModel"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "403": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorModel"
+                }
+              }
+            },
+            "description": "Forbidden"
+          },
+          "404": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorModel"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "413": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorModel"
+                }
+              }
+            },
+            "description": "Request Entity Too Large"
+          },
+          "422": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorModel"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          },
+          "429": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorModel"
+                }
+              }
+            },
+            "description": "Too Many Requests"
+          },
+          "500": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorModel"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          },
+          "502": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorModel"
+                }
+              }
+            },
+            "description": "Bad Gateway"
+          },
+          "504": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorModel"
+                }
+              }
+            },
+            "description": "Gateway Timeout"
+          }
+        },
+        "security": [
+          {
+            "ApiKeyHeader": []
+          }
+        ],
+        "summary": "Create Order From Cart (TaxCloud)",
+        "tags": [
+          "Merchant TaxCloud"
+        ],
+        "x-fern-audiences": [
+          "v10",
+          "v20",
+          "v30",
+          "v40",
+          "v50",
+          "v60"
+        ]
+      }
+    },
+    "/merchant/order/get": {
+      "post": {
+        "description": "Forwards to TaxCloud GET /connections/{connectionId}/orders/{orderId}. orderId is a path identifier; the optional expand field is passed through as a query parameter.",
+        "operationId": "merchantOrderGet",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MerchantOrderGetRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {}
+              }
+            },
+            "description": "TaxCloud response relayed verbatim. The body shape and content type are whatever the merchant's TaxCloud connection returns."
+          },
+          "400": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorModel"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "401": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorModel"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "403": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorModel"
+                }
+              }
+            },
+            "description": "Forbidden"
+          },
+          "404": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorModel"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "413": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorModel"
+                }
+              }
+            },
+            "description": "Request Entity Too Large"
+          },
+          "422": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorModel"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          },
+          "429": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorModel"
+                }
+              }
+            },
+            "description": "Too Many Requests"
+          },
+          "500": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorModel"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          },
+          "502": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorModel"
+                }
+              }
+            },
+            "description": "Bad Gateway"
+          },
+          "504": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorModel"
+                }
+              }
+            },
+            "description": "Gateway Timeout"
+          }
+        },
+        "security": [
+          {
+            "ApiKeyHeader": []
+          }
+        ],
+        "summary": "Get Order (TaxCloud)",
+        "tags": [
+          "Merchant TaxCloud"
+        ],
+        "x-fern-audiences": [
+          "v10",
+          "v20",
+          "v30",
+          "v40",
+          "v50",
+          "v60"
+        ]
+      }
+    },
+    "/merchant/order/update": {
+      "post": {
+        "description": "Forwards to TaxCloud PATCH /connections/{connectionId}/orders/{orderId}. orderId is a path identifier; the remaining body is the update payload relayed unchanged.",
+        "operationId": "merchantOrderUpdate",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MerchantOrderUpdateRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {}
+              }
+            },
+            "description": "TaxCloud response relayed verbatim. The body shape and content type are whatever the merchant's TaxCloud connection returns."
+          },
+          "400": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorModel"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "401": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorModel"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "403": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorModel"
+                }
+              }
+            },
+            "description": "Forbidden"
+          },
+          "404": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorModel"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "413": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorModel"
+                }
+              }
+            },
+            "description": "Request Entity Too Large"
+          },
+          "422": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorModel"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          },
+          "429": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorModel"
+                }
+              }
+            },
+            "description": "Too Many Requests"
+          },
+          "500": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorModel"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          },
+          "502": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorModel"
+                }
+              }
+            },
+            "description": "Bad Gateway"
+          },
+          "504": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorModel"
+                }
+              }
+            },
+            "description": "Gateway Timeout"
+          }
+        },
+        "security": [
+          {
+            "ApiKeyHeader": []
+          }
+        ],
+        "summary": "Update Order (TaxCloud)",
+        "tags": [
+          "Merchant TaxCloud"
+        ],
+        "x-fern-audiences": [
+          "v10",
+          "v20",
+          "v30",
+          "v40",
+          "v50",
+          "v60"
+        ]
+      }
+    },
+    "/merchant/refund/create": {
+      "post": {
+        "description": "Forwards to TaxCloud POST /connections/{connectionId}/orders/refunds/{orderId}. orderId is a path identifier; an optional items[] in the forwarded body scopes a partial refund (omit for a full refund).",
+        "operationId": "merchantRefundCreate",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MerchantRefundCreateRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {}
+              }
+            },
+            "description": "TaxCloud response relayed verbatim. The body shape and content type are whatever the merchant's TaxCloud connection returns."
+          },
+          "201": {
+            "content": {
+              "*/*": {
+                "schema": {}
+              }
+            },
+            "description": "Resource created. TaxCloud's 201 response is relayed verbatim, including any Location header."
+          },
+          "400": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorModel"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "401": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorModel"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "403": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorModel"
+                }
+              }
+            },
+            "description": "Forbidden"
+          },
+          "404": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorModel"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "413": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorModel"
+                }
+              }
+            },
+            "description": "Request Entity Too Large"
+          },
+          "422": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorModel"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          },
+          "429": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorModel"
+                }
+              }
+            },
+            "description": "Too Many Requests"
+          },
+          "500": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorModel"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          },
+          "502": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorModel"
+                }
+              }
+            },
+            "description": "Bad Gateway"
+          },
+          "504": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorModel"
+                }
+              }
+            },
+            "description": "Gateway Timeout"
+          }
+        },
+        "security": [
+          {
+            "ApiKeyHeader": []
+          }
+        ],
+        "summary": "Create Refund (TaxCloud)",
+        "tags": [
+          "Merchant TaxCloud"
         ],
         "x-fern-audiences": [
           "v10",
@@ -3900,16 +5548,21 @@
             }
           },
           {
-            "description": "Country of the lookup: 'USA' (default) or 'CAN'. 'CAN' requires the Canadian rates (rate_loc_can) entitlement; otherwise the request returns response code 112.",
+            "description": "Country of the lookup: 'USA' (default), 'CAN', or a US territory (ASM, GUM, MNP, PRI, VIR). 'CAN' requires the Canadian rates (rate_loc_can) entitlement; otherwise the request returns response code 112. US territories are looked up via the USA path and require no additional entitlement.",
             "explode": false,
             "in": "query",
             "name": "countryCode",
             "schema": {
               "default": "USA",
-              "description": "Country of the lookup: 'USA' (default) or 'CAN'. 'CAN' requires the Canadian rates (rate_loc_can) entitlement; otherwise the request returns response code 112.",
+              "description": "Country of the lookup: 'USA' (default), 'CAN', or a US territory (ASM, GUM, MNP, PRI, VIR). 'CAN' requires the Canadian rates (rate_loc_can) entitlement; otherwise the request returns response code 112. US territories are looked up via the USA path and require no additional entitlement.",
               "enum": [
                 "USA",
-                "CAN"
+                "CAN",
+                "PRI",
+                "ASM",
+                "GUM",
+                "MNP",
+                "VIR"
               ],
               "type": "string"
             }
@@ -4161,16 +5814,21 @@
             }
           },
           {
-            "description": "Country of the lookup: 'USA' (default) or 'CAN'. 'CAN' requires the Canadian rates (rate_loc_can) entitlement; otherwise the request returns response code 112.",
+            "description": "Country of the lookup: 'USA' (default), 'CAN', or a US territory (ASM, GUM, MNP, PRI, VIR). 'CAN' requires the Canadian rates (rate_loc_can) entitlement; otherwise the request returns response code 112. US territories are looked up via the USA path and require no additional entitlement.",
             "explode": false,
             "in": "query",
             "name": "countryCode",
             "schema": {
               "default": "USA",
-              "description": "Country of the lookup: 'USA' (default) or 'CAN'. 'CAN' requires the Canadian rates (rate_loc_can) entitlement; otherwise the request returns response code 112.",
+              "description": "Country of the lookup: 'USA' (default), 'CAN', or a US territory (ASM, GUM, MNP, PRI, VIR). 'CAN' requires the Canadian rates (rate_loc_can) entitlement; otherwise the request returns response code 112. US territories are looked up via the USA path and require no additional entitlement.",
               "enum": [
                 "USA",
-                "CAN"
+                "CAN",
+                "PRI",
+                "ASM",
+                "GUM",
+                "MNP",
+                "VIR"
               ],
               "type": "string"
             }
