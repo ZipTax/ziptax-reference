@@ -1,6 +1,41 @@
 {
   "components": {
     "schemas": {
+      "CartCalculateResponseBody": {
+        "additionalProperties": false,
+        "properties": {
+          "connectionId": {
+            "description": "The TaxCloud connection the calculation ran under.",
+            "examples": [
+              "25eb9b97-5acb-492d-b720-c03e79cf715a"
+            ],
+            "type": "string"
+          },
+          "items": {
+            "description": "One calculated cart per submitted cart, in the same order, with per-line-item tax rates and amounts.",
+            "items": {
+              "$ref": "#/components/schemas/TaxCloudCartResponse"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "transactionDate": {
+            "description": "RFC3339 datetime the carts were calculated for.",
+            "examples": [
+              "2024-08-01T14:00:00Z"
+            ],
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "connectionId",
+          "items"
+        ],
+        "type": "object"
+      },
       "Component": {
         "additionalProperties": false,
         "properties": {
@@ -413,26 +448,139 @@
       "MerchantCartCalculateRequest": {
         "additionalProperties": true,
         "properties": {
+          "items": {
+            "description": "The carts to calculate tax for. Most integrations send a single cart; up to 100 carts may be calculated in one call.",
+            "items": {
+              "$ref": "#/components/schemas/TaxCloudCart"
+            },
+            "maxItems": 100,
+            "minItems": 1,
+            "type": [
+              "array",
+              "null"
+            ]
+          },
           "merchantId": {
-            "description": "UUID of the merchant whose TaxCloud connection is used. Must be owned by the calling account.",
+            "description": "UUID of the merchant whose TaxCloud connection is used. Must be owned by the calling account. Consumed by the Ziptax layer for routing and not forwarded to TaxCloud.",
+            "type": "string"
+          },
+          "transactionDate": {
+            "description": "RFC3339 datetime the carts are calculated for. Defaults to the current time when omitted.",
+            "examples": [
+              "2024-08-01T14:00:00Z"
+            ],
+            "format": "date-time",
             "type": "string"
           }
         },
         "required": [
-          "merchantId"
+          "merchantId",
+          "items"
         ],
         "type": "object"
       },
       "MerchantCertCreateRequest": {
         "additionalProperties": true,
         "properties": {
-          "merchantId": {
-            "description": "UUID of the merchant. Must be owned by the calling account.",
+          "address": {
+            "$ref": "#/components/schemas/TaxCloudAddress",
+            "description": "Address of the exempt customer."
+          },
+          "customerBusinessDescription": {
+            "description": "Free-text description of the business. Provide when customerBusinessType is Other.",
             "type": "string"
+          },
+          "customerBusinessType": {
+            "description": "The type of business the customer is.",
+            "enum": [
+              "AccommodationAndFoodServices",
+              "AgriculturalForestryFishingHunting",
+              "Construction",
+              "FinanceAndInsurance",
+              "InformationPublishingAndCommunications",
+              "Manufacturing",
+              "Mining",
+              "RealEstate",
+              "RentalAndLeasing",
+              "RetailTrade",
+              "TransportationAndWarehousing",
+              "Utilities",
+              "WholesaleTrade",
+              "BusinessServices",
+              "ProfessionalServices",
+              "EducationAndHealthCareServices",
+              "NonprofitOrganization",
+              "Government",
+              "NotABusiness",
+              "Other"
+            ],
+            "type": "string"
+          },
+          "customerId": {
+            "description": "Your identifier for the exempt customer. Carts and orders submitted with this customerId can use the certificate.",
+            "examples": [
+              "customer-453"
+            ],
+            "type": "string"
+          },
+          "customerName": {
+            "description": "Name of the customer or organization the certificate is issued to.",
+            "examples": [
+              "Mr. Francis Exempt"
+            ],
+            "type": "string"
+          },
+          "merchantId": {
+            "description": "UUID of the merchant. Must be owned by the calling account. Consumed by the Ziptax layer for routing and not forwarded to TaxCloud.",
+            "type": "string"
+          },
+          "reason": {
+            "description": "The reason the customer is exempt from sales tax.",
+            "enum": [
+              "FederalGovernment",
+              "StateOrLocalGovernment",
+              "TribalGovernment",
+              "ForeignDiplomat",
+              "CharitableOrganization",
+              "EducationalOrganization",
+              "Resale",
+              "AgriculturalProduction",
+              "IndustrialProductionOrManufacturing",
+              "DirectPayPermit",
+              "DirectMail",
+              "Other",
+              "ReligiousOrganization"
+            ],
+            "examples": [
+              "Resale"
+            ],
+            "type": "string"
+          },
+          "reasonDescription": {
+            "description": "Short free-text elaboration of the exemption reason (maximum 20 characters).",
+            "maxLength": 20,
+            "type": "string"
+          },
+          "states": {
+            "description": "The states the certificate is valid in, each as a two-letter abbreviation object.",
+            "items": {
+              "$ref": "#/components/schemas/TaxCloudExemptState"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
           }
         },
         "required": [
-          "merchantId"
+          "merchantId",
+          "customerId",
+          "customerName",
+          "customerBusinessType",
+          "reason",
+          "reasonDescription",
+          "address",
+          "states"
         ],
         "type": "object"
       },
@@ -440,11 +588,11 @@
         "additionalProperties": true,
         "properties": {
           "certificateId": {
-            "description": "TaxCloud exemption certificate identifier to delete.",
+            "description": "The certificateId returned when the exemption certificate was created.",
             "type": "string"
           },
           "merchantId": {
-            "description": "UUID of the merchant. Must be owned by the calling account.",
+            "description": "UUID of the merchant. Must be owned by the calling account. Consumed by the Ziptax layer for routing and not forwarded to TaxCloud.",
             "type": "string"
           }
         },
@@ -458,11 +606,11 @@
         "additionalProperties": true,
         "properties": {
           "certificateId": {
-            "description": "TaxCloud exemption certificate identifier to retrieve.",
+            "description": "The certificateId returned when the exemption certificate was created.",
             "type": "string"
           },
           "merchantId": {
-            "description": "UUID of the merchant. Must be owned by the calling account.",
+            "description": "UUID of the merchant. Must be owned by the calling account. Consumed by the Ziptax layer for routing and not forwarded to TaxCloud.",
             "type": "string"
           }
         },
@@ -475,8 +623,43 @@
       "MerchantCertListRequest": {
         "additionalProperties": true,
         "properties": {
+          "ascending": {
+            "default": false,
+            "description": "Whether to sort results in ascending order. Defaults to false (descending).",
+            "type": "boolean"
+          },
+          "cursor": {
+            "description": "Opaque pagination cursor from the nextCursor field of a previous response. Omit to start at the first page.",
+            "type": "string"
+          },
+          "customerId": {
+            "description": "Filter results to certificates belonging to this customerId.",
+            "type": "string"
+          },
+          "disabled": {
+            "default": false,
+            "description": "Set true to list disabled (revoked) certificates instead of active ones. Defaults to false.",
+            "type": "boolean"
+          },
+          "limit": {
+            "default": 20,
+            "description": "Maximum number of certificates to return per page. Defaults to 20; maximum 100.",
+            "format": "int64",
+            "maximum": 100,
+            "minimum": 0,
+            "type": "integer"
+          },
           "merchantId": {
-            "description": "UUID of the merchant. Must be owned by the calling account.",
+            "description": "UUID of the merchant. Must be owned by the calling account. Consumed by the Ziptax layer for routing and not forwarded to TaxCloud.",
+            "type": "string"
+          },
+          "sortBy": {
+            "default": "id",
+            "description": "The field to sort results by: 'createdDate' or 'id'. Defaults to 'id'.",
+            "enum": [
+              "createdDate",
+              "id"
+            ],
             "type": "string"
           }
         },
@@ -489,15 +672,49 @@
         "additionalProperties": true,
         "properties": {
           "cartId": {
-            "description": "TaxCloud cart identifier to convert to an order.",
+            "description": "The cartId returned by (or supplied to) /merchant/cart/calculate identifying the calculated cart to convert into an order.",
+            "examples": [
+              "my-cart-1"
+            ],
+            "maxLength": 50,
+            "minLength": 1,
+            "type": "string"
+          },
+          "completed": {
+            "description": "Whether the order has shipped, creating a tax liability. Defaults to false. Ignored when completedDate is provided.",
+            "examples": [
+              false
+            ],
+            "type": "boolean"
+          },
+          "completedDate": {
+            "description": "RFC3339 datetime the order was shipped on, which created the tax liability. Takes precedence over the completed field when provided.",
+            "examples": [
+              "2024-08-01T14:00:00Z"
+            ],
+            "format": "date-time",
+            "type": "string"
+          },
+          "kind": {
+            "default": "order",
+            "description": "The kind of order to create: 'order' for a sale (default) or 'credit' for a credit order.",
+            "enum": [
+              "order",
+              "credit"
+            ],
             "type": "string"
           },
           "merchantId": {
-            "description": "UUID of the merchant. Must be owned by the calling account.",
+            "description": "UUID of the merchant. Must be owned by the calling account. Consumed by the Ziptax layer for routing and not forwarded to TaxCloud.",
             "type": "string"
           },
           "orderId": {
-            "description": "Integrator-defined order identifier to assign to the created order.",
+            "description": "Your identifier for the resulting order in your own system. Used later with /merchant/order/get, /merchant/order/update, and /merchant/refund/create.",
+            "examples": [
+              "my-order-1"
+            ],
+            "maxLength": 50,
+            "minLength": 1,
             "type": "string"
           }
         },
@@ -511,13 +728,117 @@
       "MerchantOrderCreateRequest": {
         "additionalProperties": true,
         "properties": {
+          "batchId": {
+            "description": "Optional batch ID for grouping related orders.",
+            "type": "string"
+          },
+          "channel": {
+            "description": "The sales channel the order came from. Pass one of amazon, ebay, or walmart to exclude marketplace-collected tax from filing.",
+            "examples": [
+              "walmart"
+            ],
+            "type": "string"
+          },
+          "completedDate": {
+            "description": "RFC3339 datetime the order was shipped on, which created the tax liability.",
+            "examples": [
+              "2024-08-01T14:00:00Z"
+            ],
+            "format": "date-time",
+            "type": "string"
+          },
+          "currency": {
+            "$ref": "#/components/schemas/TaxCloudCurrency",
+            "description": "The currency the line-item prices and tax amounts are denominated in."
+          },
+          "customerId": {
+            "description": "Your identifier for the customer in your own system. Used to match exemption certificates and order history.",
+            "examples": [
+              "customer-453"
+            ],
+            "maxLength": 50,
+            "type": "string"
+          },
+          "deliveredBySeller": {
+            "description": "Whether the seller delivers the order directly (own vehicles) rather than via common carrier. Affects taxability of delivery charges in some states.",
+            "examples": [
+              false
+            ],
+            "type": "boolean"
+          },
+          "destination": {
+            "$ref": "#/components/schemas/TaxCloudAddress",
+            "description": "The ship-to (destination) address of the sale."
+          },
+          "discounts": {
+            "$ref": "#/components/schemas/TaxCloudDiscounts",
+            "description": "Optional line-item and order-level discounts to apply. If omitted, prices are used as is."
+          },
+          "excludeFromFiling": {
+            "description": "Whether to exclude the order from tax filing.",
+            "examples": [
+              false
+            ],
+            "type": "boolean"
+          },
+          "exemption": {
+            "$ref": "#/components/schemas/TaxCloudExemption",
+            "description": "Optional exemption information for the customer."
+          },
+          "kind": {
+            "default": "order",
+            "description": "The kind of order: 'order' for a sale (default) or 'credit' for a credit order.",
+            "enum": [
+              "order",
+              "credit"
+            ],
+            "type": "string"
+          },
+          "lineItems": {
+            "description": "The items on the order, each including the tax rate and amount that was collected.",
+            "items": {
+              "$ref": "#/components/schemas/TaxCloudCartItemWithTax"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
           "merchantId": {
-            "description": "UUID of the merchant. Must be owned by the calling account.",
+            "description": "UUID of the merchant. Must be owned by the calling account. Consumed by the Ziptax layer for routing and not forwarded to TaxCloud.",
+            "type": "string"
+          },
+          "orderId": {
+            "description": "Your identifier for the order in your own system. Used later with /merchant/order/get, /merchant/order/update, and /merchant/refund/create.",
+            "examples": [
+              "my-order-1"
+            ],
+            "maxLength": 50,
+            "type": "string"
+          },
+          "origin": {
+            "$ref": "#/components/schemas/TaxCloudAddress",
+            "description": "The ship-from (origin) address of the sale."
+          },
+          "transactionDate": {
+            "description": "RFC3339 datetime the order was purchased on.",
+            "examples": [
+              "2024-08-01T14:00:00Z"
+            ],
+            "format": "date-time",
             "type": "string"
           }
         },
         "required": [
-          "merchantId"
+          "merchantId",
+          "orderId",
+          "customerId",
+          "origin",
+          "destination",
+          "currency",
+          "lineItems",
+          "transactionDate",
+          "completedDate"
         ],
         "type": "object"
       },
@@ -525,15 +846,21 @@
         "additionalProperties": true,
         "properties": {
           "expand": {
-            "description": "Optional TaxCloud expand parameter, forwarded as a query string.",
+            "description": "Set to 'refunds' to include the order's refunds in the response. Forwarded to TaxCloud as a query parameter.",
+            "enum": [
+              "refunds"
+            ],
             "type": "string"
           },
           "merchantId": {
-            "description": "UUID of the merchant. Must be owned by the calling account.",
+            "description": "UUID of the merchant. Must be owned by the calling account. Consumed by the Ziptax layer for routing and not forwarded to TaxCloud.",
             "type": "string"
           },
           "orderId": {
-            "description": "TaxCloud order identifier to retrieve.",
+            "description": "Your identifier for the order to retrieve, as supplied when the order was created.",
+            "examples": [
+              "my-order-1"
+            ],
             "type": "string"
           }
         },
@@ -546,12 +873,23 @@
       "MerchantOrderUpdateRequest": {
         "additionalProperties": true,
         "properties": {
+          "completedDate": {
+            "description": "RFC3339 datetime the order was shipped on, which creates the tax liability.",
+            "examples": [
+              "2024-08-01T14:00:00Z"
+            ],
+            "format": "date-time",
+            "type": "string"
+          },
           "merchantId": {
-            "description": "UUID of the merchant. Must be owned by the calling account.",
+            "description": "UUID of the merchant. Must be owned by the calling account. Consumed by the Ziptax layer for routing and not forwarded to TaxCloud.",
             "type": "string"
           },
           "orderId": {
-            "description": "TaxCloud order identifier to update.",
+            "description": "Your identifier for the order to update, as supplied when the order was created. Consumed for routing and not forwarded in the update payload.",
+            "examples": [
+              "my-order-1"
+            ],
             "type": "string"
           }
         },
@@ -564,12 +902,34 @@
       "MerchantRefundCreateRequest": {
         "additionalProperties": true,
         "properties": {
+          "batchId": {
+            "description": "Optional batch ID for grouping related refunds.",
+            "type": "string"
+          },
+          "items": {
+            "description": "The line items and quantities to refund. Omit (or send an empty array) to refund the entire order.",
+            "items": {
+              "$ref": "#/components/schemas/RefundItem"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
           "merchantId": {
-            "description": "UUID of the merchant. Must be owned by the calling account.",
+            "description": "UUID of the merchant. Must be owned by the calling account. Consumed by the Ziptax layer for routing and not forwarded to TaxCloud.",
             "type": "string"
           },
           "orderId": {
-            "description": "TaxCloud order identifier to refund.",
+            "description": "Your identifier for the order to refund, as supplied when the order was created. Consumed for routing and not forwarded in the refund payload.",
+            "examples": [
+              "my-order-1"
+            ],
+            "type": "string"
+          },
+          "returnedDate": {
+            "description": "Include only if this return amends a previously filed sales tax return; providing it triggers an Amended Sales Tax Return. Not typically recommended.",
+            "format": "date-time",
             "type": "string"
           }
         },
@@ -680,6 +1040,32 @@
           "geo_usage_percent",
           "is_active",
           "last_updated"
+        ],
+        "type": "object"
+      },
+      "RefundItem": {
+        "additionalProperties": false,
+        "properties": {
+          "itemId": {
+            "description": "The itemId of the line item to refund. Must match an itemId from the original order.",
+            "examples": [
+              "item-1"
+            ],
+            "maxLength": 50,
+            "minLength": 1,
+            "type": "string"
+          },
+          "quantity": {
+            "description": "The quantity of the item to refund. May be fractional and must not exceed the quantity on the original order.",
+            "format": "double",
+            "maximum": 99999.9999,
+            "minimum": 0,
+            "type": "number"
+          }
+        },
+        "required": [
+          "itemId",
+          "quantity"
         ],
         "type": "object"
       },
@@ -964,6 +1350,903 @@
         "required": [
           "tic",
           "name"
+        ],
+        "type": "object"
+      },
+      "TaxCloudAddress": {
+        "additionalProperties": false,
+        "properties": {
+          "city": {
+            "description": "City or post-town of the address.",
+            "examples": [
+              "Minneapolis"
+            ],
+            "maxLength": 50,
+            "minLength": 1,
+            "type": "string"
+          },
+          "countryCode": {
+            "default": "US",
+            "description": "ISO 3166-1 alpha-2 country code of the address. US (United States) or CA (Canada). Defaults to US when omitted.",
+            "enum": [
+              "US",
+              "CA"
+            ],
+            "type": "string"
+          },
+          "line1": {
+            "description": "First line of the address: street number and name, PO Box, or building. Values longer than 50 characters are automatically truncated by TaxCloud.",
+            "examples": [
+              "323 Washington Ave N"
+            ],
+            "maxLength": 128,
+            "minLength": 1,
+            "type": "string"
+          },
+          "line2": {
+            "description": "Second line of the address, if any (e.g. apartment, suite, or unit number). Values longer than 50 characters are automatically truncated by TaxCloud.",
+            "maxLength": 128,
+            "type": "string"
+          },
+          "state": {
+            "description": "State, province, or other large territorial division, as a two-letter abbreviation (e.g. MN, CA, ON).",
+            "examples": [
+              "MN"
+            ],
+            "maxLength": 32,
+            "minLength": 1,
+            "type": "string"
+          },
+          "zip": {
+            "description": "Postal or ZIP code. Five-digit (55401) and ZIP+4 (55401-2427) formats are accepted for US addresses.",
+            "examples": [
+              "55401-2427"
+            ],
+            "maxLength": 16,
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "required": [
+          "line1",
+          "city",
+          "state",
+          "zip"
+        ],
+        "type": "object"
+      },
+      "TaxCloudCart": {
+        "additionalProperties": false,
+        "properties": {
+          "cartId": {
+            "description": "Your identifier for this cart. If omitted, TaxCloud generates one and returns it in the response; either way, pass it to /merchant/order/create-from-cart to capture the cart as an order.",
+            "examples": [
+              "my-cart-1"
+            ],
+            "maxLength": 50,
+            "minLength": 1,
+            "type": "string"
+          },
+          "currency": {
+            "$ref": "#/components/schemas/TaxCloudCurrency",
+            "description": "The currency the line-item prices are denominated in."
+          },
+          "customerId": {
+            "description": "Your identifier for the customer in your own system. Used to match exemption certificates and order history.",
+            "examples": [
+              "customer-453"
+            ],
+            "maxLength": 50,
+            "minLength": 1,
+            "type": "string"
+          },
+          "deliveredBySeller": {
+            "description": "Whether the seller delivers the order directly (own vehicles) rather than via common carrier. Affects taxability of delivery charges in some states.",
+            "examples": [
+              false
+            ],
+            "type": "boolean"
+          },
+          "destination": {
+            "$ref": "#/components/schemas/TaxCloudAddress",
+            "description": "The ship-to (destination) address of the sale. Tax is generally calculated for this address in destination-sourced states."
+          },
+          "discounts": {
+            "$ref": "#/components/schemas/TaxCloudDiscounts",
+            "description": "Optional line-item and order-level discounts to apply. If omitted, prices are used as is."
+          },
+          "exemption": {
+            "$ref": "#/components/schemas/TaxCloudExemption",
+            "description": "Optional exemption information for the customer. When the customer is exempt, calculated tax is zero for exempt jurisdictions."
+          },
+          "lineItems": {
+            "description": "The line items in the cart. Tax is calculated per item and returned per item in the response.",
+            "items": {
+              "$ref": "#/components/schemas/TaxCloudCartItem"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "origin": {
+            "$ref": "#/components/schemas/TaxCloudAddress",
+            "description": "The ship-from (origin) address of the sale. Used together with destination to determine sourcing and the applicable jurisdictions."
+          }
+        },
+        "required": [
+          "customerId",
+          "origin",
+          "destination",
+          "currency",
+          "lineItems"
+        ],
+        "type": "object"
+      },
+      "TaxCloudCartItem": {
+        "additionalProperties": false,
+        "properties": {
+          "index": {
+            "description": "Zero-based position of the item within the cart. Each line item must have a unique index.",
+            "examples": [
+              0
+            ],
+            "format": "int64",
+            "maximum": 500,
+            "minimum": 0,
+            "type": "integer"
+          },
+          "itemId": {
+            "description": "Your unique identifier for the line item (e.g. SKU or line reference). Used to match line items in later order, refund, and discount operations.",
+            "examples": [
+              "item-1"
+            ],
+            "maxLength": 50,
+            "minLength": 1,
+            "type": "string"
+          },
+          "price": {
+            "description": "Unit price of the item, in the cart's currency. When discounts are provided, this must be the pre-discount (original) price; tax is calculated on the discounted amount.",
+            "examples": [
+              10.75
+            ],
+            "format": "double",
+            "minimum": 0,
+            "type": "number"
+          },
+          "productId": {
+            "description": "Unique ID of the product in the merchant's TaxCloud product catalog (e.g. SKU). Must match an existing catalog product when provided.",
+            "type": "string"
+          },
+          "quantity": {
+            "description": "Quantity of the item. Fractional quantities are allowed. For quantities above the maximum, send a single line with quantity 1 and the extended (total) amount as the price.",
+            "examples": [
+              1.5
+            ],
+            "format": "double",
+            "maximum": 99999.9999,
+            "minimum": 0,
+            "type": "number"
+          },
+          "tic": {
+            "description": "Taxability Information Code (TIC) classifying the product for product-specific tax rules (e.g. 11010 for shipping). Defaults to 0 (general tangible goods) when omitted.",
+            "examples": [
+              0
+            ],
+            "format": "int64",
+            "maximum": 100000,
+            "minimum": 0,
+            "type": "integer"
+          }
+        },
+        "required": [
+          "index",
+          "itemId",
+          "price",
+          "quantity"
+        ],
+        "type": "object"
+      },
+      "TaxCloudCartItemWithTax": {
+        "additionalProperties": false,
+        "properties": {
+          "index": {
+            "description": "Zero-based position of the item within the order. Each line item must have a unique index.",
+            "examples": [
+              0
+            ],
+            "format": "int64",
+            "maximum": 500,
+            "minimum": 0,
+            "type": "integer"
+          },
+          "itemId": {
+            "description": "Your unique identifier for the line item (e.g. SKU or line reference). Referenced by refunds and discounts.",
+            "examples": [
+              "item-1"
+            ],
+            "maxLength": 50,
+            "minLength": 1,
+            "type": "string"
+          },
+          "price": {
+            "description": "Unit price of the item that tax was calculated on, in the order's currency.",
+            "examples": [
+              10.75
+            ],
+            "format": "double",
+            "minimum": 0,
+            "type": "number"
+          },
+          "productId": {
+            "description": "Unique ID of the product in the merchant's TaxCloud product catalog. Must match an existing catalog product when provided.",
+            "type": "string"
+          },
+          "quantity": {
+            "description": "Quantity of the item. Fractional quantities are allowed. For quantities above the maximum, send a single line with quantity 1 and the extended (total) amount as the price.",
+            "examples": [
+              1.5
+            ],
+            "format": "double",
+            "maximum": 99999.9999,
+            "minimum": 0,
+            "type": "number"
+          },
+          "tax": {
+            "$ref": "#/components/schemas/TaxCloudTax",
+            "description": "The tax rate and amount collected for this line item. Required when creating an order directly (the amounts were computed by your checkout)."
+          },
+          "tic": {
+            "description": "Taxability Information Code (TIC) classifying the product for product-specific tax rules. Defaults to 0 (general tangible goods) when omitted.",
+            "examples": [
+              0
+            ],
+            "format": "int64",
+            "maximum": 100000,
+            "minimum": 0,
+            "type": "integer"
+          }
+        },
+        "required": [
+          "index",
+          "itemId",
+          "price",
+          "quantity",
+          "tax"
+        ],
+        "type": "object"
+      },
+      "TaxCloudCartItemWithTaxResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "index": {
+            "description": "Zero-based position of the item within the cart or order.",
+            "examples": [
+              0
+            ],
+            "format": "int64",
+            "type": "integer"
+          },
+          "itemId": {
+            "description": "Your unique identifier for the line item, as submitted.",
+            "examples": [
+              "item-1"
+            ],
+            "type": "string"
+          },
+          "originalPrice": {
+            "description": "The original (pre-discount) unit price, as submitted.",
+            "examples": [
+              12
+            ],
+            "format": "double",
+            "type": "number"
+          },
+          "price": {
+            "description": "The unit price tax was calculated on. When discounts were applied, this is the discounted unit price.",
+            "examples": [
+              10.75
+            ],
+            "format": "double",
+            "type": "number"
+          },
+          "quantity": {
+            "description": "Quantity of the item.",
+            "examples": [
+              1.5
+            ],
+            "format": "double",
+            "type": "number"
+          },
+          "tax": {
+            "$ref": "#/components/schemas/TaxCloudTax",
+            "description": "The tax rate and amount calculated for this line item."
+          },
+          "tic": {
+            "description": "Taxability Information Code (TIC) the item was calculated under. Null when no TIC applies.",
+            "examples": [
+              0
+            ],
+            "format": "int64",
+            "type": [
+              "integer",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "index",
+          "itemId",
+          "tic",
+          "price",
+          "originalPrice",
+          "quantity",
+          "tax"
+        ],
+        "type": "object"
+      },
+      "TaxCloudCartResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "cartId": {
+            "description": "Identifier of the calculated cart. Pass this to /merchant/order/create-from-cart to capture the cart as an order.",
+            "examples": [
+              "my-cart-1"
+            ],
+            "type": "string"
+          },
+          "currency": {
+            "$ref": "#/components/schemas/TaxCloudCurrency",
+            "description": "The currency the prices and tax amounts are denominated in."
+          },
+          "customerId": {
+            "description": "Your identifier for the customer, as submitted.",
+            "examples": [
+              "customer-453"
+            ],
+            "type": "string"
+          },
+          "deliveredBySeller": {
+            "description": "Whether the seller delivers the order directly, as submitted (false when omitted).",
+            "examples": [
+              false
+            ],
+            "type": "boolean"
+          },
+          "destination": {
+            "$ref": "#/components/schemas/TaxCloudAddress",
+            "description": "The ship-to (destination) address, as submitted."
+          },
+          "exemption": {
+            "$ref": "#/components/schemas/TaxCloudExemption",
+            "description": "The exemption information applied to the calculation."
+          },
+          "lineItems": {
+            "description": "The submitted line items, each with its calculated tax rate and amount.",
+            "items": {
+              "$ref": "#/components/schemas/TaxCloudCartItemWithTaxResponse"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "origin": {
+            "$ref": "#/components/schemas/TaxCloudAddress",
+            "description": "The ship-from (origin) address, as submitted."
+          }
+        },
+        "required": [
+          "cartId",
+          "customerId",
+          "deliveredBySeller",
+          "origin",
+          "destination",
+          "exemption",
+          "currency",
+          "lineItems"
+        ],
+        "type": "object"
+      },
+      "TaxCloudCertListResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "items": {
+            "description": "The exemption certificates on this page of results.",
+            "items": {
+              "$ref": "#/components/schemas/TaxCloudCertResponse"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "limit": {
+            "description": "The maximum number of results per page that was applied.",
+            "format": "int64",
+            "maximum": 100,
+            "minimum": 0,
+            "type": "integer"
+          },
+          "nextCursor": {
+            "description": "Opaque cursor to pass as 'cursor' on the next call to fetch the following page. Null when there are no further results.",
+            "type": "string"
+          }
+        },
+        "required": [
+          "items",
+          "limit",
+          "nextCursor"
+        ],
+        "type": "object"
+      },
+      "TaxCloudCertResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "accountId": {
+            "description": "The TaxCloud account id the certificate belongs to.",
+            "format": "int64",
+            "type": "integer"
+          },
+          "address": {
+            "$ref": "#/components/schemas/TaxCloudAddress",
+            "description": "Address of the exempt customer."
+          },
+          "certificateId": {
+            "description": "TaxCloud's identifier for the exemption certificate. Use it with /merchant/cert/get, /merchant/cert/delete, and as exemptionId on carts and orders.",
+            "type": "string"
+          },
+          "connectionId": {
+            "description": "The TaxCloud connection the certificate belongs to.",
+            "type": "string"
+          },
+          "createdDate": {
+            "description": "RFC3339 datetime the certificate was created.",
+            "examples": [
+              "2024-08-01T14:00:00Z"
+            ],
+            "format": "date-time",
+            "type": "string"
+          },
+          "customerBusinessDescription": {
+            "description": "Free-text description of the business, present when customerBusinessType is Other.",
+            "type": "string"
+          },
+          "customerBusinessType": {
+            "description": "The type of business the customer is (e.g. RetailTrade, Government, NonprofitOrganization).",
+            "type": "string"
+          },
+          "customerId": {
+            "description": "Your identifier for the exempt customer.",
+            "type": "string"
+          },
+          "customerName": {
+            "description": "Name of the customer the certificate was issued to.",
+            "examples": [
+              "Mr. Francis Exempt"
+            ],
+            "type": "string"
+          },
+          "disabledAt": {
+            "description": "RFC3339 datetime the certificate was disabled, or null while it is active.",
+            "format": "date-time",
+            "type": "string"
+          },
+          "reason": {
+            "description": "The reason the customer is exempt (e.g. Resale, FederalGovernment, CharitableOrganization).",
+            "examples": [
+              "Resale"
+            ],
+            "type": "string"
+          },
+          "reasonDescription": {
+            "description": "Free-text elaboration of the exemption reason.",
+            "type": "string"
+          },
+          "singlePurchase": {
+            "description": "Whether the certificate covers a single purchase only, rather than being a blanket certificate.",
+            "type": "boolean"
+          },
+          "states": {
+            "description": "The states the certificate is valid in.",
+            "items": {
+              "$ref": "#/components/schemas/TaxCloudExemptState"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "certificateId",
+          "connectionId",
+          "accountId",
+          "customerId",
+          "customerName",
+          "customerBusinessType",
+          "reason",
+          "reasonDescription",
+          "address",
+          "states",
+          "singlePurchase",
+          "createdDate"
+        ],
+        "type": "object"
+      },
+      "TaxCloudCurrency": {
+        "additionalProperties": false,
+        "properties": {
+          "currencyCode": {
+            "default": "USD",
+            "description": "ISO 4217 currency code the line-item prices are denominated in. USD or CAD. Defaults to USD when omitted.",
+            "enum": [
+              "USD",
+              "CAD"
+            ],
+            "examples": [
+              "USD"
+            ],
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "TaxCloudDiscounts": {
+        "additionalProperties": false,
+        "properties": {
+          "lineItemDiscounts": {
+            "description": "Discounts applied to specific line items, applied before any order-level discount. Each entry must reference a valid itemId from the lineItems array.",
+            "items": {
+              "$ref": "#/components/schemas/TaxCloudLineItemDiscount"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "orderDiscount": {
+            "$ref": "#/components/schemas/TaxCloudOrderLevelDiscount",
+            "description": "A discount applied to the entire order, applied after line-item discounts. Shipping items (TICs 11010-11015) and Colorado retail delivery fees (TIC 11098) are excluded from order-level discount calculations."
+          }
+        },
+        "type": "object"
+      },
+      "TaxCloudExemptState": {
+        "additionalProperties": false,
+        "properties": {
+          "abbreviation": {
+            "description": "Two-letter abbreviation of a state the exemption certificate is valid in.",
+            "examples": [
+              "MN"
+            ],
+            "maxLength": 2,
+            "minLength": 2,
+            "type": "string"
+          }
+        },
+        "required": [
+          "abbreviation"
+        ],
+        "type": "object"
+      },
+      "TaxCloudExemption": {
+        "additionalProperties": false,
+        "properties": {
+          "exemptionId": {
+            "description": "Identifier of an exemption certificate previously created for the customer (see /merchant/cert/create). When provided, the customer is treated as exempt and the certificate is associated with the transaction.",
+            "type": "string"
+          },
+          "isExempt": {
+            "description": "Whether the customer is exempt from sales tax. Assumed true when exemptionId is provided.",
+            "type": "boolean"
+          }
+        },
+        "type": "object"
+      },
+      "TaxCloudLineItemDiscount": {
+        "additionalProperties": false,
+        "properties": {
+          "itemId": {
+            "description": "The itemId of the line item this discount applies to. Must match an itemId in the lineItems array.",
+            "examples": [
+              "item-1"
+            ],
+            "type": "string"
+          },
+          "type": {
+            "description": "The kind of discount: 'percentage' (a fraction of the price) or 'amount' (a fixed currency amount).",
+            "enum": [
+              "percentage",
+              "amount"
+            ],
+            "examples": [
+              "percentage"
+            ],
+            "type": "string"
+          },
+          "value": {
+            "description": "The discount value: a decimal fraction between 0 and 1 for 'percentage' (e.g. 0.1 = 10% off), or a currency amount for 'amount'. When discounts are provided, line-item prices must be pre-discount (original) prices.",
+            "examples": [
+              0.1
+            ],
+            "format": "double",
+            "minimum": 0,
+            "type": "number"
+          }
+        },
+        "required": [
+          "itemId",
+          "type",
+          "value"
+        ],
+        "type": "object"
+      },
+      "TaxCloudOrderLevelDiscount": {
+        "additionalProperties": false,
+        "properties": {
+          "type": {
+            "description": "The kind of discount: 'percentage' (a fraction of the order total) or 'amount' (a fixed currency amount).",
+            "enum": [
+              "percentage",
+              "amount"
+            ],
+            "examples": [
+              "percentage"
+            ],
+            "type": "string"
+          },
+          "value": {
+            "description": "The discount value: a decimal fraction between 0 and 1 for 'percentage', or a currency amount for 'amount'. When discounts are provided, line-item prices must be pre-discount (original) prices.",
+            "examples": [
+              0.1
+            ],
+            "format": "double",
+            "minimum": 0,
+            "type": "number"
+          }
+        },
+        "required": [
+          "type",
+          "value"
+        ],
+        "type": "object"
+      },
+      "TaxCloudOrderResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "batchId": {
+            "description": "Batch ID grouping this order with related orders, if one was supplied.",
+            "type": "string"
+          },
+          "channel": {
+            "description": "The sales channel the order came from (e.g. amazon, ebay, walmart). Null when no channel was recorded.",
+            "examples": [
+              "amazon"
+            ],
+            "type": "string"
+          },
+          "completedDate": {
+            "description": "RFC3339 datetime the order was shipped/completed on, creating the tax liability. Absent for orders that are not yet completed.",
+            "format": "date-time",
+            "type": "string"
+          },
+          "connectionId": {
+            "description": "The TaxCloud connection the order was recorded under.",
+            "examples": [
+              "25eb9b97-5acb-492d-b720-c03e79cf715a"
+            ],
+            "type": "string"
+          },
+          "currency": {
+            "$ref": "#/components/schemas/TaxCloudCurrency",
+            "description": "The currency the prices and tax amounts are denominated in."
+          },
+          "customerId": {
+            "description": "Your identifier for the customer in your own system.",
+            "examples": [
+              "customer-453"
+            ],
+            "type": "string"
+          },
+          "deliveredBySeller": {
+            "description": "Whether the seller delivered the order directly.",
+            "type": "boolean"
+          },
+          "destination": {
+            "$ref": "#/components/schemas/TaxCloudAddress",
+            "description": "The ship-to (destination) address of the order."
+          },
+          "excludeFromFiling": {
+            "description": "Whether the order is excluded from tax filing.",
+            "type": "boolean"
+          },
+          "exemption": {
+            "$ref": "#/components/schemas/TaxCloudExemption",
+            "description": "The exemption information recorded on the order."
+          },
+          "kind": {
+            "description": "The kind of order: 'order' for a sale or 'credit' for a credit order.",
+            "enum": [
+              "order",
+              "credit"
+            ],
+            "type": "string"
+          },
+          "lineItems": {
+            "description": "The order's line items, each with its tax rate and amount.",
+            "items": {
+              "$ref": "#/components/schemas/TaxCloudCartItemWithTaxResponse"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "orderId": {
+            "description": "Your identifier for the order in your own system.",
+            "examples": [
+              "my-order-1"
+            ],
+            "type": "string"
+          },
+          "origin": {
+            "$ref": "#/components/schemas/TaxCloudAddress",
+            "description": "The ship-from (origin) address of the order."
+          },
+          "refunds": {
+            "description": "Refunds recorded against this order. Only included when the request set expand to 'refunds'.",
+            "items": {
+              "$ref": "#/components/schemas/TaxCloudRefundResponse"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "transactionDate": {
+            "description": "RFC3339 datetime the order was purchased on.",
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "connectionId",
+          "orderId",
+          "kind",
+          "customerId",
+          "deliveredBySeller",
+          "origin",
+          "destination",
+          "currency",
+          "lineItems",
+          "exemption",
+          "channel",
+          "excludeFromFiling"
+        ],
+        "type": "object"
+      },
+      "TaxCloudRefundItemResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "index": {
+            "description": "Zero-based position of the item within the refund.",
+            "format": "int64",
+            "type": "integer"
+          },
+          "itemId": {
+            "description": "The itemId of the refunded line item, matching the original order.",
+            "type": "string"
+          },
+          "price": {
+            "description": "The unit price refunded, calculated automatically from the order. When the order had discounts, this reflects the discounted amount actually paid.",
+            "format": "double",
+            "type": "number"
+          },
+          "quantity": {
+            "description": "The quantity refunded.",
+            "format": "double",
+            "type": "number"
+          },
+          "tax": {
+            "$ref": "#/components/schemas/TaxCloudRefundTax",
+            "description": "The tax amount refunded for this line item."
+          },
+          "tic": {
+            "description": "Taxability Information Code (TIC) of the refunded item.",
+            "examples": [
+              0
+            ],
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "index",
+          "itemId",
+          "price",
+          "quantity"
+        ],
+        "type": "object"
+      },
+      "TaxCloudRefundResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "batchId": {
+            "description": "Batch ID grouping this refund with related refunds, if one was supplied.",
+            "type": "string"
+          },
+          "connectionId": {
+            "description": "The TaxCloud connection the refund was recorded under.",
+            "examples": [
+              "25eb9b97-5acb-492d-b720-c03e79cf715a"
+            ],
+            "type": "string"
+          },
+          "createdDate": {
+            "description": "RFC3339 datetime the refund was created.",
+            "format": "date-time",
+            "type": "string"
+          },
+          "items": {
+            "description": "The refunded line items, each with the refunded price, quantity, and tax amount.",
+            "items": {
+              "$ref": "#/components/schemas/TaxCloudRefundItemResponse"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "returnedDate": {
+            "description": "RFC3339 datetime the refund took effect.",
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "connectionId",
+          "items"
+        ],
+        "type": "object"
+      },
+      "TaxCloudRefundTax": {
+        "additionalProperties": false,
+        "properties": {
+          "amount": {
+            "description": "The tax amount refunded for the item, calculated proportionally from the order's tax. When the order had discounts, this reflects tax on the discounted price.",
+            "format": "double",
+            "type": "number"
+          }
+        },
+        "required": [
+          "amount"
+        ],
+        "type": "object"
+      },
+      "TaxCloudTax": {
+        "additionalProperties": false,
+        "properties": {
+          "amount": {
+            "description": "The calculated tax amount for the line item, in the transaction currency.",
+            "examples": [
+              1.31
+            ],
+            "format": "double",
+            "type": "number"
+          },
+          "rate": {
+            "description": "The combined tax rate applied to the line item, as a decimal fraction (e.g. 0.08125 = 8.125%).",
+            "examples": [
+              0.08125
+            ],
+            "format": "double",
+            "type": "number"
+          }
+        },
+        "required": [
+          "rate",
+          "amount"
         ],
         "type": "object"
       },
@@ -2473,7 +3756,7 @@
     },
     "/merchant/cart/calculate": {
       "post": {
-        "description": "Forwards a cart to TaxCloud (POST /connections/{connectionId}/carts) using the merchant's stored credentials and returns TaxCloud's response verbatim. Additional cart fields (items, transactionDate, destination, ...) are relayed unchanged.",
+        "description": "Calculates sales tax for one or more carts on behalf of a connected merchant. The request is forwarded to TaxCloud (POST /connections/{connectionId}/carts) using the merchant's stored credentials and TaxCloud's response is returned verbatim. Calculation has no lasting side effect and is safe to retry; capture the returned cartId with /merchant/order/create-from-cart to record the sale.",
         "operationId": "merchantCartCalculate",
         "requestBody": {
           "content": {
@@ -2488,16 +3771,20 @@
         "responses": {
           "200": {
             "content": {
-              "*/*": {
-                "schema": {}
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CartCalculateResponseBody"
+                }
               }
             },
-            "description": "TaxCloud response relayed verbatim. The body shape and content type are whatever the merchant's TaxCloud connection returns."
+            "description": "TaxCloud response relayed verbatim."
           },
           "201": {
             "content": {
-              "*/*": {
-                "schema": {}
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CartCalculateResponseBody"
+                }
               }
             },
             "description": "Resource created. TaxCloud's 201 response is relayed verbatim, including any Location header."
@@ -2624,7 +3911,7 @@
     },
     "/merchant/cert/create": {
       "post": {
-        "description": "Forwards to TaxCloud POST /connections/{connectionId}/exemption-certificates. All certificate fields other than merchantId are relayed unchanged.",
+        "description": "Creates an exemption certificate for one of the merchant's customers. The request is forwarded to TaxCloud POST /connections/{connectionId}/exemption-certificates using the merchant's stored credentials and TaxCloud's response is returned verbatim. Reference the returned certificateId as exemptionId on carts and orders to apply the exemption.",
         "operationId": "merchantCertCreate",
         "requestBody": {
           "content": {
@@ -2639,16 +3926,20 @@
         "responses": {
           "200": {
             "content": {
-              "*/*": {
-                "schema": {}
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TaxCloudCertResponse"
+                }
               }
             },
-            "description": "TaxCloud response relayed verbatim. The body shape and content type are whatever the merchant's TaxCloud connection returns."
+            "description": "TaxCloud response relayed verbatim."
           },
           "201": {
             "content": {
-              "*/*": {
-                "schema": {}
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TaxCloudCertResponse"
+                }
               }
             },
             "description": "Resource created. TaxCloud's 201 response is relayed verbatim, including any Location header."
@@ -2775,7 +4066,7 @@
     },
     "/merchant/cert/delete": {
       "post": {
-        "description": "Forwards to TaxCloud DELETE /connections/{connectionId}/exemption-certificates/{certificateId}. certificateId is a path identifier.",
+        "description": "Deletes (disables) an exemption certificate so it can no longer be applied to new transactions. The request is forwarded to TaxCloud DELETE /connections/{connectionId}/exemption-certificates/{certificateId} using the merchant's stored credentials and TaxCloud's response is returned verbatim.",
         "operationId": "merchantCertDelete",
         "requestBody": {
           "content": {
@@ -2790,15 +4081,15 @@
         "responses": {
           "200": {
             "content": {
-              "*/*": {
+              "application/json": {
                 "schema": {}
               }
             },
-            "description": "TaxCloud response relayed verbatim. The body shape and content type are whatever the merchant's TaxCloud connection returns."
+            "description": "TaxCloud response relayed verbatim."
           },
           "204": {
             "content": {
-              "*/*": {
+              "application/json": {
                 "schema": {}
               }
             },
@@ -2926,7 +4217,7 @@
     },
     "/merchant/cert/get": {
       "post": {
-        "description": "Forwards to TaxCloud GET /connections/{connectionId}/exemption-certificates/{certificateId}. certificateId is a path identifier.",
+        "description": "Retrieves a single exemption certificate. The request is forwarded to TaxCloud GET /connections/{connectionId}/exemption-certificates/{certificateId} using the merchant's stored credentials and TaxCloud's response is returned verbatim. This is a read and is safe to retry.",
         "operationId": "merchantCertGet",
         "requestBody": {
           "content": {
@@ -2941,11 +4232,13 @@
         "responses": {
           "200": {
             "content": {
-              "*/*": {
-                "schema": {}
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TaxCloudCertResponse"
+                }
               }
             },
-            "description": "TaxCloud response relayed verbatim. The body shape and content type are whatever the merchant's TaxCloud connection returns."
+            "description": "TaxCloud response relayed verbatim."
           },
           "400": {
             "content": {
@@ -3069,7 +4362,7 @@
     },
     "/merchant/cert/list": {
       "post": {
-        "description": "Forwards to TaxCloud GET /exemption-certificates, scoped to the merchant's connection via a connectionId query filter, and returns the certificate collection verbatim.",
+        "description": "Lists the merchant's exemption certificates with cursor-based pagination. The request is forwarded to TaxCloud GET /exemption-certificates, scoped to the merchant's connection, with the optional filter fields mapped onto the query string; TaxCloud's response is returned verbatim. This is a read and is safe to retry.",
         "operationId": "merchantCertList",
         "requestBody": {
           "content": {
@@ -3084,11 +4377,13 @@
         "responses": {
           "200": {
             "content": {
-              "*/*": {
-                "schema": {}
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TaxCloudCertListResponse"
+                }
               }
             },
-            "description": "TaxCloud response relayed verbatim. The body shape and content type are whatever the merchant's TaxCloud connection returns."
+            "description": "TaxCloud response relayed verbatim."
           },
           "400": {
             "content": {
@@ -3883,7 +5178,7 @@
     },
     "/merchant/order/create": {
       "post": {
-        "description": "Forwards to TaxCloud POST /connections/{connectionId}/orders to create an order directly. All order fields other than merchantId are relayed unchanged.",
+        "description": "Records an order directly, without a prior cart calculation; the tax amounts on each line item are the amounts your checkout collected. The request is forwarded to TaxCloud POST /connections/{connectionId}/orders using the merchant's stored credentials and TaxCloud's response is returned verbatim.",
         "operationId": "merchantOrderCreate",
         "requestBody": {
           "content": {
@@ -3898,16 +5193,20 @@
         "responses": {
           "200": {
             "content": {
-              "*/*": {
-                "schema": {}
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TaxCloudOrderResponse"
+                }
               }
             },
-            "description": "TaxCloud response relayed verbatim. The body shape and content type are whatever the merchant's TaxCloud connection returns."
+            "description": "TaxCloud response relayed verbatim."
           },
           "201": {
             "content": {
-              "*/*": {
-                "schema": {}
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TaxCloudOrderResponse"
+                }
               }
             },
             "description": "Resource created. TaxCloud's 201 response is relayed verbatim, including any Location header."
@@ -4034,7 +5333,7 @@
     },
     "/merchant/order/create-from-cart": {
       "post": {
-        "description": "Forwards to TaxCloud POST /connections/{connectionId}/carts/orders to capture a previously calculated cart as an order. cartId and orderId travel in the forwarded body.",
+        "description": "Captures a cart previously calculated with /merchant/cart/calculate as a recorded order. The request is forwarded to TaxCloud POST /connections/{connectionId}/carts/orders using the merchant's stored credentials and TaxCloud's response is returned verbatim.",
         "operationId": "merchantOrderCreateFromCart",
         "requestBody": {
           "content": {
@@ -4049,16 +5348,20 @@
         "responses": {
           "200": {
             "content": {
-              "*/*": {
-                "schema": {}
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TaxCloudOrderResponse"
+                }
               }
             },
-            "description": "TaxCloud response relayed verbatim. The body shape and content type are whatever the merchant's TaxCloud connection returns."
+            "description": "TaxCloud response relayed verbatim."
           },
           "201": {
             "content": {
-              "*/*": {
-                "schema": {}
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TaxCloudOrderResponse"
+                }
               }
             },
             "description": "Resource created. TaxCloud's 201 response is relayed verbatim, including any Location header."
@@ -4185,7 +5488,7 @@
     },
     "/merchant/order/get": {
       "post": {
-        "description": "Forwards to TaxCloud GET /connections/{connectionId}/orders/{orderId}. orderId is a path identifier; the optional expand field is passed through as a query parameter.",
+        "description": "Retrieves a recorded order. The request is forwarded to TaxCloud GET /connections/{connectionId}/orders/{orderId} using the merchant's stored credentials and TaxCloud's response is returned verbatim. This is a read and is safe to retry.",
         "operationId": "merchantOrderGet",
         "requestBody": {
           "content": {
@@ -4200,11 +5503,13 @@
         "responses": {
           "200": {
             "content": {
-              "*/*": {
-                "schema": {}
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TaxCloudOrderResponse"
+                }
               }
             },
-            "description": "TaxCloud response relayed verbatim. The body shape and content type are whatever the merchant's TaxCloud connection returns."
+            "description": "TaxCloud response relayed verbatim."
           },
           "400": {
             "content": {
@@ -4328,7 +5633,7 @@
     },
     "/merchant/order/update": {
       "post": {
-        "description": "Forwards to TaxCloud PATCH /connections/{connectionId}/orders/{orderId}. orderId is a path identifier; the remaining body is the update payload relayed unchanged.",
+        "description": "Modifies a recorded order; currently the completedDate can be set to mark the order shipped, creating the tax liability. The request is forwarded to TaxCloud PATCH /connections/{connectionId}/orders/{orderId} using the merchant's stored credentials and TaxCloud's response is returned verbatim. Updates overwrite the fields you send, so do not retry them blindly.",
         "operationId": "merchantOrderUpdate",
         "requestBody": {
           "content": {
@@ -4343,11 +5648,13 @@
         "responses": {
           "200": {
             "content": {
-              "*/*": {
-                "schema": {}
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TaxCloudOrderResponse"
+                }
               }
             },
-            "description": "TaxCloud response relayed verbatim. The body shape and content type are whatever the merchant's TaxCloud connection returns."
+            "description": "TaxCloud response relayed verbatim."
           },
           "400": {
             "content": {
@@ -4471,7 +5778,7 @@
     },
     "/merchant/refund/create": {
       "post": {
-        "description": "Forwards to TaxCloud POST /connections/{connectionId}/orders/refunds/{orderId}. orderId is a path identifier; an optional items[] in the forwarded body scopes a partial refund (omit for a full refund).",
+        "description": "Refunds all or part of a recorded order. The request is forwarded to TaxCloud POST /connections/{connectionId}/orders/refunds/{orderId} using the merchant's stored credentials and TaxCloud's response is returned verbatim. Refund prices and tax amounts are calculated automatically from the order; when the order had discounts, refunds use the discounted prices actually paid. Do not retry refunds blindly - a duplicate submission records a duplicate refund.",
         "operationId": "merchantRefundCreate",
         "requestBody": {
           "content": {
@@ -4486,16 +5793,20 @@
         "responses": {
           "200": {
             "content": {
-              "*/*": {
-                "schema": {}
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TaxCloudRefundResponse"
+                }
               }
             },
-            "description": "TaxCloud response relayed verbatim. The body shape and content type are whatever the merchant's TaxCloud connection returns."
+            "description": "TaxCloud response relayed verbatim."
           },
           "201": {
             "content": {
-              "*/*": {
-                "schema": {}
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TaxCloudRefundResponse"
+                }
               }
             },
             "description": "Resource created. TaxCloud's 201 response is relayed verbatim, including any Location header."
