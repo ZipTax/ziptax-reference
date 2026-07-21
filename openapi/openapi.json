@@ -36,28 +36,6 @@
         ],
         "type": "object"
       },
-      "Component": {
-        "additionalProperties": false,
-        "properties": {
-          "message": {
-            "description": "Optional human-readable detail about the component's status; typically present only when degraded or unhealthy.",
-            "type": "string"
-          },
-          "status": {
-            "description": "Health of this individual component: 'healthy', 'degraded', or 'unhealthy'.",
-            "enum": [
-              "healthy",
-              "degraded",
-              "unhealthy"
-            ],
-            "type": "string"
-          }
-        },
-        "required": [
-          "status"
-        ],
-        "type": "object"
-      },
       "CreateMerchantRequest": {
         "additionalProperties": false,
         "properties": {
@@ -93,11 +71,7 @@
           }
         },
         "required": [
-          "merchantName",
-          "contactFirst",
-          "contactLast",
-          "contactEmail",
-          "sendTaxcloudInvite"
+          "merchantName"
         ],
         "type": "object"
       },
@@ -353,10 +327,41 @@
         "required": [
           "merchantId",
           "merchantName",
-          "contactFirst",
-          "contactLast",
-          "contactEmail",
           "status"
+        ],
+        "type": "object"
+      },
+      "HealthComponents": {
+        "additionalProperties": false,
+        "properties": {
+          "dynamo": {
+            "description": "DynamoDB connectivity status: 'ok', 'config_error' (AWS config could not be loaded), or 'connection_error' (table could not be described).",
+            "enum": [
+              "ok",
+              "config_error",
+              "connection_error"
+            ],
+            "type": "string"
+          },
+          "taxdata": {
+            "description": "Tax-data cache status: 'ok', 'empty' (cache not loaded), or 'partial' (fewer than the expected number of records loaded).",
+            "enum": [
+              "ok",
+              "empty",
+              "partial"
+            ],
+            "type": "string"
+          },
+          "taxdata_count": {
+            "description": "Number of tax-data records currently loaded in the in-memory cache.",
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "taxdata",
+          "taxdata_count",
+          "dynamo"
         ],
         "type": "object"
       },
@@ -364,35 +369,19 @@
         "additionalProperties": false,
         "properties": {
           "components": {
-            "additionalProperties": {
-              "$ref": "#/components/schemas/Component"
-            },
-            "description": "Per-component health, keyed by component name (e.g. database, cache, geocoding).",
-            "type": "object"
+            "$ref": "#/components/schemas/HealthComponents",
+            "description": "Per-component health detail."
           },
           "status": {
-            "description": "Overall health of the API: 'healthy' (all components OK), 'degraded' (one or more non-critical components impaired), or 'unhealthy' (a critical component is failing).",
-            "enum": [
-              "healthy",
-              "degraded",
-              "unhealthy"
+            "description": "Overall health of the API. Always 'ok' on a served response; component-level detail is in the components object.",
+            "examples": [
+              "ok"
             ],
-            "type": "string"
-          },
-          "timestamp": {
-            "description": "Time at which the health check was evaluated (RFC 3339).",
-            "format": "date-time",
-            "type": "string"
-          },
-          "version": {
-            "description": "Running API version.",
             "type": "string"
           }
         },
         "required": [
           "status",
-          "version",
-          "timestamp",
           "components"
         ],
         "type": "object"
@@ -438,9 +427,6 @@
         "required": [
           "merchantId",
           "merchantName",
-          "contactFirst",
-          "contactLast",
-          "contactEmail",
           "status"
         ],
         "type": "object"
@@ -942,44 +928,18 @@
       "MetadataResponse": {
         "additionalProperties": false,
         "properties": {
-          "buildTime": {
-            "description": "Timestamp the running binary was built.",
+          "go_version": {
+            "description": "Go runtime version the running binary was built with.",
             "type": "string"
           },
-          "environment": {
-            "description": "Deployment environment the API is running in (e.g. production, staging).",
-            "type": "string"
-          },
-          "features": {
-            "additionalProperties": {
-              "type": "boolean"
-            },
-            "description": "Map of feature flags to whether they are enabled in this deployment.",
-            "type": "object"
-          },
-          "gitCommit": {
-            "description": "Git commit hash the running binary was built from.",
-            "type": "string"
-          },
-          "metadata": {
-            "additionalProperties": {
-              "type": "string"
-            },
-            "description": "Additional free-form key/value metadata about the deployment.",
-            "type": "object"
-          },
-          "version": {
-            "description": "Running API version.",
+          "hostname": {
+            "description": "Hostname of the instance serving the request.",
             "type": "string"
           }
         },
         "required": [
-          "version",
-          "environment",
-          "buildTime",
-          "gitCommit",
-          "features",
-          "metadata"
+          "go_version",
+          "hostname"
         ],
         "type": "object"
       },
@@ -1024,22 +984,134 @@
             "description": "Whether the account is currently active and able to make requests.",
             "type": "boolean"
           },
-          "last_updated": {
-            "description": "Time the usage counters were last updated (RFC 3339).",
-            "format": "date-time",
+          "merchant_request_count": {
+            "description": "Number of merchant requests the account has consumed in the current period.",
+            "format": "int64",
+            "type": "integer"
+          },
+          "merchant_request_limit": {
+            "description": "Maximum merchant requests allowed for the account in the current period.",
+            "format": "int64",
+            "type": "integer"
+          },
+          "merchant_usage_percent": {
+            "description": "Merchant request usage as a percentage of the limit (0–100).",
+            "format": "double",
+            "type": "number"
+          },
+          "message": {
+            "description": "Informational message about the account.",
             "type": "string"
           }
         },
         "required": [
+          "is_active",
           "core_request_count",
           "core_request_limit",
-          "core_usage_percent",
-          "geo_enabled",
           "geo_request_count",
           "geo_request_limit",
+          "geo_enabled",
+          "core_usage_percent",
           "geo_usage_percent",
+          "merchant_request_count",
+          "merchant_request_limit",
+          "merchant_usage_percent",
+          "message"
+        ],
+        "type": "object"
+      },
+      "MetricsV50Response": {
+        "additionalProperties": false,
+        "properties": {
+          "core_request_count": {
+            "description": "Number of core (tax lookup) requests the account has consumed in the current billing period.",
+            "format": "int64",
+            "type": "integer"
+          },
+          "core_request_limit": {
+            "description": "Maximum core requests allowed for the account in the current period, from the account's entitlement.",
+            "format": "int64",
+            "type": "integer"
+          },
+          "core_usage_percent": {
+            "description": "Core request usage as a percentage of the limit (0–100).",
+            "format": "double",
+            "type": "number"
+          },
+          "geo_enabled": {
+            "description": "Whether the account has the geocoding (geo_enabled) entitlement that allows address and coordinate lookups.",
+            "type": "boolean"
+          },
+          "geo_request_count": {
+            "description": "Number of geocoding requests the account has consumed in the current period.",
+            "format": "int64",
+            "type": "integer"
+          },
+          "geo_request_limit": {
+            "description": "Maximum geocoding requests allowed for the account in the current period.",
+            "format": "int64",
+            "type": "integer"
+          },
+          "geo_usage_percent": {
+            "description": "Geocoding request usage as a percentage of the limit (0–100).",
+            "format": "double",
+            "type": "number"
+          },
+          "is_active": {
+            "description": "Whether the account is currently active and able to make requests.",
+            "type": "boolean"
+          },
+          "message": {
+            "description": "Informational message about the account.",
+            "type": "string"
+          }
+        },
+        "required": [
           "is_active",
-          "last_updated"
+          "core_request_count",
+          "core_request_limit",
+          "geo_request_count",
+          "geo_request_limit",
+          "geo_enabled",
+          "core_usage_percent",
+          "geo_usage_percent",
+          "message"
+        ],
+        "type": "object"
+      },
+      "MetricsV60Response": {
+        "additionalProperties": false,
+        "properties": {
+          "is_active": {
+            "description": "Whether the account is currently active.",
+            "type": "boolean"
+          },
+          "message": {
+            "description": "Informational message about the account.",
+            "type": "string"
+          },
+          "request_count": {
+            "description": "Number of requests consumed in the current period.",
+            "format": "int64",
+            "type": "integer"
+          },
+          "request_limit": {
+            "description": "Maximum requests allowed for the account in the current period.",
+            "format": "int64",
+            "type": "integer"
+          },
+          "usage_percent": {
+            "description": "Request usage as a percentage of the limit (0-100).",
+            "format": "double",
+            "type": "number"
+          }
+        },
+        "required": [
+          "request_count",
+          "request_limit",
+          "usage_percent",
+          "is_active",
+          "message"
         ],
         "type": "object"
       },
@@ -2319,10 +2391,7 @@
           }
         },
         "required": [
-          "merchantName",
-          "contactFirst",
-          "contactLast",
-          "contactEmail"
+          "merchantName"
         ],
         "type": "object"
       },
@@ -3120,25 +3189,22 @@
       "V60BaseRate": {
         "additionalProperties": false,
         "properties": {
-          "jur_description": {
+          "jurDescription": {
             "description": "Human-readable label combining the jurisdiction and tax type (e.g. 'US State Sales Tax').",
             "type": "string"
           },
-          "jur_name": {
+          "jurName": {
             "description": "Name or code of the jurisdiction: state alpha code, county/city name, or district label (e.g. 'CA', 'ORANGE', 'Local District: 37').",
-            "enum": [
-              "US_STATE",
-              "US_COUNTY",
-              "US_CITY",
-              "US_DISTRICT"
-            ],
             "type": "string"
           },
-          "jur_tax_code": {
-            "description": "FIPS-like tax code for the jurisdiction (state, county, city, or district). Empty when the jurisdiction has no associated code.",
-            "type": "string"
+          "jurTaxCode": {
+            "description": "FIPS-like tax code for the jurisdiction (state, county, city, or district). Null when the jurisdiction has no associated code.",
+            "type": [
+              "string",
+              "null"
+            ]
           },
-          "jur_type": {
+          "jurType": {
             "description": "Jurisdiction level combined with the tax kind (sales vs use) this component represents.",
             "enum": [
               "US_STATE_SALES_TAX",
@@ -3156,32 +3222,42 @@
             "description": "Tax rate for this jurisdiction/tax-type component, as a decimal fraction (e.g. 0.0625 = 6.25%).",
             "format": "float",
             "type": "number"
-          },
-          "rate_id": {
-            "description": "Identifier of the source rate row in the underlying tax table.",
-            "type": "string"
           }
         },
         "required": [
           "rate",
-          "rate_id",
-          "jur_type",
-          "jur_name",
-          "jur_description",
-          "jur_tax_code"
+          "jurType",
+          "jurName",
+          "jurDescription",
+          "jurTaxCode"
+        ],
+        "type": "object"
+      },
+      "V60DisplayRate": {
+        "additionalProperties": false,
+        "properties": {
+          "name": {
+            "description": "Label for this display rate line (e.g. the jurisdiction name).",
+            "type": "string"
+          },
+          "rate": {
+            "description": "Rate for this display line, as a decimal fraction.",
+            "format": "float",
+            "type": "number"
+          }
+        },
+        "required": [
+          "name",
+          "rate"
         ],
         "type": "object"
       },
       "V60Metadata": {
         "additionalProperties": false,
         "properties": {
-          "rCode": {
-            "description": "Numeric status of the request. 100 = success; 101 = invalid/unknown API key; 102 = invalid state; 103 = invalid city; 104 = invalid postal code; 105 = invalid query string; 106 = unknown API error; 107 = feature/version not enabled for the plan; 108 = request rate limit exceeded; 109 = missing/incomplete/invalid address; 110 = valid request but no result found; 111 = invalid historical parameter; 112 = Canadian (international) rates not enabled; 113 = product rate rules not enabled.",
-            "examples": [
-              100
-            ],
-            "format": "int64",
-            "type": "integer"
+          "response": {
+            "$ref": "#/components/schemas/V60ResponseInfo",
+            "description": "Response-code detail: numeric code, symbolic name, human-readable message, and a URL to the response schema definition."
           },
           "version": {
             "description": "Schema version of the response payload.",
@@ -3193,14 +3269,14 @@
         },
         "required": [
           "version",
-          "rCode"
+          "response"
         ],
         "type": "object"
       },
       "V60OriginDestination": {
         "additionalProperties": false,
         "properties": {
-          "adjustment_type": {
+          "adjustmentType": {
             "description": "Sourcing ruleset name. Currently always 'ORIGIN_DESTINATION'.",
             "examples": [
               "ORIGIN_DESTINATION"
@@ -3221,7 +3297,7 @@
           }
         },
         "required": [
-          "adjustment_type",
+          "adjustmentType",
           "description",
           "value"
         ],
@@ -3365,7 +3441,7 @@
             "$ref": "#/components/schemas/V60AddressDetail",
             "description": "Normalized and geocoded address details used for the lookup."
           },
-          "base_rates": {
+          "baseRates": {
             "description": "Component tax rates broken out by jurisdiction level (state/county/city/district) and tax type (sales/use). Sum the relevant components to obtain a combined rate.",
             "items": {
               "$ref": "#/components/schemas/V60BaseRate"
@@ -3379,10 +3455,6 @@
             "$ref": "#/components/schemas/V60Metadata",
             "description": "Versioning and response-code metadata for the request."
           },
-          "origin_destination": {
-            "$ref": "#/components/schemas/V60OriginDestination",
-            "description": "Sourcing model (origin- vs destination-based) that applies to the resolved location."
-          },
           "productDetail": {
             "$ref": "#/components/schemas/V60ProductDetail",
             "description": "Product-specific tax rules. Present only when a taxabilityCode is supplied on the request and the account carries the product_rates entitlement."
@@ -3395,7 +3467,11 @@
             "$ref": "#/components/schemas/V60Shipping",
             "description": "Whether freight/shipping is taxable in the resolved jurisdiction."
           },
-          "tax_summaries": {
+          "sourcingRules": {
+            "$ref": "#/components/schemas/V60OriginDestination",
+            "description": "Sourcing model (origin- vs destination-based) that applies to the resolved location."
+          },
+          "taxSummaries": {
             "description": "Aggregated sales and use tax rates for the location, summarizing the base rate components.",
             "items": {
               "$ref": "#/components/schemas/V60TaxSummary"
@@ -3408,19 +3484,60 @@
         },
         "required": [
           "metadata",
-          "base_rates",
+          "baseRates",
           "service",
           "shipping",
-          "origin_destination",
-          "tax_summaries",
+          "sourcingRules",
+          "taxSummaries",
           "addressDetail"
+        ],
+        "type": "object"
+      },
+      "V60ResponseInfo": {
+        "additionalProperties": false,
+        "properties": {
+          "code": {
+            "description": "Numeric status code (100 = success)",
+            "examples": [
+              100
+            ],
+            "format": "int64",
+            "type": "integer"
+          },
+          "definition": {
+            "description": "URL to the response schema",
+            "examples": [
+              "http://api.zip-tax.com/request/v60/schema"
+            ],
+            "type": "string"
+          },
+          "message": {
+            "description": "Human-readable summary",
+            "examples": [
+              "Successful API Request."
+            ],
+            "type": "string"
+          },
+          "name": {
+            "description": "Symbolic status name",
+            "examples": [
+              "RESPONSE_CODE_SUCCESS"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "name",
+          "message",
+          "definition"
         ],
         "type": "object"
       },
       "V60Service": {
         "additionalProperties": false,
         "properties": {
-          "adjustment_type": {
+          "adjustmentType": {
             "description": "Service taxation classification. Currently always 'SERVICE_TAXABLE'.",
             "examples": [
               "SERVICE_TAXABLE"
@@ -3442,7 +3559,7 @@
           }
         },
         "required": [
-          "adjustment_type",
+          "adjustmentType",
           "taxable",
           "description"
         ],
@@ -3451,7 +3568,7 @@
       "V60Shipping": {
         "additionalProperties": false,
         "properties": {
-          "adjustment_type": {
+          "adjustmentType": {
             "description": "Freight taxation classification. Currently always 'FREIGHT_TAXABLE'.",
             "examples": [
               "FREIGHT_TAXABLE"
@@ -3461,6 +3578,10 @@
           "description": {
             "description": "Human-readable explanation of the freight/shipping taxability determination.",
             "type": "string"
+          },
+          "shippingExtended": {
+            "$ref": "#/components/schemas/V60ShippingExtended",
+            "description": "Extended state-level shipping rule detail. Present only when shippingExtended=true is supplied on the request."
           },
           "taxable": {
             "description": "Whether freight/shipping is taxable in this jurisdiction. 'Y' = taxable, 'N' = not taxable.",
@@ -3472,8 +3593,41 @@
           }
         },
         "required": [
-          "adjustment_type",
+          "adjustmentType",
           "taxable",
+          "description"
+        ],
+        "type": "object"
+      },
+      "V60ShippingExtended": {
+        "additionalProperties": false,
+        "properties": {
+          "description": {
+            "description": "Human-readable description of the shipping taxability rule.",
+            "type": "string"
+          },
+          "exemptWhenSeparatelyStated": {
+            "description": "Whether shipping is exempt when separately stated on the invoice, as the string 'true' or 'false'.",
+            "type": "string"
+          },
+          "rule": {
+            "description": "General shipping-taxability rule for the state: one of EXEMPT, EXEMPT_WHEN_SEPARATELY_STATED, ITEM_SPECIFIC, CONDITIONAL, or TAXABLE.",
+            "type": "string"
+          },
+          "stateCode": {
+            "description": "Two-letter state code the shipping rule applies to.",
+            "type": "string"
+          },
+          "stateName": {
+            "description": "Full state name the shipping rule applies to.",
+            "type": "string"
+          }
+        },
+        "required": [
+          "stateName",
+          "stateCode",
+          "rule",
+          "exemptWhenSeparatelyStated",
           "description"
         ],
         "type": "object"
@@ -3481,16 +3635,26 @@
       "V60TaxSummary": {
         "additionalProperties": false,
         "properties": {
+          "displayRates": {
+            "description": "Per-line rate breakdown displayed under this summary.",
+            "items": {
+              "$ref": "#/components/schemas/V60DisplayRate"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
           "rate": {
             "description": "Aggregated tax rate for this summary line, as a decimal fraction (e.g. 0.0775 = 7.75%).",
             "format": "float",
             "type": "number"
           },
-          "summary_name": {
+          "summaryName": {
             "description": "Human-readable name of the summary grouping (e.g. 'Sales Tax').",
             "type": "string"
           },
-          "tax_type": {
+          "taxType": {
             "description": "Tax kind this summary aggregates: 'SALES_TAX' or 'USE_TAX'.",
             "enum": [
               "SALES_TAX",
@@ -3501,8 +3665,9 @@
         },
         "required": [
           "rate",
-          "tax_type",
-          "summary_name"
+          "taxType",
+          "summaryName",
+          "displayRates"
         ],
         "type": "object"
       },
@@ -3693,6 +3858,160 @@
           "v30",
           "v40",
           "v50",
+          "v60"
+        ]
+      }
+    },
+    "/account/v50/metrics": {
+      "get": {
+        "description": "Returns usage metrics for the authenticated account in the legacy core/geo format (the /account/metrics shape without the merchant_* counters).",
+        "operationId": "getAccountMetricsV50",
+        "parameters": [
+          {
+            "description": "API key identifying the account whose usage metrics are returned. May be supplied as this query parameter or the X-API-KEY header.",
+            "explode": false,
+            "in": "query",
+            "name": "key",
+            "schema": {
+              "description": "API key identifying the account whose usage metrics are returned. May be supplied as this query parameter or the X-API-KEY header.",
+              "maxLength": 100,
+              "minLength": 10,
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MetricsV50Response"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "400": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorModel"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "422": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorModel"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          },
+          "500": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorModel"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          }
+        },
+        "security": [
+          {
+            "ApiKeyQuery": []
+          },
+          {
+            "ApiKeyHeader": []
+          }
+        ],
+        "summary": "Get Account Metrics (v5.0)",
+        "tags": [
+          "Account"
+        ],
+        "x-fern-audiences": [
+          "v50"
+        ]
+      }
+    },
+    "/account/v60/metrics": {
+      "get": {
+        "description": "Returns usage metrics for the authenticated account in the simplified v6.0 format. In v6.0 all keys are geo keys, so the counters reflect geo usage.",
+        "operationId": "getAccountMetricsV60",
+        "parameters": [
+          {
+            "description": "API key identifying the account whose usage metrics are returned. May be supplied as this query parameter or the X-API-KEY header.",
+            "explode": false,
+            "in": "query",
+            "name": "key",
+            "schema": {
+              "description": "API key identifying the account whose usage metrics are returned. May be supplied as this query parameter or the X-API-KEY header.",
+              "maxLength": 100,
+              "minLength": 10,
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MetricsV60Response"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "400": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorModel"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "422": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorModel"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          },
+          "500": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorModel"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          }
+        },
+        "security": [
+          {
+            "ApiKeyQuery": []
+          },
+          {
+            "ApiKeyHeader": []
+          }
+        ],
+        "summary": "Get Account Metrics (v6.0)",
+        "tags": [
+          "Account"
+        ],
+        "x-fern-audiences": [
           "v60"
         ]
       }
@@ -4917,7 +5236,7 @@
     },
     "/merchant/delete": {
       "post": {
-        "description": "Soft-deletes a merchant by setting deleted_at to now. The caller must own the merchant. If the merchant is already soft-deleted (deleted_at \u003c= now), returns 404 — the merchant does not exist.",
+        "description": "Soft-deletes a merchant by setting deleted_at to now. The caller must own the merchant. If the merchant is not owned by the caller, or is already soft-deleted (deleted_at \u003c= now), the ownership check returns 403. A 404 is only reachable in a rare race after the ownership check passes.",
         "operationId": "deleteMerchant",
         "requestBody": {
           "content": {
@@ -5933,7 +6252,7 @@
     },
     "/merchant/update": {
       "post": {
-        "description": "Updates an existing merchant. The caller must own the merchant. Cross-account modification is blocked. Soft-deleted merchants (deleted_at \u003c= now) are treated as non-existent and cannot be updated.",
+        "description": "Updates an existing merchant. The caller must own the merchant. Cross-account modification is blocked. Soft-deleted merchants (deleted_at \u003c= now), and merchants owned by another account, fail the ownership check and return 403.",
         "operationId": "updateMerchant",
         "requestBody": {
           "content": {
@@ -6158,26 +6477,6 @@
             },
             "description": "OK"
           },
-          "400": {
-            "content": {
-              "application/problem+json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorModel"
-                }
-              }
-            },
-            "description": "Bad Request"
-          },
-          "401": {
-            "content": {
-              "application/problem+json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorModel"
-                }
-              }
-            },
-            "description": "Unauthorized"
-          },
           "422": {
             "content": {
               "application/problem+json": {
@@ -6337,26 +6636,6 @@
               }
             },
             "description": "OK"
-          },
-          "400": {
-            "content": {
-              "application/problem+json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorModel"
-                }
-              }
-            },
-            "description": "Bad Request"
-          },
-          "401": {
-            "content": {
-              "application/problem+json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorModel"
-                }
-              }
-            },
-            "description": "Unauthorized"
           },
           "422": {
             "content": {
@@ -6518,26 +6797,6 @@
             },
             "description": "OK"
           },
-          "400": {
-            "content": {
-              "application/problem+json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorModel"
-                }
-              }
-            },
-            "description": "Bad Request"
-          },
-          "401": {
-            "content": {
-              "application/problem+json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorModel"
-                }
-              }
-            },
-            "description": "Unauthorized"
-          },
           "422": {
             "content": {
               "application/problem+json": {
@@ -6697,26 +6956,6 @@
               }
             },
             "description": "OK"
-          },
-          "400": {
-            "content": {
-              "application/problem+json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorModel"
-                }
-              }
-            },
-            "description": "Bad Request"
-          },
-          "401": {
-            "content": {
-              "application/problem+json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorModel"
-                }
-              }
-            },
-            "description": "Unauthorized"
           },
           "422": {
             "content": {
@@ -6975,12 +7214,12 @@
             }
           },
           {
-            "description": "Sourcing/unincorporated-area handling mode: 'auto' (default) lets the API determine the correct sourcing, 'origin' forces origin-based sourcing (ship-from rate), and 'destination' forces destination-based sourcing (ship-to rate).",
+            "description": "Unincorporated-area handling. Only the value 'auto' has an effect: on geo (address) lookups in unincorporated areas it applies the appropriate sourcing adjustment. No default is applied when omitted, and no other value (including 'origin'/'destination') changes the result.",
             "explode": false,
             "in": "query",
             "name": "adjustment",
             "schema": {
-              "description": "Sourcing/unincorporated-area handling mode: 'auto' (default) lets the API determine the correct sourcing, 'origin' forces origin-based sourcing (ship-from rate), and 'destination' forces destination-based sourcing (ship-to rate).",
+              "description": "Unincorporated-area handling. Only the value 'auto' has an effect: on geo (address) lookups in unincorporated areas it applies the appropriate sourcing adjustment. No default is applied when omitted, and no other value (including 'origin'/'destination') changes the result.",
               "maxLength": 100,
               "type": "string"
             }
@@ -7019,26 +7258,6 @@
               }
             },
             "description": "OK"
-          },
-          "400": {
-            "content": {
-              "application/problem+json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorModel"
-                }
-              }
-            },
-            "description": "Bad Request"
-          },
-          "401": {
-            "content": {
-              "application/problem+json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorModel"
-                }
-              }
-            },
-            "description": "Unauthorized"
           },
           "422": {
             "content": {
@@ -7090,7 +7309,7 @@
     },
     "/request/v60": {
       "get": {
-        "description": "Returns tax rates in a new structured format with separate base rates,\n\t\t\tservice/shipping taxability, and tax summaries. Built on v5.0 data but with enhanced organization",
+        "description": "Returns tax rates in a new structured format with separate base rates,\n\t\t\tservice/shipping taxability, and tax summaries. Built on v5.0 data but with enhanced organization. Note: postal-code-only lookups (no address or lat/lng) return the legacy v5.0-style response body (version, rCode, results) rather than the structured object documented here.",
         "operationId": "getTaxRatesV60",
         "parameters": [
           {
@@ -7241,12 +7460,28 @@
             }
           },
           {
-            "description": "Single-article item total in dollars used to compute Tennessee Single Article Tax (SAT). When greater than 0 and the resolved location is in Tennessee, the response reflects the single-article tax limits in the tax summaries.",
+            "description": "Sourcing/unincorporated-area handling. Defaults to 'auto', which applies the appropriate sourcing adjustment on geo (address) lookups in unincorporated areas. The values 'origin' and 'destination' are accepted but currently do not change the resolved result.",
+            "explode": false,
+            "in": "query",
+            "name": "adjustment",
+            "schema": {
+              "default": "auto",
+              "description": "Sourcing/unincorporated-area handling. Defaults to 'auto', which applies the appropriate sourcing adjustment on geo (address) lookups in unincorporated areas. The values 'origin' and 'destination' are accepted but currently do not change the resolved result.",
+              "enum": [
+                "auto",
+                "origin",
+                "destination"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Single-article item total in dollars, used for Tennessee Single Article Tax (SAT) calculation on TN address lookups. Note: the v6.0 response does not currently return a SAT breakdown object; the SAT detail (satTaxDetail) is available in the v5.0 response.",
             "explode": false,
             "in": "query",
             "name": "sat_item_total",
             "schema": {
-              "description": "Single-article item total in dollars used to compute Tennessee Single Article Tax (SAT). When greater than 0 and the resolved location is in Tennessee, the response reflects the single-article tax limits in the tax summaries.",
+              "description": "Single-article item total in dollars, used for Tennessee Single Article Tax (SAT) calculation on TN address lookups. Note: the v6.0 response does not currently return a SAT breakdown object; the SAT detail (satTaxDetail) is available in the v5.0 response.",
               "format": "double",
               "minimum": 0,
               "type": "number"
@@ -7312,16 +7547,6 @@
             },
             "description": "OK"
           },
-          "400": {
-            "content": {
-              "application/problem+json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorModel"
-                }
-              }
-            },
-            "description": "Bad Request"
-          },
           "401": {
             "content": {
               "application/problem+json": {
@@ -7331,6 +7556,26 @@
               }
             },
             "description": "Unauthorized"
+          },
+          "403": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorModel"
+                }
+              }
+            },
+            "description": "Forbidden"
+          },
+          "405": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorModel"
+                }
+              }
+            },
+            "description": "Method Not Allowed"
           },
           "422": {
             "content": {
@@ -7376,6 +7621,47 @@
           "Tax Rates"
         ],
         "x-fern-audiences": [
+          "v60"
+        ]
+      }
+    },
+    "/schemas/ticsearch": {
+      "get": {
+        "description": "Returns the JSON Schema describing the TIC search response body. Public; no authentication required.",
+        "operationId": "getTICSearchSchema",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": {},
+                  "type": "object"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorModel"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Get TIC Search JSON Schema",
+        "tags": [
+          "Search"
+        ],
+        "x-fern-audiences": [
+          "v10",
+          "v20",
+          "v30",
+          "v40",
+          "v50",
           "v60"
         ]
       }
