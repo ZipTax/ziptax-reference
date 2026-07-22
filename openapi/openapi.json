@@ -441,10 +441,7 @@
             },
             "maxItems": 100,
             "minItems": 1,
-            "type": [
-              "array",
-              "null"
-            ]
+            "type": "array"
           },
           "merchantId": {
             "description": "UUID of the merchant whose TaxCloud connection is used. Must be owned by the calling account. Consumed by the Ziptax layer for routing and not forwarded to TaxCloud.",
@@ -552,10 +549,7 @@
             "items": {
               "$ref": "#/components/schemas/TaxCloudExemptState"
             },
-            "type": [
-              "array",
-              "null"
-            ]
+            "type": "array"
           }
         },
         "required": [
@@ -785,10 +779,7 @@
             "items": {
               "$ref": "#/components/schemas/TaxCloudCartItemWithTax"
             },
-            "type": [
-              "array",
-              "null"
-            ]
+            "type": "array"
           },
           "merchantId": {
             "description": "UUID of the merchant. Must be owned by the calling account. Consumed by the Ziptax layer for routing and not forwarded to TaxCloud.",
@@ -1536,10 +1527,7 @@
             "items": {
               "$ref": "#/components/schemas/TaxCloudCartItem"
             },
-            "type": [
-              "array",
-              "null"
-            ]
+            "type": "array"
           },
           "origin": {
             "$ref": "#/components/schemas/TaxCloudAddress",
