@@ -58,7 +58,7 @@
             "type": "string"
           },
           "sendTaxcloudInvite": {
-            "description": "Sends invite to set up and connect a TaxCloud account to a merchant who does not already use TaxCloud. To connect a TaxCloud account for a merchant who already uses TaxCloud, use the \"Set Merchant Credentials\" function.",
+            "description": "Sends invite to set up and connect a TaxCloud account to a merchant who does not already use TaxCloud. To connect a TaxCloud account for a merchant who already uses TaxCloud, use the \"Set Merchant Credentials\" function. Ignored when merchant_type is 'offline'.",
             "type": [
               "boolean",
               "null"
@@ -67,6 +67,15 @@
           "referenceId": {
             "description": "The ID you use in your own system to identify this merchant.",
             "maxLength": 255,
+            "type": "string"
+          },
+          "merchant_type": {
+            "default": "connected",
+            "description": "Merchant lifecycle type. 'connected' (default) kicks off the TaxCloud invite process. 'offline' bypasses the TaxCloud invite process and the merchant is automatically active after creation.",
+            "enum": [
+              "connected",
+              "offline"
+            ],
             "type": "string"
           }
         },
@@ -2513,7 +2522,7 @@
             "type": "number"
           },
           "cityTaxCode": {
-            "description": "Tax code (jurisdiction identifier) for the city; empty when the location has no city-level tax.",
+            "description": "Tax code (jurisdiction identifier) for the city; for Texas addresses this is the TAID of the city that contains the address. Empty when the location has no city-level tax.",
             "type": "string"
           },
           "cityUseTax": {
@@ -2647,7 +2656,7 @@
             "type": "number"
           },
           "cityTaxCode": {
-            "description": "Tax code (jurisdiction identifier) for the city; empty when the location has no city-level tax.",
+            "description": "Tax code (jurisdiction identifier) for the city; for Texas addresses this is the TAID of the city that contains the address. Empty when the location has no city-level tax.",
             "type": "string"
           },
           "cityUseTax": {
@@ -2882,7 +2891,7 @@
             "type": "number"
           },
           "cityTaxCode": {
-            "description": "Tax code (jurisdiction identifier) for the city; empty when the location has no city-level tax.",
+            "description": "Tax code (jurisdiction identifier) for the city; for Texas addresses this is the TAID of the city that contains the address. Empty when the location has no city-level tax.",
             "type": "string"
           },
           "cityUseTax": {
@@ -3186,7 +3195,7 @@
             "type": "string"
           },
           "jurTaxCode": {
-            "description": "FIPS-like tax code for the jurisdiction (state, county, city, or district). Null when the jurisdiction has no associated code.",
+            "description": "FIPS-like tax code for the jurisdiction (state, county, city, or district). For Texas city components this is the TAID published for the city that contains the address. Null when the jurisdiction has no associated code.",
             "type": [
               "string",
               "null"
