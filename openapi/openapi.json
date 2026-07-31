@@ -3377,7 +3377,7 @@
             ]
           },
           "jurTaxCode": {
-            "description": "FIPS-like code identifying the jurisdiction (state, county, or city) the rule applies to; null when not specified.",
+            "description": "Code identifying the jurisdiction the rule applies to: a FIPS-like code (state, county, or city), or a conditional jurisdiction code of the form 36:XX-L#### (NY ST-100.3 codes for location-resolved school district / city / county rules); null when not specified.",
             "examples": [
               "06"
             ],
