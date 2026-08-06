@@ -1,6 +1,6 @@
 # ZipTax Reference
 
-A reference repository for the [ZipTax Sales Tax API](https://developers.zip.tax) containing machine-readable files, documentation, configurations, code samples, and other materials for API integration.
+A reference repository for the [ZipTax Sales Tax API](https://docs.zip.tax) containing machine-readable files, documentation, configurations, code samples, and other materials for API integration.
 
 ## Purpose
 
@@ -18,7 +18,7 @@ Materials in this repository support developers integrating with the ZipTax API 
 
 ## API Documentation
 
-For complete API documentation, visit [developers.zip.tax](https://developers.zip.tax)
+For complete API documentation, visit [docs.zip.tax](https://docs.zip.tax)
 
 ## License
 
