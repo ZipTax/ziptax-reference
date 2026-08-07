@@ -58,7 +58,7 @@
             "type": "string"
           },
           "sendTaxcloudInvite": {
-            "description": "Sends invite to set up and connect a TaxCloud account to a merchant who does not already use TaxCloud. To connect a TaxCloud account for a merchant who already uses TaxCloud, use the \"Set Merchant Credentials\" function. Ignored when merchant_type is 'offline'.",
+            "description": "Sends invite to set up and connect a TaxCloud account to a merchant who does not already use TaxCloud. To connect a TaxCloud account for a merchant who already uses TaxCloud, use the \"Set Merchant Credentials\" function. Ignored when merchant_type is 'self-managed'.",
             "type": [
               "boolean",
               "null"
@@ -70,9 +70,11 @@
             "type": "string"
           },
           "merchant_type": {
-            "default": "connected",
-            "description": "Merchant lifecycle type. 'connected' (default) kicks off the TaxCloud invite process. 'offline' bypasses the TaxCloud invite process and the merchant is automatically active after creation.",
+            "default": "taxcloud",
+            "description": "The merchant's compliance model, chosen once at creation. 'taxcloud' (the default) starts the TaxCloud invite process, so TaxCloud can handle registration, filing, and remittance for the merchant. 'self-managed' skips the invite entirely and the merchant is active as soon as the call returns, with the merchant remaining responsible for their own compliance. 'connected' and 'offline' are deprecated aliases for 'taxcloud' and 'self-managed' respectively; they are still accepted but should not be used in new integrations.",
             "enum": [
+              "taxcloud",
+              "self-managed",
               "connected",
               "offline"
             ],
@@ -1141,6 +1143,144 @@
         ],
         "type": "object"
       },
+      "SelfManagedCartCalculateResponseBody": {
+        "additionalProperties": false,
+        "properties": {
+          "items": {
+            "description": "One calculated cart per submitted cart, in the same order, with per-line-item tax rates and amounts.",
+            "items": {
+              "$ref": "#/components/schemas/SelfManagedCartResponse"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "items"
+        ],
+        "type": "object"
+      },
+      "SelfManagedCartItemWithTaxResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "index": {
+            "description": "Zero-based position of the item within the cart, as submitted.",
+            "examples": [
+              0
+            ],
+            "format": "int64",
+            "type": "integer"
+          },
+          "itemId": {
+            "description": "Your unique identifier for the line item, as submitted.",
+            "examples": [
+              "item-1"
+            ],
+            "type": "string"
+          },
+          "originalPrice": {
+            "description": "The original unit price. Always equal to price, because discounts are not supported for self-managed merchants.",
+            "examples": [
+              10.75
+            ],
+            "format": "double",
+            "type": "number"
+          },
+          "price": {
+            "description": "The unit price tax was calculated on, as submitted. Discounts are not supported for self-managed merchants, so this is always the submitted price.",
+            "examples": [
+              10.75
+            ],
+            "format": "double",
+            "type": "number"
+          },
+          "quantity": {
+            "description": "Quantity of the item, as submitted.",
+            "examples": [
+              1.5
+            ],
+            "format": "double",
+            "type": "number"
+          },
+          "tax": {
+            "$ref": "#/components/schemas/TaxCloudTax",
+            "description": "The tax rate and amount calculated for this line item. The amount is money and is rounded to two decimal places, the same precision a TaxCloud-managed cart returns; the rate keeps five decimal places."
+          },
+          "tic": {
+            "description": "Taxability Information Code (TIC) the item was calculated under, as submitted. Null when no TIC was supplied (general tangible goods).",
+            "examples": [
+              0
+            ],
+            "format": "int64",
+            "type": [
+              "integer",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "index",
+          "itemId",
+          "tic",
+          "price",
+          "originalPrice",
+          "quantity",
+          "tax"
+        ],
+        "type": "object"
+      },
+      "SelfManagedCartResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "cartId": {
+            "description": "Identifier of the calculated cart: the cartId you submitted, or a generated one when you omitted it. Self-managed calculations are not persisted, so this identifier is for correlating the response with the request only and cannot be used with /merchant/order/create-from-cart.",
+            "examples": [
+              "my-cart-1"
+            ],
+            "type": "string"
+          },
+          "currency": {
+            "$ref": "#/components/schemas/TaxCloudCurrency",
+            "description": "The currency the prices and tax amounts are denominated in. Always USD for self-managed merchants."
+          },
+          "customerId": {
+            "description": "Your identifier for the customer, as submitted.",
+            "examples": [
+              "customer-453"
+            ],
+            "type": "string"
+          },
+          "destination": {
+            "$ref": "#/components/schemas/TaxCloudAddress",
+            "description": "The ship-to (destination) address, as submitted."
+          },
+          "lineItems": {
+            "description": "The submitted line items, each with its calculated tax rate and amount.",
+            "items": {
+              "$ref": "#/components/schemas/SelfManagedCartItemWithTaxResponse"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "origin": {
+            "$ref": "#/components/schemas/TaxCloudAddress",
+            "description": "The ship-from (origin) address, as submitted."
+          }
+        },
+        "required": [
+          "cartId",
+          "customerId",
+          "origin",
+          "destination",
+          "currency",
+          "lineItems"
+        ],
+        "type": "object"
+      },
       "SetMerchantCredentialsRequest": {
         "additionalProperties": false,
         "properties": {
@@ -1575,7 +1715,7 @@
             "type": "string"
           },
           "price": {
-            "description": "Unit price of the item, in the cart's currency. When discounts are provided, this must be the pre-discount (original) price; tax is calculated on the discounted amount.",
+            "description": "Unit price of the item, in the cart's currency. When discounts are provided, this must be the pre-discount (original) price; tax is calculated on the discounted amount. Self-managed merchants only: both the unit price and the extended price (price * quantity) must be at most 1e12.",
             "examples": [
               10.75
             ],
@@ -4072,7 +4212,7 @@
     },
     "/merchant/cart/calculate": {
       "post": {
-        "description": "Calculates sales tax for one or more carts on behalf of a connected merchant. The request is forwarded to TaxCloud (POST /connections/{connectionId}/carts) using the merchant's stored credentials and TaxCloud's response is returned verbatim. Calculation has no lasting side effect and is safe to retry; capture the returned cartId with /merchant/order/create-from-cart to record the sale.",
+        "description": "Calculates sales tax for one or more carts on behalf of a merchant. The request contract is the same for both merchant management modes, so a caller does not have to know which mode a merchant is in. TaxCloud-managed merchant: the request is forwarded to TaxCloud (POST /connections/{connectionId}/carts) using the merchant's stored credentials and TaxCloud's response is returned verbatim; capture the returned cartId with /merchant/order/create-from-cart to record the sale. Self-managed merchant: the cart is calculated in-process by the Ziptax rate engine, US destinations only, and nothing is persisted - the returned cartId correlates the response with the request and cannot be captured as an order, and the other stateful /merchant endpoints return 403. Self-managed calculation rejects (rather than ignores) fields it cannot honour: discounts, exemption, deliveredBySeller, productId, and any currency other than USD. A value that asks for nothing is accepted, so a caller that always emits the TaxCloud shape is not refused: deliveredBySeller false, and an exemption claiming no exemption ({} or {\"isExempt\": false}). TIC vocabulary also differs: self-managed carts use Ziptax TICs, where 10001 is shipping and 11000 is handling, and TaxCloud's shipping TICs 11010-11015 and the Colorado retail delivery fee TIC 11098 are rejected with 400 because they cannot be mapped onto the in-process shipping and handling treatment. A self-managed interstate cart whose destination address cannot be resolved returns 422 rather than being sourced at its origin, which would quote another state's rate. A self-managed request may contain at most 2500 line items summed across all carts; a larger batch is rejected with 400 before any cart is calculated. Calculation has no lasting side effect in either mode and is safe to retry.",
         "operationId": "merchantCartCalculate",
         "requestBody": {
           "content": {
@@ -4089,11 +4229,18 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/CartCalculateResponseBody"
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/CartCalculateResponseBody"
+                    },
+                    {
+                      "$ref": "#/components/schemas/SelfManagedCartCalculateResponseBody"
+                    }
+                  ]
                 }
               }
             },
-            "description": "TaxCloud response relayed verbatim."
+            "description": "Calculated carts. For a TaxCloud-managed merchant this is TaxCloud's response relayed verbatim; for a self-managed merchant it is the Ziptax calculation, which has no connectionId, exemption, or deliveredBySeller."
           },
           "201": {
             "content": {
@@ -4211,7 +4358,7 @@
             "ApiKeyHeader": []
           }
         ],
-        "summary": "Calculate Cart Tax (TaxCloud)",
+        "summary": "Calculate Cart Tax",
         "tags": [
           "Merchant TaxCloud"
         ],
@@ -4227,7 +4374,7 @@
     },
     "/merchant/cert/create": {
       "post": {
-        "description": "Creates an exemption certificate for one of the merchant's customers. The request is forwarded to TaxCloud POST /connections/{connectionId}/exemption-certificates using the merchant's stored credentials and TaxCloud's response is returned verbatim. Reference the returned certificateId as exemptionId on carts and orders to apply the exemption.",
+        "description": "Creates an exemption certificate for one of the merchant's customers. The request is forwarded to TaxCloud POST /connections/{connectionId}/exemption-certificates using the merchant's stored credentials and TaxCloud's response is returned verbatim. Reference the returned certificateId as exemptionId on carts and orders to apply the exemption. Available only for TaxCloud-managed merchants: a self-managed merchant has no TaxCloud connection to store or read this state in, so the request is refused with 403 and only /merchant/cart/calculate is supported.",
         "operationId": "merchantCertCreate",
         "requestBody": {
           "content": {
@@ -4382,7 +4529,7 @@
     },
     "/merchant/cert/delete": {
       "post": {
-        "description": "Deletes (disables) an exemption certificate so it can no longer be applied to new transactions. The request is forwarded to TaxCloud DELETE /connections/{connectionId}/exemption-certificates/{certificateId} using the merchant's stored credentials and TaxCloud's response is returned verbatim.",
+        "description": "Deletes (disables) an exemption certificate so it can no longer be applied to new transactions. The request is forwarded to TaxCloud DELETE /connections/{connectionId}/exemption-certificates/{certificateId} using the merchant's stored credentials and TaxCloud's response is returned verbatim. Available only for TaxCloud-managed merchants: a self-managed merchant has no TaxCloud connection to store or read this state in, so the request is refused with 403 and only /merchant/cart/calculate is supported.",
         "operationId": "merchantCertDelete",
         "requestBody": {
           "content": {
@@ -4533,7 +4680,7 @@
     },
     "/merchant/cert/get": {
       "post": {
-        "description": "Retrieves a single exemption certificate. The request is forwarded to TaxCloud GET /connections/{connectionId}/exemption-certificates/{certificateId} using the merchant's stored credentials and TaxCloud's response is returned verbatim. This is a read and is safe to retry.",
+        "description": "Retrieves a single exemption certificate. The request is forwarded to TaxCloud GET /connections/{connectionId}/exemption-certificates/{certificateId} using the merchant's stored credentials and TaxCloud's response is returned verbatim. This is a read and is safe to retry. Available only for TaxCloud-managed merchants: a self-managed merchant has no TaxCloud connection to store or read this state in, so the request is refused with 403 and only /merchant/cart/calculate is supported.",
         "operationId": "merchantCertGet",
         "requestBody": {
           "content": {
@@ -4678,7 +4825,7 @@
     },
     "/merchant/cert/list": {
       "post": {
-        "description": "Lists the merchant's exemption certificates with cursor-based pagination. The request is forwarded to TaxCloud GET /exemption-certificates, scoped to the merchant's connection, with the optional filter fields mapped onto the query string; TaxCloud's response is returned verbatim. This is a read and is safe to retry.",
+        "description": "Lists the merchant's exemption certificates with cursor-based pagination. The request is forwarded to TaxCloud GET /exemption-certificates, scoped to the merchant's connection, with the optional filter fields mapped onto the query string; TaxCloud's response is returned verbatim. This is a read and is safe to retry. Available only for TaxCloud-managed merchants: a self-managed merchant has no TaxCloud connection to store or read this state in, so the request is refused with 403 and only /merchant/cart/calculate is supported.",
         "operationId": "merchantCertList",
         "requestBody": {
           "content": {
@@ -5494,7 +5641,7 @@
     },
     "/merchant/order/create": {
       "post": {
-        "description": "Records an order directly, without a prior cart calculation; the tax amounts on each line item are the amounts your checkout collected. The request is forwarded to TaxCloud POST /connections/{connectionId}/orders using the merchant's stored credentials and TaxCloud's response is returned verbatim.",
+        "description": "Records an order directly, without a prior cart calculation; the tax amounts on each line item are the amounts your checkout collected. The request is forwarded to TaxCloud POST /connections/{connectionId}/orders using the merchant's stored credentials and TaxCloud's response is returned verbatim. Available only for TaxCloud-managed merchants: a self-managed merchant has no TaxCloud connection to store or read this state in, so the request is refused with 403 and only /merchant/cart/calculate is supported.",
         "operationId": "merchantOrderCreate",
         "requestBody": {
           "content": {
@@ -5649,7 +5796,7 @@
     },
     "/merchant/order/create-from-cart": {
       "post": {
-        "description": "Captures a cart previously calculated with /merchant/cart/calculate as a recorded order. The request is forwarded to TaxCloud POST /connections/{connectionId}/carts/orders using the merchant's stored credentials and TaxCloud's response is returned verbatim.",
+        "description": "Captures a cart previously calculated with /merchant/cart/calculate as a recorded order. The request is forwarded to TaxCloud POST /connections/{connectionId}/carts/orders using the merchant's stored credentials and TaxCloud's response is returned verbatim. Available only for TaxCloud-managed merchants: a self-managed merchant has no TaxCloud connection to store or read this state in, so the request is refused with 403 and only /merchant/cart/calculate is supported.",
         "operationId": "merchantOrderCreateFromCart",
         "requestBody": {
           "content": {
@@ -5804,7 +5951,7 @@
     },
     "/merchant/order/get": {
       "post": {
-        "description": "Retrieves a recorded order. The request is forwarded to TaxCloud GET /connections/{connectionId}/orders/{orderId} using the merchant's stored credentials and TaxCloud's response is returned verbatim. This is a read and is safe to retry.",
+        "description": "Retrieves a recorded order. The request is forwarded to TaxCloud GET /connections/{connectionId}/orders/{orderId} using the merchant's stored credentials and TaxCloud's response is returned verbatim. This is a read and is safe to retry. Available only for TaxCloud-managed merchants: a self-managed merchant has no TaxCloud connection to store or read this state in, so the request is refused with 403 and only /merchant/cart/calculate is supported.",
         "operationId": "merchantOrderGet",
         "requestBody": {
           "content": {
@@ -5949,7 +6096,7 @@
     },
     "/merchant/order/update": {
       "post": {
-        "description": "Modifies a recorded order; currently the completedDate can be set to mark the order shipped, creating the tax liability. The request is forwarded to TaxCloud PATCH /connections/{connectionId}/orders/{orderId} using the merchant's stored credentials and TaxCloud's response is returned verbatim. Updates overwrite the fields you send, so do not retry them blindly.",
+        "description": "Modifies a recorded order; currently the completedDate can be set to mark the order shipped, creating the tax liability. The request is forwarded to TaxCloud PATCH /connections/{connectionId}/orders/{orderId} using the merchant's stored credentials and TaxCloud's response is returned verbatim. Updates overwrite the fields you send, so do not retry them blindly. Available only for TaxCloud-managed merchants: a self-managed merchant has no TaxCloud connection to store or read this state in, so the request is refused with 403 and only /merchant/cart/calculate is supported.",
         "operationId": "merchantOrderUpdate",
         "requestBody": {
           "content": {
@@ -6094,7 +6241,7 @@
     },
     "/merchant/refund/create": {
       "post": {
-        "description": "Refunds all or part of a recorded order. The request is forwarded to TaxCloud POST /connections/{connectionId}/orders/refunds/{orderId} using the merchant's stored credentials and TaxCloud's response is returned verbatim. Refund prices and tax amounts are calculated automatically from the order; when the order had discounts, refunds use the discounted prices actually paid. Do not retry refunds blindly - a duplicate submission records a duplicate refund.",
+        "description": "Refunds all or part of a recorded order. The request is forwarded to TaxCloud POST /connections/{connectionId}/orders/refunds/{orderId} using the merchant's stored credentials and TaxCloud's response is returned verbatim. Refund prices and tax amounts are calculated automatically from the order; when the order had discounts, refunds use the discounted prices actually paid. Do not retry refunds blindly - a duplicate submission records a duplicate refund. Available only for TaxCloud-managed merchants: a self-managed merchant has no TaxCloud connection to store or read this state in, so the request is refused with 403 and only /merchant/cart/calculate is supported.",
         "operationId": "merchantRefundCreate",
         "requestBody": {
           "content": {
