@@ -58,11 +58,22 @@
             "type": "string"
           },
           "sendTaxcloudInvite": {
-            "description": "Sends invite to set up and connect a TaxCloud account to a merchant who does not already use TaxCloud. To connect a TaxCloud account for a merchant who already uses TaxCloud, use the \"Set Merchant Credentials\" function. Ignored when merchant_type is 'self-managed'.",
+            "description": "Sends invite to set up and connect a TaxCloud account to a merchant who does not already use TaxCloud. To connect a TaxCloud account for a merchant who already uses TaxCloud, use the \"Set Merchant Credentials\" function. Ignored when merchantType is 'self-managed'.",
             "type": [
               "boolean",
               "null"
             ]
+          },
+          "merchantType": {
+            "default": "taxcloud",
+            "description": "The merchant's compliance model, chosen once at creation. 'taxcloud' (the default) starts the TaxCloud invite process, so TaxCloud can handle registration, filing, and remittance for the merchant. 'self-managed' skips the invite entirely and the merchant is active as soon as the call returns, with the merchant remaining responsible for their own compliance. 'connected' and 'offline' are deprecated aliases for 'taxcloud' and 'self-managed' respectively; they are still accepted but should not be used in new integrations.",
+            "enum": [
+              "taxcloud",
+              "self-managed",
+              "connected",
+              "offline"
+            ],
+            "type": "string"
           },
           "referenceId": {
             "description": "The ID you use in your own system to identify this merchant.",
@@ -70,8 +81,8 @@
             "type": "string"
           },
           "merchant_type": {
-            "default": "taxcloud",
-            "description": "The merchant's compliance model, chosen once at creation. 'taxcloud' (the default) starts the TaxCloud invite process, so TaxCloud can handle registration, filing, and remittance for the merchant. 'self-managed' skips the invite entirely and the merchant is active as soon as the call returns, with the merchant remaining responsible for their own compliance. 'connected' and 'offline' are deprecated aliases for 'taxcloud' and 'self-managed' respectively; they are still accepted but should not be used in new integrations.",
+            "deprecated": true,
+            "description": "Deprecated: use 'merchantType' instead. This is the original snake_case spelling of the same field and is still accepted so existing integrations keep working. When both are sent, 'merchantType' wins and this value is ignored.",
             "enum": [
               "taxcloud",
               "self-managed",
@@ -935,7 +946,7 @@
             "type": "string"
           },
           "hostname": {
-            "description": "Hostname of the instance serving the request.",
+            "description": "Opaque identifier for the instance serving the request. Stable for the life of that instance and changes when it restarts. Useful for telling support which instance handled a request; it is not a resolvable hostname.",
             "type": "string"
           }
         },
