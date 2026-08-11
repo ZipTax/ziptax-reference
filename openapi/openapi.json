@@ -2477,14 +2477,30 @@
             "description": "UUID of the merchant to update. The merchant must be owned by the calling account.",
             "type": "string"
           },
+          "sendTaxcloudInvite": {
+            "description": "Whether to email the merchant a TaxCloud invite when this request switches them to 'taxcloud'. Defaults to true. It has no effect on a request that does not change the compliance model, so repeating a request will not invite the merchant twice. The invite goes to the merchant's stored contactEmail; include an 'update' block to change that address first. A merchant with no contact email cannot be invited.",
+            "type": [
+              "boolean",
+              "null"
+            ]
+          },
+          "setMerchantType": {
+            "description": "Switches the merchant to a different compliance model. Use 'taxcloud' to have TaxCloud handle the merchant's registration, filing, and remittance: their status becomes 'taxcloud_invited' and they are emailed an invite. Use 'self-managed' to hand compliance back to the merchant: their status becomes 'external_compliance' and their stored TaxCloud credentials are removed. 'connected' and 'offline' are deprecated names for 'taxcloud' and 'self-managed'. Sending the merchant's current model changes nothing. Omit this field to leave the compliance model as it is.",
+            "enum": [
+              "taxcloud",
+              "self-managed",
+              "connected",
+              "offline"
+            ],
+            "type": "string"
+          },
           "update": {
             "$ref": "#/components/schemas/UpdateStruct",
-            "description": "New field values for the merchant"
+            "description": "New values for the merchant's name and contact details. Every field in this block is replaced, so send the current value for anything you do not want to clear. Omit the block to change only the compliance model."
           }
         },
         "required": [
-          "merchantId",
-          "update"
+          "merchantId"
         ],
         "type": "object"
       },
@@ -5391,7 +5407,7 @@
     },
     "/merchant/delete": {
       "post": {
-        "description": "Soft-deletes a merchant by setting deleted_at to now. The caller must own the merchant. If the merchant is not owned by the caller, or is already soft-deleted (deleted_at \u003c= now), the ownership check returns 403. A 404 is only reachable in a rare race after the ownership check passes.",
+        "description": "Deletes a merchant. You can only delete merchants that belong to your account. Requests for any other merchant, or for one that has already been deleted, return 403.",
         "operationId": "deleteMerchant",
         "requestBody": {
           "content": {
@@ -5496,7 +5512,7 @@
     },
     "/merchant/get": {
       "post": {
-        "description": "Returns a single merchant by UUID. The caller must own the merchant. Cross-account reads are blocked. Soft-deleted merchants (deleted_at \u003c= now) are treated as non-existent and return 404.",
+        "description": "Returns a single merchant by ID. You can only read merchants that belong to your account. Requests for any other merchant, or for one that has been deleted, return 404.",
         "operationId": "getMerchant",
         "requestBody": {
           "content": {
@@ -5591,7 +5607,7 @@
     },
     "/merchant/list": {
       "get": {
-        "description": "Returns every active merchant owned by the calling account. A merchant is considered active when its deleted_at is NULL or set to a future date. Soft-deleted merchants (deleted_at \u003c= now) are excluded from results.",
+        "description": "Returns every active merchant on your account. Deleted merchants are not included.",
         "operationId": "listMerchants",
         "responses": {
           "200": {
@@ -6407,7 +6423,7 @@
     },
     "/merchant/update": {
       "post": {
-        "description": "Updates an existing merchant. The caller must own the merchant. Cross-account modification is blocked. Soft-deleted merchants (deleted_at \u003c= now), and merchants owned by another account, fail the ownership check and return 403.",
+        "description": "Updates a merchant's details, its compliance model, or both.\n\nSend `update` to change the merchant's name and contact details, `setMerchantType` to switch the merchant between the `taxcloud` and `self-managed` compliance models, or both together. At least one of the two is required.\n\nSwitching the compliance model sets the merchant's `status`: `taxcloud` produces `taxcloud_invited` and emails the merchant a TaxCloud invite, `self-managed` produces `external_compliance`.\n\n**Switching to `self-managed` disconnects the merchant from TaxCloud.** Their stored TaxCloud credentials are removed, so the order, exemption certificate, and refund endpoints return 403 for them and cart calculation switches to Ziptax's own rate engine. Reconnecting later means switching back to `taxcloud` and setting their credentials again via \"Set Merchant Credentials\".\n\nSending the compliance model a merchant already has changes nothing and does not re-send the invite, so a request is safe to repeat.\n\nYou can only update merchants that belong to your account. Requests for any other merchant, or for one that has been deleted, return 403.",
         "operationId": "updateMerchant",
         "requestBody": {
           "content": {
