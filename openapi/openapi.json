@@ -670,6 +670,194 @@
         ],
         "type": "object"
       },
+      "MerchantNexusCreateRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "locations": {
+            "description": "The locations to record. Up to 25 per call; each one is geocoded as it is written, which is what bounds the batch.",
+            "items": {
+              "$ref": "#/components/schemas/NexusLocationInput"
+            },
+            "maxItems": 25,
+            "minItems": 1,
+            "type": "array"
+          },
+          "merchantId": {
+            "description": "UUID of the merchant these locations belong to. Must be owned by the calling account and must be self-managed.",
+            "type": "string"
+          },
+          "nexusType": {
+            "default": "physical",
+            "description": "The kind of nexus being recorded. Only 'physical' can be created: economic nexus is derived from a merchant's sales activity rather than declared, so sending 'economic' is rejected rather than silently stored as physical.",
+            "enum": [
+              "physical"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "merchantId",
+          "locations"
+        ],
+        "type": "object"
+      },
+      "MerchantNexusCreateResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "locations": {
+            "description": "The stored locations, in the order submitted, each with its server-issued locationId and normalized address.",
+            "items": {
+              "$ref": "#/components/schemas/NexusLocationOutput"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "merchantId": {
+            "description": "UUID of the merchant the locations were recorded for.",
+            "type": "string"
+          }
+        },
+        "required": [
+          "merchantId",
+          "locations"
+        ],
+        "type": "object"
+      },
+      "MerchantNexusDeleteRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "locationId": {
+            "description": "Identifier of the location to remove, as returned by /merchant/nexus/create or /merchant/nexus/list.",
+            "examples": [
+              "P-6dc371de-00a4-44bf-8a88-2bcab2f15041"
+            ],
+            "type": "string"
+          },
+          "merchantId": {
+            "description": "UUID of the merchant that owns the location. Must be owned by the calling account and must be self-managed.",
+            "type": "string"
+          }
+        },
+        "required": [
+          "merchantId",
+          "locationId"
+        ],
+        "type": "object"
+      },
+      "MerchantNexusDeleteResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "locationId": {
+            "description": "Identifier of the removed location.",
+            "type": "string"
+          },
+          "merchantId": {
+            "description": "UUID of the merchant the location belonged to.",
+            "type": "string"
+          },
+          "message": {
+            "description": "Human-readable description of the result.",
+            "type": "string"
+          }
+        },
+        "required": [
+          "merchantId",
+          "locationId",
+          "message"
+        ],
+        "type": "object"
+      },
+      "MerchantNexusListRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "merchantId": {
+            "description": "UUID of the merchant whose locations to list. Must be owned by the calling account and must be self-managed.",
+            "type": "string"
+          },
+          "nexusType": {
+            "description": "Restricts the response to one kind of nexus. Omit it to return every kind. 'economic' is accepted and currently returns an empty list, because economic nexus is not yet tracked.",
+            "enum": [
+              "physical",
+              "economic"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "merchantId"
+        ],
+        "type": "object"
+      },
+      "MerchantNexusListResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "locations": {
+            "description": "The merchant's recorded locations. An empty array when the merchant has none, which means no physical nexus is being tracked for them.",
+            "items": {
+              "$ref": "#/components/schemas/NexusLocationOutput"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "merchantId": {
+            "description": "UUID of the merchant the locations belong to.",
+            "type": "string"
+          }
+        },
+        "required": [
+          "merchantId",
+          "locations"
+        ],
+        "type": "object"
+      },
+      "MerchantNexusUpdateRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "location": {
+            "$ref": "#/components/schemas/NexusLocationInput",
+            "description": "The location's new contents. Every field is replaced, so send the current value for anything you do not want to clear."
+          },
+          "locationId": {
+            "description": "Identifier of the location to replace, as returned by /merchant/nexus/create or /merchant/nexus/list. A location that has been deleted returns 404.",
+            "examples": [
+              "P-6dc371de-00a4-44bf-8a88-2bcab2f15041"
+            ],
+            "type": "string"
+          },
+          "merchantId": {
+            "description": "UUID of the merchant that owns the location. Must be owned by the calling account and must be self-managed.",
+            "type": "string"
+          }
+        },
+        "required": [
+          "merchantId",
+          "locationId",
+          "location"
+        ],
+        "type": "object"
+      },
+      "MerchantNexusUpdateResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "location": {
+            "$ref": "#/components/schemas/NexusLocationOutput",
+            "description": "The stored location after the update, with its normalized address."
+          },
+          "merchantId": {
+            "description": "UUID of the merchant the location belongs to.",
+            "type": "string"
+          }
+        },
+        "required": [
+          "merchantId",
+          "location"
+        ],
+        "type": "object"
+      },
       "MerchantOrderCreateFromCartRequest": {
         "additionalProperties": true,
         "properties": {
@@ -1125,6 +1313,144 @@
           "usage_percent",
           "is_active",
           "message"
+        ],
+        "type": "object"
+      },
+      "NexusLocationInput": {
+        "additionalProperties": false,
+        "properties": {
+          "address": {
+            "description": "The location's street address as a single line. It is geocoded when you send it, and the normalized result is what every response returns, so the value you get back will usually differ from the one you sent. US addresses only. An address that cannot be resolved to a state is rejected with 422 rather than stored.",
+            "examples": [
+              "1401 Lavaca St Austin TX 78701"
+            ],
+            "maxLength": 255,
+            "minLength": 1,
+            "type": "string"
+          },
+          "isFulfillmentOrigin": {
+            "description": "Whether goods actually ship from this location. This is the field origin-sourcing consults, so set it explicitly for anything unusual, such as an office that also ships or a warehouse that does not. When omitted it defaults by locationType: true for 'warehouse', 'fulfillment', and 'store'; false for the rest.",
+            "examples": [
+              true
+            ],
+            "type": "boolean"
+          },
+          "locationType": {
+            "description": "What kind of presence this location represents. 'office', 'store', 'warehouse', and 'fulfillment' are premises you occupy; 'personnel' covers employees or contractors working in a state; 'property' covers inventory or equipment held there; 'temporary' covers short-term presence such as a trade show.",
+            "enum": [
+              "office",
+              "store",
+              "warehouse",
+              "fulfillment",
+              "personnel",
+              "property",
+              "temporary"
+            ],
+            "examples": [
+              "warehouse"
+            ],
+            "type": "string"
+          },
+          "name": {
+            "description": "Your own label for this location. Shown back to you on every response and never used in a calculation.",
+            "examples": [
+              "TestCo Texas Distribution Center"
+            ],
+            "maxLength": 255,
+            "type": "string"
+          },
+          "referenceId": {
+            "description": "The ID you use in your own system to identify this location.",
+            "examples": [
+              "warehouse-123"
+            ],
+            "maxLength": 255,
+            "type": "string"
+          },
+          "registered": {
+            "description": "Whether the merchant is registered to collect sales tax in this location's state. Defaults to false when omitted.",
+            "examples": [
+              true
+            ],
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "locationType",
+          "address"
+        ],
+        "type": "object"
+      },
+      "NexusLocationOutput": {
+        "additionalProperties": false,
+        "properties": {
+          "address": {
+            "description": "The normalized address resolved when the location was written, not the string you sent.",
+            "examples": [
+              "1401 Lavaca St, Austin, TX 78701-1634, United States"
+            ],
+            "type": "string"
+          },
+          "isFulfillmentOrigin": {
+            "description": "Whether goods ship from this location.",
+            "examples": [
+              true
+            ],
+            "type": "boolean"
+          },
+          "locationId": {
+            "description": "Server-issued identifier for this location. Use it with /merchant/nexus/update and /merchant/nexus/delete.",
+            "examples": [
+              "P-6dc371de-00a4-44bf-8a88-2bcab2f15041"
+            ],
+            "type": "string"
+          },
+          "locationType": {
+            "description": "What kind of presence this location represents.",
+            "enum": [
+              "office",
+              "store",
+              "warehouse",
+              "fulfillment",
+              "personnel",
+              "property",
+              "temporary"
+            ],
+            "examples": [
+              "warehouse"
+            ],
+            "type": "string"
+          },
+          "name": {
+            "description": "Your own label for this location. Empty when none was supplied.",
+            "examples": [
+              "TestCo Texas Distribution Center"
+            ],
+            "type": "string"
+          },
+          "referenceId": {
+            "description": "The ID you use in your own system to identify this location. Empty when none was supplied.",
+            "examples": [
+              "warehouse-123"
+            ],
+            "type": "string"
+          },
+          "registered": {
+            "description": "Whether the merchant is registered to collect sales tax in this location's state.",
+            "examples": [
+              true
+            ],
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "locationId",
+          "locationType",
+          "name",
+          "address",
+          "registered",
+          "isFulfillmentOrigin",
+          "referenceId"
         ],
         "type": "object"
       },
@@ -4171,7 +4497,7 @@
             "ApiKeyHeader": []
           }
         ],
-        "summary": "Get Account Metrics (v6.0)",
+        "summary": "Get Account Metrics",
         "tags": [
           "Account"
         ],
@@ -5655,6 +5981,516 @@
         "summary": "List Merchants",
         "tags": [
           "Merchant"
+        ],
+        "x-fern-audiences": [
+          "v10",
+          "v20",
+          "v30",
+          "v40",
+          "v50",
+          "v60"
+        ]
+      }
+    },
+    "/merchant/nexus/create": {
+      "post": {
+        "description": "Records one or more physical locations for a merchant. A merchant's physical locations are what establish its nexus, and nexus is what decides whether a sale is sourced at its origin or its destination, so this is the data a self-managed cart calculation depends on.\n\nEach address is geocoded as it is written, and the normalized result is what every response returns; expect the address you get back to differ from the one you sent. If any address in the request cannot be resolved to a US state the whole request is rejected with 422 and nothing is stored, so a retry cannot duplicate the locations that would otherwise have succeeded.\n\nAddress resolution for the whole request is budgeted at 10 seconds. A batch that exceeds it returns 504 and stores nothing; send fewer locations per call if you hit this. Geocoding that had already completed is still billed, because the lookups were still performed.\n\nAvailable to self-managed merchants only. A TaxCloud-managed merchant's nexus is held in TaxCloud, so this returns 403 for them.",
+        "operationId": "merchantNexusCreate",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MerchantNexusCreateRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MerchantNexusCreateResponse"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "400": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorModel"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "401": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorModel"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "403": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorModel"
+                }
+              }
+            },
+            "description": "Forbidden"
+          },
+          "404": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorModel"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "422": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorModel"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          },
+          "429": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorModel"
+                }
+              }
+            },
+            "description": "Too Many Requests"
+          },
+          "500": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorModel"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          },
+          "503": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorModel"
+                }
+              }
+            },
+            "description": "Service Unavailable"
+          },
+          "504": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorModel"
+                }
+              }
+            },
+            "description": "Gateway Timeout"
+          }
+        },
+        "security": [
+          {
+            "ApiKeyHeader": []
+          }
+        ],
+        "summary": "Create Nexus Locations",
+        "tags": [
+          "Merchant Nexus"
+        ],
+        "x-fern-audiences": [
+          "v10",
+          "v20",
+          "v30",
+          "v40",
+          "v50",
+          "v60"
+        ]
+      }
+    },
+    "/merchant/nexus/delete": {
+      "post": {
+        "description": "Removes a recorded location so it no longer contributes to the merchant's nexus. The location stops appearing in /merchant/nexus/list immediately, and is retained internally so past filings keep their basis.\n\nRemoving a merchant's last location is allowed: it simply means no physical nexus is tracked for them. Deleting a location that is already gone returns 404.\n\nAvailable to self-managed merchants only; a TaxCloud-managed merchant returns 403.",
+        "operationId": "merchantNexusDelete",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MerchantNexusDeleteRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MerchantNexusDeleteResponse"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "400": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorModel"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "401": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorModel"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "403": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorModel"
+                }
+              }
+            },
+            "description": "Forbidden"
+          },
+          "404": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorModel"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "422": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorModel"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          },
+          "429": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorModel"
+                }
+              }
+            },
+            "description": "Too Many Requests"
+          },
+          "500": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorModel"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          },
+          "503": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorModel"
+                }
+              }
+            },
+            "description": "Service Unavailable"
+          }
+        },
+        "security": [
+          {
+            "ApiKeyHeader": []
+          }
+        ],
+        "summary": "Delete Nexus Location",
+        "tags": [
+          "Merchant Nexus"
+        ],
+        "x-fern-audiences": [
+          "v10",
+          "v20",
+          "v30",
+          "v40",
+          "v50",
+          "v60"
+        ]
+      }
+    },
+    "/merchant/nexus/list": {
+      "post": {
+        "description": "Returns a merchant's recorded nexus locations. Deleted locations are not included.\n\nAvailable to self-managed merchants only; a TaxCloud-managed merchant returns 403, and their nexus is read through the Management API instead.",
+        "operationId": "merchantNexusList",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MerchantNexusListRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MerchantNexusListResponse"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "400": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorModel"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "401": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorModel"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "403": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorModel"
+                }
+              }
+            },
+            "description": "Forbidden"
+          },
+          "404": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorModel"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "422": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorModel"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          },
+          "429": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorModel"
+                }
+              }
+            },
+            "description": "Too Many Requests"
+          },
+          "500": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorModel"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          },
+          "503": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorModel"
+                }
+              }
+            },
+            "description": "Service Unavailable"
+          }
+        },
+        "security": [
+          {
+            "ApiKeyHeader": []
+          }
+        ],
+        "summary": "List Nexus Locations",
+        "tags": [
+          "Merchant Nexus"
+        ],
+        "x-fern-audiences": [
+          "v10",
+          "v20",
+          "v30",
+          "v40",
+          "v50",
+          "v60"
+        ]
+      }
+    },
+    "/merchant/nexus/update": {
+      "post": {
+        "description": "Replaces a recorded location.\n\nThe `location` block is a full replacement, not a patch: every field in it is written, so send the current value for anything you do not want cleared. The address is geocoded again, so an update may change the normalized address even when you send the same string, and a location can be moved to a different state this way.\n\nAvailable to self-managed merchants only; a TaxCloud-managed merchant returns 403.",
+        "operationId": "merchantNexusUpdate",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MerchantNexusUpdateRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MerchantNexusUpdateResponse"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "400": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorModel"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "401": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorModel"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "403": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorModel"
+                }
+              }
+            },
+            "description": "Forbidden"
+          },
+          "404": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorModel"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "422": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorModel"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          },
+          "429": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorModel"
+                }
+              }
+            },
+            "description": "Too Many Requests"
+          },
+          "500": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorModel"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          },
+          "503": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorModel"
+                }
+              }
+            },
+            "description": "Service Unavailable"
+          }
+        },
+        "security": [
+          {
+            "ApiKeyHeader": []
+          }
+        ],
+        "summary": "Update Nexus Location",
+        "tags": [
+          "Merchant Nexus"
         ],
         "x-fern-audiences": [
           "v10",
@@ -7787,7 +8623,7 @@
             "ApiKeyHeader": []
           }
         ],
-        "summary": "Get Tax Rates (v6.0)",
+        "summary": "Get Tax Rates",
         "tags": [
           "Tax Rates"
         ],
@@ -8174,6 +9010,10 @@
     {
       "description": "Merchant management and credential operations",
       "name": "Merchant"
+    },
+    {
+      "description": "Physical nexus locations for self-managed merchants",
+      "name": "Merchant Nexus"
     }
   ]
 }
