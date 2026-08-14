@@ -731,7 +731,7 @@
           "locationId": {
             "description": "Identifier of the location to remove, as returned by /merchant/nexus/create or /merchant/nexus/list.",
             "examples": [
-              "P-6dc371de-00a4-44bf-8a88-2bcab2f15041"
+              "6dc371de-00a4-44bf-8a88-2bcab2f15041"
             ],
             "type": "string"
           },
@@ -777,7 +777,7 @@
             "type": "string"
           },
           "nexusType": {
-            "description": "Restricts the response to one kind of nexus. Omit it to return every kind. 'economic' is accepted and currently returns an empty list, because economic nexus is not yet tracked.",
+            "description": "Restricts the response to one kind of nexus. Omit it to return every kind. Only 'physical' is supported; 'economic' is rejected with 400, because those rows carry a registration id instead of an address and do not fit this response shape (ZIP-1214).",
             "enum": [
               "physical",
               "economic"
@@ -824,7 +824,7 @@
           "locationId": {
             "description": "Identifier of the location to replace, as returned by /merchant/nexus/create or /merchant/nexus/list. A location that has been deleted returns 404.",
             "examples": [
-              "P-6dc371de-00a4-44bf-8a88-2bcab2f15041"
+              "6dc371de-00a4-44bf-8a88-2bcab2f15041"
             ],
             "type": "string"
           },
@@ -1329,20 +1329,20 @@
             "type": "string"
           },
           "isFulfillmentOrigin": {
-            "description": "Whether goods actually ship from this location. This is the field origin-sourcing consults, so set it explicitly for anything unusual, such as an office that also ships or a warehouse that does not. When omitted it defaults by locationType: true for 'warehouse', 'fulfillment', and 'store'; false for the rest.",
+            "description": "Whether goods actually ship from this location. This is the field origin-sourcing consults, so set it explicitly for anything unusual, such as an office that also ships or a warehouse that does not. When omitted it defaults by locationType: true for 'warehouse', 'inventory_fba', and 'store'; false for the rest.",
             "examples": [
               true
             ],
             "type": "boolean"
           },
           "locationType": {
-            "description": "What kind of presence this location represents. 'office', 'store', 'warehouse', and 'fulfillment' are premises you occupy; 'personnel' covers employees or contractors working in a state; 'property' covers inventory or equipment held there; 'temporary' covers short-term presence such as a trade show.",
+            "description": "What kind of presence this location represents. 'office', 'store', and 'warehouse' are premises you occupy; 'inventory_fba' covers inventory held in a third-party fulfilment network; 'employee' covers staff or contractors working in a state; 'property' covers inventory or equipment held there; 'temporary' covers short-term presence such as a trade show.",
             "enum": [
               "office",
               "store",
               "warehouse",
-              "fulfillment",
-              "personnel",
+              "inventory_fba",
+              "employee",
               "property",
               "temporary"
             ],
@@ -1401,7 +1401,7 @@
           "locationId": {
             "description": "Server-issued identifier for this location. Use it with /merchant/nexus/update and /merchant/nexus/delete.",
             "examples": [
-              "P-6dc371de-00a4-44bf-8a88-2bcab2f15041"
+              "6dc371de-00a4-44bf-8a88-2bcab2f15041"
             ],
             "type": "string"
           },
@@ -1411,8 +1411,8 @@
               "office",
               "store",
               "warehouse",
-              "fulfillment",
-              "personnel",
+              "inventory_fba",
+              "employee",
               "property",
               "temporary"
             ],
