@@ -1454,6 +1454,170 @@
         ],
         "type": "object"
       },
+      "NexusThresholdListRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "countryCode": {
+            "description": "ISO 3166-1 alpha-3 country code. Defaults to USA, which is the only country published today. A country with no published data returns 404.",
+            "examples": [
+              "USA"
+            ],
+            "maxLength": 3,
+            "minLength": 3,
+            "type": "string"
+          },
+          "stateCodes": {
+            "description": "Two-letter jurisdiction codes to return. Omit it for every jurisdiction. The response is ordered by state code regardless of the order sent, and a repeated code yields one row.",
+            "examples": [
+              [
+                "CA",
+                "NY"
+              ]
+            ],
+            "items": {
+              "type": "string"
+            },
+            "maxItems": 64,
+            "type": [
+              "array",
+              "null"
+            ]
+          }
+        },
+        "type": "object"
+      },
+      "NexusThresholdListResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "thresholds": {
+            "description": "The matching thresholds, ordered by state code.",
+            "items": {
+              "$ref": "#/components/schemas/NexusThresholdOutput"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "thresholds"
+        ],
+        "type": "object"
+      },
+      "NexusThresholdOutput": {
+        "additionalProperties": false,
+        "properties": {
+          "countryCode": {
+            "description": "ISO 3166-1 alpha-3 code of the country this jurisdiction belongs to.",
+            "examples": [
+              "USA"
+            ],
+            "type": "string"
+          },
+          "includableSales": {
+            "description": "Which sales count toward the threshold. 'none' for a state with no general statewide sales tax.",
+            "enum": [
+              "gross-sales",
+              "retail-sales",
+              "taxable-sales",
+              "gross-receipts",
+              "none"
+            ],
+            "examples": [
+              "gross-sales"
+            ],
+            "type": "string"
+          },
+          "includableSalesDetail": {
+            "description": "The source wording behind includableSales, carrying qualifiers the enum cannot: California, Georgia, and Missouri count tangible personal property only, and Connecticut names retail sales of both property and services. Empty for a state with no general statewide sales tax.",
+            "examples": [
+              "Gross sales (TPP only)"
+            ],
+            "type": "string"
+          },
+          "marketplace": {
+            "description": "Whether sales made through a marketplace facilitator count toward the threshold. 'none' for a state with no general statewide sales tax.",
+            "enum": [
+              "included",
+              "excluded",
+              "none"
+            ],
+            "examples": [
+              "included"
+            ],
+            "type": "string"
+          },
+          "noSalesTax": {
+            "description": "True for the states with no general statewide sales tax: Delaware, Montana, New Hampshire, and Oregon. They are returned rather than omitted so a caller iterating states does not read a missing row as missing data.",
+            "examples": [
+              false
+            ],
+            "type": "boolean"
+          },
+          "period": {
+            "description": "The window the threshold is measured over, in the source's own words. Prose rather than a code because the periods genuinely differ per state, from a calendar year to a rolling twelve months to the previous four sales tax quarters. Empty for a state with no general statewide sales tax.",
+            "examples": [
+              "Current or previous calendar year"
+            ],
+            "type": "string"
+          },
+          "rule": {
+            "description": "How the two thresholds combine. 'either-threshold': meeting either one establishes nexus. 'both-required': both must be met. 'sales-only': there is no transaction test.",
+            "enum": [
+              "either-threshold",
+              "both-required",
+              "sales-only"
+            ],
+            "examples": [
+              "sales-only"
+            ],
+            "type": "string"
+          },
+          "stateCode": {
+            "description": "Two-letter jurisdiction code. US states plus DC and PR.",
+            "examples": [
+              "CA"
+            ],
+            "type": "string"
+          },
+          "thresholdSales": {
+            "description": "Sales volume, in whole US dollars, that establishes economic nexus. Null for a state with no general statewide sales tax.",
+            "examples": [
+              500000
+            ],
+            "format": "int64",
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "thresholdTransactions": {
+            "description": "Number of separate transactions that establishes economic nexus. Null when the state has no transaction test, which is increasingly common: several states have repealed theirs.",
+            "examples": [
+              200
+            ],
+            "format": "int64",
+            "type": [
+              "integer",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "countryCode",
+          "stateCode",
+          "thresholdSales",
+          "thresholdTransactions",
+          "rule",
+          "includableSales",
+          "includableSalesDetail",
+          "marketplace",
+          "period",
+          "noSalesTax"
+        ],
+        "type": "object"
+      },
       "RefundItem": {
         "additionalProperties": false,
         "properties": {
@@ -7361,6 +7525,121 @@
         "summary": "Update Merchant",
         "tags": [
           "Merchant"
+        ],
+        "x-fern-audiences": [
+          "v10",
+          "v20",
+          "v30",
+          "v40",
+          "v50",
+          "v60"
+        ]
+      }
+    },
+    "/nexus-threshold/list": {
+      "post": {
+        "description": "Returns the economic nexus thresholds that decide when a seller has to register in a state: the sales figure, the transaction count where one still applies, how the two combine, which sales count toward them, whether marketplace sales are included, and the period each state measures over.\n\nThis is reference data. It is the same for every caller and is not derived from your sales: compare it against your own totals to work out where you are approaching a threshold.\n\nSend no body, or no `stateCodes`, to get every jurisdiction the country publishes. `countryCode` defaults to USA, currently the only country published. States with no general statewide sales tax (Delaware, Montana, New Hampshire, Oregon) are returned with `noSalesTax: true` and null thresholds rather than omitted.\n\nA `stateCodes` list naming a code that is not published is rejected with 400 rather than answered with the states that did match, so a typo cannot read back as 'this state has no threshold'.",
+        "operationId": "nexusThresholdList",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/NexusThresholdListRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NexusThresholdListResponse"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "400": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorModel"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "401": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorModel"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "404": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorModel"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "422": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorModel"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          },
+          "429": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorModel"
+                }
+              }
+            },
+            "description": "Too Many Requests"
+          },
+          "500": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorModel"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          },
+          "503": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorModel"
+                }
+              }
+            },
+            "description": "Service Unavailable"
+          }
+        },
+        "security": [
+          {
+            "ApiKeyHeader": []
+          }
+        ],
+        "summary": "List Economic Nexus Thresholds",
+        "tags": [
+          "Nexus Thresholds"
         ],
         "x-fern-audiences": [
           "v10",
