@@ -3906,6 +3906,151 @@
         ],
         "type": "object"
       },
+      "V60MealTax": {
+        "additionalProperties": false,
+        "properties": {
+          "combinedMealRate": {
+            "description": "Sum of the returned components' rates, as a decimal. Excludes ordinary sales tax; a component with replacesStateRate true stands in for the state sales tax component rather than adding to it. null when no component applies.",
+            "examples": [
+              0.1
+            ],
+            "format": "float",
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "reasonCodes": {
+            "description": "Qualifications of the result. LOCATION_NOT_RESOLVED and RULES_NOT_LOADED mean meal tax could not be evaluated, so an empty rules array is not a finding of no meal tax. STATE_NOT_COVERED: the dataset has no meal-tax rules for the state, which is not a finding that the state has none. UNMAPPED_SCOPES_IN_STATE: some of the state's meal-tax districts could not be evaluated for a location.",
+            "items": {
+              "enum": [
+                "LOCATION_NOT_RESOLVED",
+                "RULES_NOT_LOADED",
+                "STATE_NOT_COVERED",
+                "UNMAPPED_SCOPES_IN_STATE"
+              ],
+              "type": "string"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "rules": {
+            "description": "Meal-tax components that apply at the location, widest jurisdiction first. Empty if none.",
+            "items": {
+              "$ref": "#/components/schemas/V60MealTaxRule"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "combinedMealRate",
+          "rules",
+          "reasonCodes"
+        ],
+        "type": "object"
+      },
+      "V60MealTaxRule": {
+        "additionalProperties": false,
+        "properties": {
+          "componentType": {
+            "description": "ADD_ON is levied on top of sales tax. STATE_SPECIAL_TOTAL is a state meals rate that replaces the state sales tax component. OCCUPATION_TAX is a seller-side levy that may itself enter the sales tax base.",
+            "enum": [
+              "ADD_ON",
+              "STATE_SPECIAL_TOTAL",
+              "OCCUPATION_TAX"
+            ],
+            "examples": [
+              "ADD_ON"
+            ],
+            "type": "string"
+          },
+          "effectiveDt": {
+            "description": "First day the component applies, YYYYMMDD; null when not recorded.",
+            "examples": [
+              20180101
+            ],
+            "format": "int64",
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "expiresDt": {
+            "description": "Last day the component applies, YYYYMMDD; null when open-ended.",
+            "format": "int64",
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "jurisdictionCode": {
+            "description": "Geography code the location matched: state FIPS, state + county FIPS, Census place GEOID (7 digits), or Census county subdivision GEOID (10 digits, Massachusetts and Vermont towns).",
+            "examples": [
+              "5000784475"
+            ],
+            "pattern": "^[0-9]{2,10}$",
+            "type": "string"
+          },
+          "jurisdictionName": {
+            "description": "Levying jurisdiction's name.",
+            "examples": [
+              "Williston"
+            ],
+            "type": "string"
+          },
+          "jurisdictionType": {
+            "description": "Levying jurisdiction level, e.g. STATE, COUNTY, INDEPENDENT_CITY, MUNICIPALITY, SPECIAL_DISTRICT.",
+            "examples": [
+              "MUNICIPALITY"
+            ],
+            "type": "string"
+          },
+          "rate": {
+            "description": "Component rate as a decimal (0.01 = 1%).",
+            "examples": [
+              0.01
+            ],
+            "format": "float",
+            "type": "number"
+          },
+          "replacesStateRate": {
+            "description": "True when this component replaces the state sales tax component instead of adding to it.",
+            "type": "boolean"
+          },
+          "sourcingBasis": {
+            "description": "How the levy is sourced (e.g. SELLER_LOCATION, DESTINATION); independent of the ordinary sourcingRules.",
+            "examples": [
+              "DESTINATION"
+            ],
+            "type": "string"
+          },
+          "taxName": {
+            "description": "Name of the tax program.",
+            "examples": [
+              "Local option meals and alcohol tax"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "jurisdictionType",
+          "jurisdictionName",
+          "jurisdictionCode",
+          "taxName",
+          "componentType",
+          "rate",
+          "replacesStateRate",
+          "effectiveDt",
+          "expiresDt",
+          "sourcingBasis"
+        ],
+        "type": "object"
+      },
       "V60Metadata": {
         "additionalProperties": false,
         "properties": {
@@ -4286,6 +4431,16 @@
         ],
         "type": "object"
       },
+      "V60SpecialRules": {
+        "additionalProperties": false,
+        "properties": {
+          "mealTax": {
+            "$ref": "#/components/schemas/V60MealTax",
+            "description": "Meal tax on prepared food. Present only when taxabilityCode is 41000 or 41041."
+          }
+        },
+        "type": "object"
+      },
       "V60TaxSummary": {
         "additionalProperties": false,
         "properties": {
@@ -4378,6 +4533,10 @@
               "array",
               "null"
             ]
+          },
+          "specialRules": {
+            "$ref": "#/components/schemas/V60SpecialRules",
+            "description": "Special tax rules that apply to this TIC beside its rate rules. Present only when one applies (today, meal tax on TICs 41000 and 41041)."
           },
           "stateFIPS": {
             "description": "State FIPS code resolved for the request location.",
@@ -6158,7 +6317,7 @@
     },
     "/merchant/nexus/create": {
       "post": {
-        "description": "Records one or more physical locations for a merchant. A merchant's physical locations are what establish its nexus, and nexus is what decides whether a sale is sourced at its origin or its destination, so this is the data a self-managed cart calculation depends on.\n\nEach address is geocoded as it is written, and the normalized result is what every response returns; expect the address you get back to differ from the one you sent. If any address in the request cannot be resolved to a US state the whole request is rejected with 422 and nothing is stored, so a retry cannot duplicate the locations that would otherwise have succeeded.\n\nAddress resolution for the whole request is budgeted at 10 seconds. A batch that exceeds it returns 504 and stores nothing; send fewer locations per call if you hit this. Geocoding that had already completed is still billed, because the lookups were still performed.\n\nAvailable to self-managed merchants only. A TaxCloud-managed merchant's nexus is held in TaxCloud, so this returns 403 for them.",
+        "description": "Records one or more physical locations for a merchant. A merchant's physical locations are what establish its nexus, and nexus is what decides whether a sale is sourced at its origin or its destination, so this is the data a self-managed cart calculation depends on.\n\nEach address is geocoded as it is written, and the normalized result is what every response returns; expect the address you get back to differ from the one you sent. If any address in the request cannot be resolved to a US state the whole request is rejected with 422 and nothing is stored, so a retry cannot duplicate the locations that would otherwise have succeeded.\n\nAddress resolution for the whole request is budgeted at 10 seconds. A batch that exceeds it returns 504 and stores nothing; send fewer locations per call if you hit this.\n\nAvailable to self-managed merchants only. A TaxCloud-managed merchant's nexus is held in TaxCloud, so this returns 403 for them.",
         "operationId": "merchantNexusCreate",
         "requestBody": {
           "content": {
