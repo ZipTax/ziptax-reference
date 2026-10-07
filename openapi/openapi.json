@@ -8633,12 +8633,12 @@
             }
           },
           {
-            "description": "Latitude of a geographic point. When both lat and lng are supplied the API resolves the single jurisdiction containing that point (coordinate lookup).",
+            "description": "Latitude of a geographic point, from -90 to 90. Send it together with lng: when both are supplied the API resolves the single jurisdiction containing that point (coordinate lookup). A lat without lng, or a lat that is not a number from -90 to 90, returns response code 105 unless the request carries an address, which takes precedence over coordinates.",
             "explode": false,
             "in": "query",
             "name": "lat",
             "schema": {
-              "description": "Latitude of a geographic point. When both lat and lng are supplied the API resolves the single jurisdiction containing that point (coordinate lookup).",
+              "description": "Latitude of a geographic point, from -90 to 90. Send it together with lng: when both are supplied the API resolves the single jurisdiction containing that point (coordinate lookup). A lat without lng, or a lat that is not a number from -90 to 90, returns response code 105 unless the request carries an address, which takes precedence over coordinates.",
               "format": "double",
               "maximum": 90,
               "minimum": -90,
@@ -8646,12 +8646,12 @@
             }
           },
           {
-            "description": "Longitude of a geographic point. When both lat and lng are supplied the API resolves the single jurisdiction containing that point (coordinate lookup).",
+            "description": "Longitude of a geographic point, from -180 to 180. Send it together with lat: when both are supplied the API resolves the single jurisdiction containing that point (coordinate lookup). A lng without lat, or a lng that is not a number from -180 to 180, returns response code 105 unless the request carries an address, which takes precedence over coordinates.",
             "explode": false,
             "in": "query",
             "name": "lng",
             "schema": {
-              "description": "Longitude of a geographic point. When both lat and lng are supplied the API resolves the single jurisdiction containing that point (coordinate lookup).",
+              "description": "Longitude of a geographic point, from -180 to 180. Send it together with lat: when both are supplied the API resolves the single jurisdiction containing that point (coordinate lookup). A lng without lat, or a lng that is not a number from -180 to 180, returns response code 105 unless the request carries an address, which takes precedence over coordinates.",
               "format": "double",
               "maximum": 180,
               "minimum": -180,
@@ -8879,12 +8879,12 @@
             }
           },
           {
-            "description": "Latitude of a geographic point. When both lat and lng are supplied the API resolves the single jurisdiction containing that point (coordinate lookup).",
+            "description": "Latitude of a geographic point, from -90 to 90. Send it together with lng: when both are supplied the API resolves the single jurisdiction containing that point (coordinate lookup). A lat without lng, or a lat that is not a number from -90 to 90, returns response code 105 unless the request carries an address, which takes precedence over coordinates.",
             "explode": false,
             "in": "query",
             "name": "lat",
             "schema": {
-              "description": "Latitude of a geographic point. When both lat and lng are supplied the API resolves the single jurisdiction containing that point (coordinate lookup).",
+              "description": "Latitude of a geographic point, from -90 to 90. Send it together with lng: when both are supplied the API resolves the single jurisdiction containing that point (coordinate lookup). A lat without lng, or a lat that is not a number from -90 to 90, returns response code 105 unless the request carries an address, which takes precedence over coordinates.",
               "format": "double",
               "maximum": 90,
               "minimum": -90,
@@ -8892,12 +8892,12 @@
             }
           },
           {
-            "description": "Longitude of a geographic point. When both lat and lng are supplied the API resolves the single jurisdiction containing that point (coordinate lookup).",
+            "description": "Longitude of a geographic point, from -180 to 180. Send it together with lat: when both are supplied the API resolves the single jurisdiction containing that point (coordinate lookup). A lng without lat, or a lng that is not a number from -180 to 180, returns response code 105 unless the request carries an address, which takes precedence over coordinates.",
             "explode": false,
             "in": "query",
             "name": "lng",
             "schema": {
-              "description": "Longitude of a geographic point. When both lat and lng are supplied the API resolves the single jurisdiction containing that point (coordinate lookup).",
+              "description": "Longitude of a geographic point, from -180 to 180. Send it together with lat: when both are supplied the API resolves the single jurisdiction containing that point (coordinate lookup). A lng without lat, or a lng that is not a number from -180 to 180, returns response code 105 unless the request carries an address, which takes precedence over coordinates.",
               "format": "double",
               "maximum": 180,
               "minimum": -180,
