@@ -3120,10 +3120,11 @@
             "type": "string"
           },
           "txbService": {
-            "description": "Whether services/labor are taxable in this jurisdiction. 'Y' = taxable, 'N' = not taxable.",
+            "description": "Whether services/labor are taxable in this jurisdiction. 'Y' = the service is fully taxable and must be separately stated on the invoice; 'N' = the service is not taxable and must be separately stated on the invoice; 'L' = the labor portion of services is taxable only when separately stated.",
             "enum": [
               "Y",
-              "N"
+              "N",
+              "L"
             ],
             "type": "string"
           }
@@ -3246,10 +3247,11 @@
             "type": "string"
           },
           "txbService": {
-            "description": "Whether services/labor are taxable in this jurisdiction. 'Y' = taxable, 'N' = not taxable.",
+            "description": "Whether services/labor are taxable in this jurisdiction. 'Y' = the service is fully taxable and must be separately stated on the invoice; 'N' = the service is not taxable and must be separately stated on the invoice; 'L' = the labor portion of services is taxable only when separately stated.",
             "enum": [
               "Y",
-              "N"
+              "N",
+              "L"
             ],
             "type": "string"
           }
@@ -3404,10 +3406,11 @@
             "type": "string"
           },
           "txbService": {
-            "description": "Whether services/labor are taxable in this jurisdiction. 'Y' = taxable, 'N' = not taxable.",
+            "description": "Whether services/labor are taxable in this jurisdiction. 'Y' = the service is fully taxable and must be separately stated on the invoice; 'N' = the service is not taxable and must be separately stated on the invoice; 'L' = the labor portion of services is taxable only when separately stated.",
             "enum": [
               "Y",
-              "N"
+              "N",
+              "L"
             ],
             "type": "string"
           }
@@ -3703,10 +3706,11 @@
             "type": "string"
           },
           "txbService": {
-            "description": "Whether services/labor are taxable in this jurisdiction. 'Y' = taxable, 'N' = not taxable.",
+            "description": "Whether services/labor are taxable in this jurisdiction. 'Y' = the service is fully taxable and must be separately stated on the invoice; 'N' = the service is not taxable and must be separately stated on the invoice; 'L' = the labor portion of services is taxable only when separately stated.",
             "enum": [
               "Y",
-              "N"
+              "N",
+              "L"
             ],
             "type": "string"
           }
@@ -7817,7 +7821,6 @@
         "parameters": [
           {
             "description": "API key that authenticates the request and resolves the account's plan, entitlements, and rate limits. Supply it either as this query parameter or the X-API-KEY request header. A missing, malformed, or unknown key returns response code 101.",
-            "example": "your-api-key",
             "explode": false,
             "in": "query",
             "name": "key",
@@ -7848,7 +7851,6 @@
           },
           {
             "description": "5-digit US ZIP code to look up. When supplied on its own (no street address), the response may contain multiple results — one per tax jurisdiction that overlaps the ZIP. An invalid format returns response code 104.",
-            "example": "90210",
             "explode": false,
             "in": "query",
             "name": "postalcode",
@@ -7865,7 +7867,6 @@
           },
           {
             "description": "Street address to geocode to a single rooftop-level jurisdiction. When supplied (typically alongside city/state or postal code) the API geocodes the address and returns the one applicable rate. An incomplete or ungeocodable address returns response code 109.",
-            "example": "123 Main St",
             "explode": false,
             "in": "query",
             "name": "address",
@@ -7880,7 +7881,6 @@
           },
           {
             "description": "Two-letter USPS state abbreviation. Used together with city or postal code to disambiguate the location. An invalid format returns response code 102.",
-            "example": "CA",
             "explode": false,
             "in": "query",
             "name": "state",
@@ -7897,7 +7897,6 @@
           },
           {
             "description": "City name used together with state to narrow the lookup when no street address is supplied. An invalid format returns response code 103.",
-            "example": "Beverly Hills",
             "explode": false,
             "in": "query",
             "name": "city",
@@ -7977,7 +7976,6 @@
         "parameters": [
           {
             "description": "API key that authenticates the request and resolves the account's plan, entitlements, and rate limits. Supply it either as this query parameter or the X-API-KEY request header. A missing, malformed, or unknown key returns response code 101.",
-            "example": "your-api-key",
             "explode": false,
             "in": "query",
             "name": "key",
@@ -8008,7 +8006,6 @@
           },
           {
             "description": "5-digit US ZIP code to look up. When supplied on its own (no street address), the response may contain multiple results — one per tax jurisdiction that overlaps the ZIP. An invalid format returns response code 104.",
-            "example": "90210",
             "explode": false,
             "in": "query",
             "name": "postalcode",
@@ -8025,7 +8022,6 @@
           },
           {
             "description": "Street address to geocode to a single rooftop-level jurisdiction. When supplied (typically alongside city/state or postal code) the API geocodes the address and returns the one applicable rate. An incomplete or ungeocodable address returns response code 109.",
-            "example": "123 Main St",
             "explode": false,
             "in": "query",
             "name": "address",
@@ -8040,7 +8036,6 @@
           },
           {
             "description": "Two-letter USPS state abbreviation. Used together with city or postal code to disambiguate the location. An invalid format returns response code 102.",
-            "example": "CA",
             "explode": false,
             "in": "query",
             "name": "state",
@@ -8057,7 +8052,6 @@
           },
           {
             "description": "City name used together with state to narrow the lookup when no street address is supplied. An invalid format returns response code 103.",
-            "example": "Beverly Hills",
             "explode": false,
             "in": "query",
             "name": "city",
@@ -8137,7 +8131,6 @@
         "parameters": [
           {
             "description": "API key that authenticates the request and resolves the account's plan, entitlements, and rate limits. Supply it either as this query parameter or the X-API-KEY request header. A missing, malformed, or unknown key returns response code 101.",
-            "example": "your-api-key",
             "explode": false,
             "in": "query",
             "name": "key",
@@ -8168,7 +8161,6 @@
           },
           {
             "description": "5-digit US ZIP code to look up. When supplied on its own (no street address), the response may contain multiple results — one per tax jurisdiction that overlaps the ZIP. An invalid format returns response code 104.",
-            "example": "90210",
             "explode": false,
             "in": "query",
             "name": "postalcode",
@@ -8185,7 +8177,6 @@
           },
           {
             "description": "Street address to geocode to a single rooftop-level jurisdiction. When supplied (typically alongside city/state or postal code) the API geocodes the address and returns the one applicable rate. An incomplete or ungeocodable address returns response code 109.",
-            "example": "123 Main St",
             "explode": false,
             "in": "query",
             "name": "address",
@@ -8200,7 +8191,6 @@
           },
           {
             "description": "Two-letter USPS state abbreviation. Used together with city or postal code to disambiguate the location. An invalid format returns response code 102.",
-            "example": "CA",
             "explode": false,
             "in": "query",
             "name": "state",
@@ -8217,7 +8207,6 @@
           },
           {
             "description": "City name used together with state to narrow the lookup when no street address is supplied. An invalid format returns response code 103.",
-            "example": "Beverly Hills",
             "explode": false,
             "in": "query",
             "name": "city",
@@ -8297,7 +8286,6 @@
         "parameters": [
           {
             "description": "API key that authenticates the request and resolves the account's plan, entitlements, and rate limits. Supply it either as this query parameter or the X-API-KEY request header. A missing, malformed, or unknown key returns response code 101.",
-            "example": "your-api-key",
             "explode": false,
             "in": "query",
             "name": "key",
@@ -8328,7 +8316,6 @@
           },
           {
             "description": "5-digit US ZIP code to look up. When supplied on its own (no street address), the response may contain multiple results — one per tax jurisdiction that overlaps the ZIP. An invalid format returns response code 104.",
-            "example": "90210",
             "explode": false,
             "in": "query",
             "name": "postalcode",
@@ -8345,7 +8332,6 @@
           },
           {
             "description": "Street address to geocode to a single rooftop-level jurisdiction. When supplied (typically alongside city/state or postal code) the API geocodes the address and returns the one applicable rate. An incomplete or ungeocodable address returns response code 109.",
-            "example": "123 Main St",
             "explode": false,
             "in": "query",
             "name": "address",
@@ -8360,7 +8346,6 @@
           },
           {
             "description": "Two-letter USPS state abbreviation. Used together with city or postal code to disambiguate the location. An invalid format returns response code 102.",
-            "example": "CA",
             "explode": false,
             "in": "query",
             "name": "state",
@@ -8377,7 +8362,6 @@
           },
           {
             "description": "City name used together with state to narrow the lookup when no street address is supplied. An invalid format returns response code 103.",
-            "example": "Beverly Hills",
             "explode": false,
             "in": "query",
             "name": "city",
@@ -8513,7 +8497,6 @@
         "parameters": [
           {
             "description": "API key that authenticates the request and resolves the account's plan, entitlements, and rate limits. Supply it either as this query parameter or the X-API-KEY request header. A missing, malformed, or unknown key returns response code 101.",
-            "example": "your-api-key",
             "explode": false,
             "in": "query",
             "name": "key",
@@ -8759,7 +8742,6 @@
         "parameters": [
           {
             "description": "API key that authenticates the request and resolves the account's plan, entitlements, and rate limits. Supply it either as this query parameter or the X-API-KEY request header. A missing, malformed, or unknown key returns response code 101.",
-            "example": "your-api-key",
             "explode": false,
             "in": "query",
             "name": "key",
@@ -8945,7 +8927,6 @@
           },
           {
             "description": "Product Taxability Information Code (TIC). When supplied, the response includes a productDetail object describing the rate rules that apply to that product category in the resolved jurisdiction. Accepts numeric standard TIC codes (e.g., 20010) or alphanumeric override codes (e.g., CIR00001). Requires the product_rates entitlement for standard codes.",
-            "example": "20010",
             "explode": false,
             "in": "query",
             "name": "taxabilityCode",
