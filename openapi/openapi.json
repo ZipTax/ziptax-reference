@@ -4183,10 +4183,11 @@
             ]
           },
           "jurTaxCode": {
-            "description": "Code identifying the jurisdiction the rule applies to: a FIPS-like code (state, county, or city), or a conditional jurisdiction code of the form 36:XX-#### or 36:XX-L#### (NY ST-100.3 codes for location-resolved school district / city / county rules; the code is specific to the form part the TIC is sourced from); null when not specified.",
+            "description": "Jurisdiction code of the rule, in one of these forms: a 1-2 digit state FIPS (6, 13) for a state rule; 00000 for a rule on the local taxes anywhere in the state; a 3-digit county FIPS without the state (001); a 5-digit Census place FIPS without the state (45955); a legacy state+county FIPS (06001) or 7-digit Census place GEOID (0653000), as stored, so the state's leading zero may be missing (a legacy state+county code and a place FIPS share the 5-digit shape); for an Alabama local rule, the 1-10 digit tax code of the rate component the rule applies to, which matches that component's jurTaxCode in baseRates; or a conditional jurisdiction code of the form 36:XX-#### or 36:XX-L#### (NY ST-100.3 codes for location-resolved school district / city / county rules; the code is specific to the form part the TIC is sourced from). null when the rule names no jurisdiction.",
             "examples": [
               "06"
             ],
+            "pattern": "^(\\d{1,10}|\\d{2}:[A-Z]{2}-L?\\d{4})$",
             "type": [
               "string",
               "null"
@@ -4529,7 +4530,7 @@
             "type": "string"
           },
           "rateRules": {
-            "description": "Product rate rules that apply to this TIC in the resolved jurisdiction, filtered to rules active on the current date.",
+            "description": "Rate rules that apply to this TIC at the location, active on the lookup date, listed widest jurisdiction first. State, statewide local, county and NY ST-100.3 rules apply to the whole rate; place and tax-code rules apply only to their own rate component. Within the Alabama tax-code level, rules are ordered 00000, county, name, place. When two rules apply to the same component, the later one is the more granular and wins. Empty if none apply.",
             "items": {
               "$ref": "#/components/schemas/V60RateRule"
             },
@@ -6321,7 +6322,7 @@
     },
     "/merchant/nexus/create": {
       "post": {
-        "description": "Records one or more physical locations for a merchant. A merchant's physical locations are what establish its nexus, and nexus is what decides whether a sale is sourced at its origin or its destination, so this is the data a self-managed cart calculation depends on.\n\nEach address is geocoded as it is written, and the normalized result is what every response returns; expect the address you get back to differ from the one you sent. If any address in the request cannot be resolved to a US state the whole request is rejected with 422 and nothing is stored, so a retry cannot duplicate the locations that would otherwise have succeeded.\n\nAddress resolution for the whole request is budgeted at 10 seconds. A batch that exceeds it returns 504 and stores nothing; send fewer locations per call if you hit this.\n\nAvailable to self-managed merchants only. A TaxCloud-managed merchant's nexus is held in TaxCloud, so this returns 403 for them.",
+        "description": "Records one or more physical locations for a merchant. A merchant's physical locations are what establish its nexus, and nexus is what decides whether a sale is sourced at its origin or its destination, so this is the data a self-managed cart calculation depends on.\n\nEach address is geocoded as it is written, and the normalized result is what every response returns; expect the address you get back to differ from the one you sent. If any address in the request cannot be resolved to a US state the whole request is rejected with 422 and nothing is stored, so a retry cannot duplicate the locations that would otherwise have succeeded. If the address geocoder is temporarily unavailable the request is rejected with 503 and nothing is stored; it can be retried.\n\nAddress resolution for the whole request is budgeted at 10 seconds. A batch that exceeds it returns 504 and stores nothing; send fewer locations per call if you hit this.\n\nAvailable to self-managed merchants only. A TaxCloud-managed merchant's nexus is held in TaxCloud, so this returns 403 for them.",
         "operationId": "merchantNexusCreate",
         "requestBody": {
           "content": {
@@ -6706,7 +6707,7 @@
     },
     "/merchant/nexus/update": {
       "post": {
-        "description": "Replaces a recorded location.\n\nThe `location` block is a full replacement, not a patch: every field in it is written, so send the current value for anything you do not want cleared. The address is geocoded again, so an update may change the normalized address even when you send the same string, and a location can be moved to a different state this way.\n\nAvailable to self-managed merchants only; a TaxCloud-managed merchant returns 403.",
+        "description": "Replaces a recorded location.\n\nThe `location` block is a full replacement, not a patch: every field in it is written, so send the current value for anything you do not want cleared. The address is geocoded again, so an update may change the normalized address even when you send the same string, and a location can be moved to a different state this way. If the address geocoder is temporarily unavailable the update is rejected with 503 and the stored location is unchanged; it can be retried.\n\nAvailable to self-managed merchants only; a TaxCloud-managed merchant returns 403.",
         "operationId": "merchantNexusUpdate",
         "requestBody": {
           "content": {
