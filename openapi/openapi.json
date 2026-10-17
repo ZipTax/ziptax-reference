@@ -3825,7 +3825,7 @@
           },
           "satTaxDetail": {
             "$ref": "#/components/schemas/V50SingleArticleTax",
-            "description": "Tennessee Single Article Tax breakdown. Present only when sat_item_total is supplied and the resolved location is in Tennessee."
+            "description": "Tennessee Single Article Tax breakdown. Present only when sat_item_total is supplied on an address lookup in Tennessee by a geo-enabled key."
           },
           "version": {
             "description": "Schema version of the response payload (e.g. 'v50').",
@@ -3844,23 +3844,23 @@
         "additionalProperties": false,
         "properties": {
           "appliedTotal": {
-            "description": "Item total (dollars, formatted as a string) used as the basis for the Tennessee Single Article Tax calculation; echoes the sat_item_total request parameter.",
+            "description": "Item total (dollars, formatted as a string with 2 decimals) used as the basis for the Tennessee Single Article Tax calculation; echoes the sat_item_total request parameter.",
             "type": "string"
           },
           "countyTaxRate": {
-            "description": "County tax rate (formatted as a string) applied in the single-article tax calculation.",
+            "description": "Local tax rate (county + city + district, as a decimal fraction formatted as a string with 4 decimals) applied to the first $1,600 of the item ($300 in Hamblen County outside Morristown, $375 in Hancock County).",
             "type": "string"
           },
           "localTaxLimit": {
-            "description": "Maximum dollar amount of a single article that is subject to local tax under Tennessee SAT rules (formatted as a string).",
+            "description": "Part of a single article subject to local tax (dollars, formatted as a string with 2 decimals): 1600.00, or 300.00 in Hamblen County outside Morristown, or 375.00 in Hancock County.",
             "type": "string"
           },
           "localTaxTotal": {
-            "description": "Total local tax (dollars, formatted as a string) computed for the single article up to the local tax limit.",
+            "description": "Local tax (dollars, formatted as a string with 2 decimals): countyTaxRate applied to the item up to localTaxLimit.",
             "type": "string"
           },
           "stateAdditionalTaxTotal": {
-            "description": "Additional state single-article tax (dollars, formatted as a string) applied to the portion of the item above the local tax limit.",
+            "description": "State single article tax (dollars, formatted as a string with 2 decimals): 2.75% of the part of the item from $1,600 to $3,200, at most 44.00, whatever the local tax limit.",
             "type": "string"
           }
         },
@@ -4594,6 +4594,10 @@
             "$ref": "#/components/schemas/V60ProductDetail",
             "description": "Product-specific tax rules. Present only when a taxabilityCode is supplied on the request and the account carries the product_rates entitlement."
           },
+          "satTaxDetail": {
+            "$ref": "#/components/schemas/V60SingleArticleTax",
+            "description": "Tennessee Single Article Tax breakdown, in numbers. Present only when sat_item_total is supplied on an address lookup in Tennessee by a geo-enabled key."
+          },
           "service": {
             "$ref": "#/components/schemas/V60Service",
             "description": "Whether services/labor are taxable in the resolved jurisdiction."
@@ -4764,6 +4768,44 @@
           "rule",
           "exemptWhenSeparatelyStated",
           "description"
+        ],
+        "type": "object"
+      },
+      "V60SingleArticleTax": {
+        "additionalProperties": false,
+        "properties": {
+          "appliedTotal": {
+            "description": "Item total in dollars used as the basis for the Tennessee Single Article Tax calculation; echoes the sat_item_total request parameter.",
+            "format": "double",
+            "type": "number"
+          },
+          "countyTaxRate": {
+            "description": "Local tax rate (county + city + district, as a decimal fraction) applied to the first $1,600 of the item ($300 in Hamblen County outside Morristown, $375 in Hancock County).",
+            "format": "double",
+            "type": "number"
+          },
+          "localTaxLimit": {
+            "description": "Part of a single article subject to local tax, in dollars: 1600, or 300 in Hamblen County outside Morristown, or 375 in Hancock County.",
+            "format": "double",
+            "type": "number"
+          },
+          "localTaxTotal": {
+            "description": "Local tax in dollars: countyTaxRate applied to the item up to localTaxLimit, rounded to cents.",
+            "format": "double",
+            "type": "number"
+          },
+          "stateAdditionalTaxTotal": {
+            "description": "State single article tax in dollars: 2.75% of the part of the item from $1,600 to $3,200 (at most 44), whatever the local tax limit, rounded to cents.",
+            "format": "double",
+            "type": "number"
+          }
+        },
+        "required": [
+          "appliedTotal",
+          "countyTaxRate",
+          "localTaxLimit",
+          "localTaxTotal",
+          "stateAdditionalTaxTotal"
         ],
         "type": "object"
       },
@@ -9090,12 +9132,12 @@
             }
           },
           {
-            "description": "Single-article item total in dollars used to compute Tennessee Single Article Tax (SAT). When greater than 0 and the location is in Tennessee, the response includes the satTaxDetail object describing the local tax limit and additional state tax on the single article.",
+            "description": "Single-article item total in dollars used to compute Tennessee Single Article Tax (SAT). When greater than 0 on an address lookup in Tennessee by a geo-enabled key, the response includes the satTaxDetail object: the local tax on the first $1,600 of the item ($300 in Hamblen County outside Morristown, $375 in Hancock County) and the 2.75% state single article tax on the part from $1,600 to $3,200.",
             "explode": false,
             "in": "query",
             "name": "sat_item_total",
             "schema": {
-              "description": "Single-article item total in dollars used to compute Tennessee Single Article Tax (SAT). When greater than 0 and the location is in Tennessee, the response includes the satTaxDetail object describing the local tax limit and additional state tax on the single article.",
+              "description": "Single-article item total in dollars used to compute Tennessee Single Article Tax (SAT). When greater than 0 on an address lookup in Tennessee by a geo-enabled key, the response includes the satTaxDetail object: the local tax on the first $1,600 of the item ($300 in Hamblen County outside Morristown, $375 in Hancock County) and the 2.75% state single article tax on the part from $1,600 to $3,200.",
               "format": "double",
               "minimum": 0,
               "type": "number"
@@ -9340,12 +9382,12 @@
             }
           },
           {
-            "description": "Single-article item total in dollars, used for Tennessee Single Article Tax (SAT) calculation on TN address lookups. Note: the v6.0 response does not currently return a SAT breakdown object; the SAT detail (satTaxDetail) is available in the v5.0 response.",
+            "description": "Single-article item total in dollars used to compute Tennessee Single Article Tax (SAT). When greater than 0 on an address lookup in Tennessee by a geo-enabled key, the response includes the satTaxDetail object, in numbers: the local tax on the first $1,600 of the item ($300 in Hamblen County outside Morristown, $375 in Hancock County) and the 2.75% state single article tax on the part from $1,600 to $3,200. Postal-code and lat/lng lookups return no satTaxDetail.",
             "explode": false,
             "in": "query",
             "name": "sat_item_total",
             "schema": {
-              "description": "Single-article item total in dollars, used for Tennessee Single Article Tax (SAT) calculation on TN address lookups. Note: the v6.0 response does not currently return a SAT breakdown object; the SAT detail (satTaxDetail) is available in the v5.0 response.",
+              "description": "Single-article item total in dollars used to compute Tennessee Single Article Tax (SAT). When greater than 0 on an address lookup in Tennessee by a geo-enabled key, the response includes the satTaxDetail object, in numbers: the local tax on the first $1,600 of the item ($300 in Hamblen County outside Morristown, $375 in Hancock County) and the 2.75% state single article tax on the part from $1,600 to $3,200. Postal-code and lat/lng lookups return no satTaxDetail.",
               "format": "double",
               "minimum": 0,
               "type": "number"
