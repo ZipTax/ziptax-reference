@@ -3825,7 +3825,7 @@
           },
           "satTaxDetail": {
             "$ref": "#/components/schemas/V50SingleArticleTax",
-            "description": "Tennessee Single Article Tax breakdown. Present only when sat_item_total is supplied on an address lookup in Tennessee by a geo-enabled key."
+            "description": "Single article tax breakdown. Present when sat_item_total is supplied by a geo-enabled key on an address lookup in Tennessee (Tennessee Single Article Tax), or on an address or lat/lng lookup where a single-item rule changes the item's tax (singleItemRules): an Arizona city with a single-item rate past its threshold, or a Florida item past the $5,000 county surtax cap."
           },
           "version": {
             "description": "Schema version of the response payload (e.g. 'v50').",
@@ -3844,23 +3844,33 @@
         "additionalProperties": false,
         "properties": {
           "appliedTotal": {
-            "description": "Item total (dollars, formatted as a string with 2 decimals) used as the basis for the Tennessee Single Article Tax calculation; echoes the sat_item_total request parameter.",
+            "description": "Item total (dollars, formatted as a string with 2 decimals) the single-item detail is computed on (Tennessee single article tax, Arizona city tier or Florida surtax cap); echoes the sat_item_total request parameter.",
             "type": "string"
           },
           "countyTaxRate": {
-            "description": "Local tax rate (county + city + district, as a decimal fraction formatted as a string with 4 decimals) applied to the first $1,600 of the item ($300 in Hamblen County outside Morristown, $375 in Hancock County).",
+            "description": "Local tax rate (county + city + district, as a decimal fraction formatted as a string with 4 decimals). Tennessee: applied to the first $1,600 of the item ($300 in Hamblen County outside Morristown, $375 in Hancock County). Arizona and Florida (singleItemRules): the standard local rate, before the rules change it.",
             "type": "string"
           },
           "localTaxLimit": {
-            "description": "Part of a single article subject to local tax (dollars, formatted as a string with 2 decimals): 1600.00, or 300.00 in Hamblen County outside Morristown, or 375.00 in Hancock County.",
+            "description": "Part of a single article subject to local tax (dollars, formatted as a string with 2 decimals). Tennessee: 1600.00, or 300.00 in Hamblen County outside Morristown, or 375.00 in Hancock County. Florida: 5000.00 when the county surtax cap applied. Arizona: appliedTotal (a city tier changes the rate, not the taxable part).",
             "type": "string"
           },
           "localTaxTotal": {
-            "description": "Local tax (dollars, formatted as a string with 2 decimals): countyTaxRate applied to the item up to localTaxLimit.",
+            "description": "Local tax (dollars, formatted as a string with 2 decimals). Tennessee: countyTaxRate applied to the item up to localTaxLimit. Arizona and Florida: countyTaxRate on the whole item, rounded to cents half away from zero, plus each singleItemRules taxChange.",
             "type": "string"
           },
+          "singleItemRules": {
+            "description": "Single-item rules applied to the item (Arizona city single-item rates, per the Arizona Department of Revenue; Florida's discretionary sales surtax cap, s. 212.054(2)(b)1, F.S.). Present only when a rule changes the item's tax; never on a Tennessee breakdown. On such a breakdown countyTaxRate is the standard local rate (county + city + district), localTaxLimit is 5000.00 when Florida's cap applied and appliedTotal otherwise, and localTaxTotal is countyTaxRate on the whole item plus each rule's taxChange, each rounded to cents half away from zero before they are added. The breakdown is computed on the location's standard component rates and does not reflect the rate rules of a taxabilityCode sent with the request.",
+            "items": {
+              "$ref": "#/components/schemas/V50SingleItemRuleDetail"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
           "stateAdditionalTaxTotal": {
-            "description": "State single article tax (dollars, formatted as a string with 2 decimals): 2.75% of the part of the item from $1,600 to $3,200, at most 44.00, whatever the local tax limit.",
+            "description": "State single article tax (dollars, formatted as a string with 2 decimals): 2.75% of the part of the item from $1,600 to $3,200, at most 44.00, whatever the local tax limit. 0.00 outside Tennessee.",
             "type": "string"
           }
         },
@@ -3870,6 +3880,76 @@
           "localTaxLimit",
           "localTaxTotal",
           "stateAdditionalTaxTotal"
+        ],
+        "type": "object"
+      },
+      "V50SingleItemRuleDetail": {
+        "additionalProperties": false,
+        "properties": {
+          "affectedAmount": {
+            "description": "Part of the item price the reduced rate applies to (dollars, formatted as a string with 2 decimals).",
+            "type": "string"
+          },
+          "component": {
+            "description": "Rate component the rule changes: CITY for an Arizona tier, COUNTY for Florida's surtax cap.",
+            "enum": [
+              "CITY",
+              "COUNTY"
+            ],
+            "type": "string"
+          },
+          "jurisdiction": {
+            "description": "FIPS code of the jurisdiction whose rule applies: a state's 2-digit FIPS (Florida 12), a county's 5-digit FIPS, or a city's 7-digit Census place GEOID (state + place FIPS).",
+            "type": "string"
+          },
+          "kind": {
+            "description": "Rule kind. TIER_RATE: a reduced rate replaces the component's standard one on the affected amount. TAXABLE_CAP: the component does not tax the part of the price above the threshold (reducedRate 0).",
+            "enum": [
+              "TIER_RATE",
+              "TAXABLE_CAP"
+            ],
+            "type": "string"
+          },
+          "name": {
+            "description": "Name of the rule's jurisdiction or rule.",
+            "type": "string"
+          },
+          "portion": {
+            "description": "ABOVE: the reduced rate applies to the part of the item price above the threshold (always ABOVE for TAXABLE_CAP). WHOLE: once the price is past the threshold, the reduced rate applies to the whole price.",
+            "enum": [
+              "ABOVE",
+              "WHOLE"
+            ],
+            "type": "string"
+          },
+          "reducedRate": {
+            "description": "The single-item rate on the affected amount (decimal fraction, formatted as a string with 4 decimals; 0.0000 for TAXABLE_CAP).",
+            "type": "string"
+          },
+          "standardRate": {
+            "description": "The component's standard rate (decimal fraction, formatted as a string with 4 decimals).",
+            "type": "string"
+          },
+          "taxChange": {
+            "description": "Change in the component's tax from the rule (dollars, formatted as a string with 2 decimals; negative when the rule lowers the tax).",
+            "type": "string"
+          },
+          "threshold": {
+            "description": "Per-item price threshold (dollars, formatted as a string with 2 decimals).",
+            "type": "string"
+          }
+        },
+        "required": [
+          "jurisdiction",
+          "name",
+          "component",
+          "kind",
+          "portion",
+          "threshold",
+          "standardRate",
+          "reducedRate",
+          "affectedAmount",
+          "taxChange"
         ],
         "type": "object"
       },
@@ -4596,7 +4676,7 @@
           },
           "satTaxDetail": {
             "$ref": "#/components/schemas/V60SingleArticleTax",
-            "description": "Tennessee Single Article Tax breakdown, in numbers. Present only when sat_item_total is supplied on an address lookup in Tennessee by a geo-enabled key."
+            "description": "Single article tax breakdown, in numbers. Present when sat_item_total is supplied by a geo-enabled key on an address lookup in Tennessee (Tennessee Single Article Tax), or on an address or lat/lng lookup where a single-item rule changes the item's tax (singleItemRules): an Arizona city with a single-item rate past its threshold, or a Florida item past the $5,000 county surtax cap. The rates in baseRates and taxSummaries are never changed by it."
           },
           "service": {
             "$ref": "#/components/schemas/V60Service",
@@ -4775,27 +4855,37 @@
         "additionalProperties": false,
         "properties": {
           "appliedTotal": {
-            "description": "Item total in dollars used as the basis for the Tennessee Single Article Tax calculation; echoes the sat_item_total request parameter.",
+            "description": "Item total in dollars the single-item detail is computed on (Tennessee single article tax, Arizona city tier or Florida surtax cap); echoes the sat_item_total request parameter.",
             "format": "double",
             "type": "number"
           },
           "countyTaxRate": {
-            "description": "Local tax rate (county + city + district, as a decimal fraction) applied to the first $1,600 of the item ($300 in Hamblen County outside Morristown, $375 in Hancock County).",
+            "description": "Local tax rate (county + city + district, as a decimal fraction). Tennessee: applied to the first $1,600 of the item ($300 in Hamblen County outside Morristown, $375 in Hancock County). Arizona and Florida (singleItemRules): the standard local rate, before the rules change it.",
             "format": "double",
             "type": "number"
           },
           "localTaxLimit": {
-            "description": "Part of a single article subject to local tax, in dollars: 1600, or 300 in Hamblen County outside Morristown, or 375 in Hancock County.",
+            "description": "Part of a single article subject to local tax, in dollars. Tennessee: 1600, or 300 in Hamblen County outside Morristown, or 375 in Hancock County. Florida: 5000 when the county surtax cap applied. Arizona: appliedTotal (a city tier changes the rate, not the taxable part).",
             "format": "double",
             "type": "number"
           },
           "localTaxTotal": {
-            "description": "Local tax in dollars: countyTaxRate applied to the item up to localTaxLimit, rounded to cents.",
+            "description": "Local tax in dollars, rounded to cents half away from zero. Tennessee: countyTaxRate applied to the item up to localTaxLimit. Arizona and Florida: countyTaxRate on the whole item, rounded to cents, plus each singleItemRules taxChange.",
             "format": "double",
             "type": "number"
           },
+          "singleItemRules": {
+            "description": "Single-item rules applied to the item (Arizona city single-item rates, per the Arizona Department of Revenue; Florida's discretionary sales surtax cap, s. 212.054(2)(b)1, F.S.). Present only when a rule changes the item's tax; never on a Tennessee breakdown. On such a breakdown countyTaxRate is the standard local rate (county + city + district), localTaxLimit is 5000 when Florida's cap applied and appliedTotal otherwise, and localTaxTotal is countyTaxRate on the whole item plus each rule's taxChange, each rounded to cents half away from zero before they are added. The breakdown is computed on the location's standard component rates and does not reflect the rate rules of a taxabilityCode sent with the request.",
+            "items": {
+              "$ref": "#/components/schemas/V60SingleItemRuleDetail"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
           "stateAdditionalTaxTotal": {
-            "description": "State single article tax in dollars: 2.75% of the part of the item from $1,600 to $3,200 (at most 44), whatever the local tax limit, rounded to cents.",
+            "description": "State single article tax in dollars: 2.75% of the part of the item from $1,600 to $3,200 (at most 44), whatever the local tax limit, rounded to cents. 0 outside Tennessee.",
             "format": "double",
             "type": "number"
           }
@@ -4806,6 +4896,81 @@
           "localTaxLimit",
           "localTaxTotal",
           "stateAdditionalTaxTotal"
+        ],
+        "type": "object"
+      },
+      "V60SingleItemRuleDetail": {
+        "additionalProperties": false,
+        "properties": {
+          "affectedAmount": {
+            "description": "Part of the item price the reduced rate applies to, in dollars, rounded to cents.",
+            "format": "double",
+            "type": "number"
+          },
+          "component": {
+            "description": "Rate component the rule changes: CITY for an Arizona tier, COUNTY for Florida's surtax cap.",
+            "enum": [
+              "CITY",
+              "COUNTY"
+            ],
+            "type": "string"
+          },
+          "jurisdiction": {
+            "description": "FIPS code of the jurisdiction whose rule applies: a state's 2-digit FIPS (Florida 12), a county's 5-digit FIPS, or a city's 7-digit Census place GEOID (state + place FIPS).",
+            "type": "string"
+          },
+          "kind": {
+            "description": "Rule kind. TIER_RATE: a reduced rate replaces the component's standard one on the affected amount. TAXABLE_CAP: the component does not tax the part of the price above the threshold (reducedRate 0).",
+            "enum": [
+              "TIER_RATE",
+              "TAXABLE_CAP"
+            ],
+            "type": "string"
+          },
+          "name": {
+            "description": "Name of the rule's jurisdiction or rule.",
+            "type": "string"
+          },
+          "portion": {
+            "description": "ABOVE: the reduced rate applies to the part of the item price above the threshold (always ABOVE for TAXABLE_CAP). WHOLE: once the price is past the threshold, the reduced rate applies to the whole price.",
+            "enum": [
+              "ABOVE",
+              "WHOLE"
+            ],
+            "type": "string"
+          },
+          "reducedRate": {
+            "description": "The single-item rate on the affected amount, as a decimal fraction (0 for TAXABLE_CAP).",
+            "format": "double",
+            "type": "number"
+          },
+          "standardRate": {
+            "description": "The component's standard rate, as a decimal fraction.",
+            "format": "double",
+            "type": "number"
+          },
+          "taxChange": {
+            "description": "Change in the component's tax from the rule, in dollars, rounded to cents half away from zero (negative when the rule lowers the tax).",
+            "format": "double",
+            "type": "number"
+          },
+          "threshold": {
+            "description": "Per-item price threshold in dollars.",
+            "format": "double",
+            "type": "number"
+          }
+        },
+        "required": [
+          "jurisdiction",
+          "name",
+          "component",
+          "kind",
+          "portion",
+          "threshold",
+          "standardRate",
+          "reducedRate",
+          "affectedAmount",
+          "taxChange"
         ],
         "type": "object"
       },
@@ -9132,12 +9297,12 @@
             }
           },
           {
-            "description": "Single-article item total in dollars used to compute Tennessee Single Article Tax (SAT). When greater than 0 on an address lookup in Tennessee by a geo-enabled key, the response includes the satTaxDetail object: the local tax on the first $1,600 of the item ($300 in Hamblen County outside Morristown, $375 in Hancock County) and the 2.75% state single article tax on the part from $1,600 to $3,200.",
+            "description": "Single-article item price in dollars. Tennessee: returns the single article tax breakdown on address lookups. Arizona: when the city has a single-item rate (ADOR), returns the reduced city rate's effect in satTaxDetail.singleItemRules on address and lat/lng lookups. Florida: county surtax capped at the first $5,000 of the item (s. 212.054(2)(b)1, F.S.), returned the same way. Requires a geo-enabled key. Tennessee's satTaxDetail holds the local tax on the first $1,600 of the item ($300 in Hamblen County outside Morristown, $375 in Hancock County) and the 2.75% state single article tax on the part from $1,600 to $3,200.",
             "explode": false,
             "in": "query",
             "name": "sat_item_total",
             "schema": {
-              "description": "Single-article item total in dollars used to compute Tennessee Single Article Tax (SAT). When greater than 0 on an address lookup in Tennessee by a geo-enabled key, the response includes the satTaxDetail object: the local tax on the first $1,600 of the item ($300 in Hamblen County outside Morristown, $375 in Hancock County) and the 2.75% state single article tax on the part from $1,600 to $3,200.",
+              "description": "Single-article item price in dollars. Tennessee: returns the single article tax breakdown on address lookups. Arizona: when the city has a single-item rate (ADOR), returns the reduced city rate's effect in satTaxDetail.singleItemRules on address and lat/lng lookups. Florida: county surtax capped at the first $5,000 of the item (s. 212.054(2)(b)1, F.S.), returned the same way. Requires a geo-enabled key. Tennessee's satTaxDetail holds the local tax on the first $1,600 of the item ($300 in Hamblen County outside Morristown, $375 in Hancock County) and the 2.75% state single article tax on the part from $1,600 to $3,200.",
               "format": "double",
               "minimum": 0,
               "type": "number"
@@ -9382,12 +9547,12 @@
             }
           },
           {
-            "description": "Single-article item total in dollars used to compute Tennessee Single Article Tax (SAT). When greater than 0 on an address lookup in Tennessee by a geo-enabled key, the response includes the satTaxDetail object, in numbers: the local tax on the first $1,600 of the item ($300 in Hamblen County outside Morristown, $375 in Hancock County) and the 2.75% state single article tax on the part from $1,600 to $3,200. Postal-code and lat/lng lookups return no satTaxDetail.",
+            "description": "Single-article item price in dollars. Tennessee: returns the single article tax breakdown on address lookups. Arizona: when the city has a single-item rate (ADOR), returns the reduced city rate's effect in satTaxDetail.singleItemRules on address and lat/lng lookups. Florida: county surtax capped at the first $5,000 of the item (s. 212.054(2)(b)1, F.S.), returned the same way. Requires a geo-enabled key. Tennessee's satTaxDetail holds, in numbers, the local tax on the first $1,600 of the item ($300 in Hamblen County outside Morristown, $375 in Hancock County) and the 2.75% state single article tax on the part from $1,600 to $3,200. Postal-code lookups return no satTaxDetail.",
             "explode": false,
             "in": "query",
             "name": "sat_item_total",
             "schema": {
-              "description": "Single-article item total in dollars used to compute Tennessee Single Article Tax (SAT). When greater than 0 on an address lookup in Tennessee by a geo-enabled key, the response includes the satTaxDetail object, in numbers: the local tax on the first $1,600 of the item ($300 in Hamblen County outside Morristown, $375 in Hancock County) and the 2.75% state single article tax on the part from $1,600 to $3,200. Postal-code and lat/lng lookups return no satTaxDetail.",
+              "description": "Single-article item price in dollars. Tennessee: returns the single article tax breakdown on address lookups. Arizona: when the city has a single-item rate (ADOR), returns the reduced city rate's effect in satTaxDetail.singleItemRules on address and lat/lng lookups. Florida: county surtax capped at the first $5,000 of the item (s. 212.054(2)(b)1, F.S.), returned the same way. Requires a geo-enabled key. Tennessee's satTaxDetail holds, in numbers, the local tax on the first $1,600 of the item ($300 in Hamblen County outside Morristown, $375 in Hancock County) and the 2.75% state single article tax on the part from $1,600 to $3,200. Postal-code lookups return no satTaxDetail.",
               "format": "double",
               "minimum": 0,
               "type": "number"
