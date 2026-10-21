@@ -4325,7 +4325,7 @@
         "additionalProperties": false,
         "properties": {
           "combinedMealRate": {
-            "description": "Sum of the returned components' rates, as a decimal. Excludes ordinary sales tax; a component with replacesStateRate true stands in for the state sales tax component rather than adding to it. null when no component applies.",
+            "description": "Sum of the rates of the unconditional components in rules, as a decimal. It is not the total tax: apply each component by its componentType, so a STATE_SPECIAL_TOTAL component replaces the ordinary sales tax rather than adding to it. Components with conditional true are excluded; when any component is conditional, sum the components you apply yourself. null when no unconditional component applies, including when only conditional components apply.",
             "examples": [
               0.1
             ],
@@ -4336,7 +4336,7 @@
             ]
           },
           "reasonCodes": {
-            "description": "Qualifications of the result. LOCATION_NOT_RESOLVED and RULES_NOT_LOADED mean meal tax could not be evaluated, so an empty rules array is not a finding of no meal tax. STATE_NOT_COVERED: the dataset has no meal-tax rules for the state, which is not a finding that the state has none. UNMAPPED_SCOPES_IN_STATE: some of the state's meal-tax districts could not be evaluated for a location.",
+            "description": "Qualifications of the result. LOCATION_NOT_RESOLVED and RULES_NOT_LOADED: meal tax could not be evaluated, so an empty rules array is not a finding of no meal tax. STATE_NOT_COVERED: the dataset has no meal-tax rules for the state, which is not a finding that the state has none. UNMAPPED_SCOPES_IN_STATE is set per state, not per location: it appears on every lookup in a state where at least one meal-tax district in effect has no mapped boundary, whatever the address. Apply the returned rules, and treat the result as possibly incomplete only if the location being rated (for a cart, the address the component would be sourced at) could be inside one of the state's unmapped districts.",
             "items": {
               "enum": [
                 "LOCATION_NOT_RESOLVED",
@@ -4373,7 +4373,7 @@
         "additionalProperties": false,
         "properties": {
           "componentType": {
-            "description": "ADD_ON is levied on top of sales tax. STATE_SPECIAL_TOTAL is a state meals rate that replaces the state sales tax component. OCCUPATION_TAX is a seller-side levy that may itself enter the sales tax base.",
+            "description": "How the component adjusts the ordinary sales tax. ADD_ON is added on top of the ordinary sales tax and does not enter its base. STATE_SPECIAL_TOTAL replaces the whole ordinary sales tax, state and local, whether the meals rate is higher or lower (CT, DC, ME, NH, VT). OCCUPATION_TAX is a seller-side levy added on its own that also enters the sales tax base: occupation + sales x (1 + occupation), where sales is the ordinary sales tax total or the STATE_SPECIAL_TOTAL rate.",
             "enum": [
               "ADD_ON",
               "STATE_SPECIAL_TOTAL",
@@ -4383,6 +4383,30 @@
               "ADD_ON"
             ],
             "type": "string"
+          },
+          "conditionCode": {
+            "description": "Machine-readable reason the component is conditional, e.g. LIVE_PERFORMANCE. An open set: new codes may be added. null when conditional is false.",
+            "examples": [
+              "LIVE_PERFORMANCE"
+            ],
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "conditionDescription": {
+            "description": "Plain-language description of the condition; null when conditional is false.",
+            "examples": [
+              "Applies only to food and drinks sold in public places during live performances."
+            ],
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "conditional": {
+            "description": "True when the component applies only to some sales at the location; conditionCode and conditionDescription say which. Conditional components are listed but not counted in combinedMealRate.",
+            "type": "boolean"
           },
           "effectiveDt": {
             "description": "First day the component applies, YYYYMMDD; null when not recorded.",
@@ -4434,11 +4458,11 @@
             "type": "number"
           },
           "replacesStateRate": {
-            "description": "True when this component replaces the state sales tax component instead of adding to it.",
+            "description": "True exactly when componentType is STATE_SPECIAL_TOTAL: the component replaces the whole ordinary sales tax, state and local, not only the state component. The name is kept for compatibility.",
             "type": "boolean"
           },
           "sourcingBasis": {
-            "description": "How the levy is sourced (e.g. SELLER_LOCATION, DESTINATION); independent of the ordinary sourcingRules.",
+            "description": "Where the component is sourced, independent of the ordinary sourcingRules. The carts read an origin value at the seller's address, a destination value at the customer's address, and a cart's-sourcing value at the address the cart is sourced at, per sourcingRules. An interstate cart reads only the destination, so an origin component is dropped. SELLER_LOCATION (origin): follows the seller's location; SELLER_LOCATION_WITH_CATERING_EXCEPTION (origin): the seller's location, except catering, which follows the jurisdiction served (IN); SELLER_LOCATION_REVIEW_DELIVERY (origin): the seller's location for on-site sales; delivery treatment not confirmed (MS); SOLD_OR_SERVED_LOCATION (origin): where the meal is sold or served (LA); EVENT_LOCATION (origin): where the event takes place (MS catered sales); DESTINATION (destination): where meals are provided or delivered (VT); CUSTOMER_RECEIPT_LOCATION (destination): where the customer receives the meal (WI); STATE_TAX_SOURCING (cart's sourcing): follows the state's ordinary sales tax sourcing; MEAL_SALE_SOURCING (cart's sourcing): a local meals excise sourced with the meal sale (MA); STATEWIDE_EATING_ESTABLISHMENT_SALES (cart's sourcing): a statewide levy on eating-establishment sales (RI); REVIEW_REQUIRED (cart's sourcing): rate on file, sourcing not yet confirmed; says nothing about the rate itself. Treat any other value as following the cart's sourcing; new values may be added.",
             "examples": [
               "DESTINATION"
             ],
@@ -4462,7 +4486,10 @@
           "replacesStateRate",
           "effectiveDt",
           "expiresDt",
-          "sourcingBasis"
+          "sourcingBasis",
+          "conditional",
+          "conditionCode",
+          "conditionDescription"
         ],
         "type": "object"
       },
