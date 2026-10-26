@@ -4267,7 +4267,7 @@
             "type": "string"
           },
           "jurTaxCode": {
-            "description": "FIPS-like tax code for the jurisdiction (state, county, city, or district). For Texas city components this is the TAID published for the city that contains the address. Null when the jurisdiction has no associated code.",
+            "description": "Tax code of the jurisdiction (state, county, city, or district): the state-assigned filing code where one is known (for example an Oklahoma Tax Commission COPO code, or for Texas city components the TAID published for the city that contains the address), and a FIPS code otherwise. Null when the jurisdiction has no associated code.",
             "type": [
               "string",
               "null"
