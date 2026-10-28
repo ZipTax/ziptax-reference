@@ -992,6 +992,35 @@
         ],
         "type": "object"
       },
+      "MerchantErrorResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "code": {
+            "description": "Set when the plan's per-type merchant limits refused the request: MERCHANT_TYPE_NOT_ENTITLED (403) when the plan includes no merchants of the type, PLAN_LIMIT_MERCHANTS (409) when the account already has as many as the plan includes. Absent on every other error.",
+            "enum": [
+              "MERCHANT_TYPE_NOT_ENTITLED",
+              "PLAN_LIMIT_MERCHANTS"
+            ],
+            "type": "string"
+          },
+          "message": {
+            "description": "Human-readable description of the error.",
+            "type": "string"
+          },
+          "status": {
+            "description": "Always 'error'.",
+            "enum": [
+              "error"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "status",
+          "message"
+        ],
+        "type": "object"
+      },
       "MerchantNexusCreateRequest": {
         "additionalProperties": false,
         "properties": {
@@ -6364,15 +6393,25 @@
             },
             "description": "Unauthorized"
           },
-          "409": {
+          "403": {
             "content": {
-              "application/problem+json": {
+              "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ErrorModel"
+                  "$ref": "#/components/schemas/MerchantErrorResponse"
                 }
               }
             },
-            "description": "Conflict"
+            "description": "The account's plan does not include merchants of the requested merchantType (code `MERCHANT_TYPE_NOT_ENTITLED`, message `Your plan does not include \u003cself-managed|TaxCloud-connected\u003e merchants.`). An omitted merchantType is `taxcloud`, so a plan without taxcloud merchants must send `self-managed`. Also the account already has 1000 active merchants, the limit on every plan (no code, message `merchant limit reached (max 1000 per account)`)."
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MerchantErrorResponse"
+                }
+              }
+            },
+            "description": "The account already has as many active merchants of the requested merchantType as its plan includes (code `PLAN_LIMIT_MERCHANTS`, message `Merchant limit reached: your plan includes N \u003cself-managed|TaxCloud-connected\u003e merchant(s) and this account already has M.`). Existing merchants are kept; delete one or upgrade the plan to add another. Also a merchant with the same referenceId already exists on the account (no code, message `already exists`)."
           },
           "422": {
             "content": {
@@ -8302,13 +8341,13 @@
           },
           "403": {
             "content": {
-              "application/problem+json": {
+              "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ErrorModel"
+                  "$ref": "#/components/schemas/MerchantErrorResponse"
                 }
               }
             },
-            "description": "Forbidden"
+            "description": "The merchant does not belong to the account or has been deleted (no code, message `merchant not found`), or setMerchantType switches the merchant to a merchantType the account's plan does not include (code `MERCHANT_TYPE_NOT_ENTITLED`, message `Your plan does not include \u003cself-managed|TaxCloud-connected\u003e merchants.`)."
           },
           "404": {
             "content": {
@@ -8322,13 +8361,13 @@
           },
           "409": {
             "content": {
-              "application/problem+json": {
+              "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ErrorModel"
+                  "$ref": "#/components/schemas/MerchantErrorResponse"
                 }
               }
             },
-            "description": "Conflict"
+            "description": "setMerchantType switches the merchant to a merchantType of which the account already has as many active merchants as its plan includes (code `PLAN_LIMIT_MERCHANTS`, message `Merchant limit reached: your plan includes N \u003cself-managed|TaxCloud-connected\u003e merchant(s) and this account already has M.`), or the new referenceId is already used by another merchant on the account (no code, message `reference id already in use`). Sending the merchant's current merchantType is never refused."
           },
           "422": {
             "content": {
