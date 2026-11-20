@@ -5430,6 +5430,11 @@
         "tags": [
           "Account"
         ],
+        "x-billing": {
+          "billable": false,
+          "counted": "Included. Doesn't count toward billable API calls.",
+          "unit": "billable API call"
+        },
         "x-fern-audiences": [
           "v60"
         ]
@@ -5530,6 +5535,11 @@
         "tags": [
           "Cart"
         ],
+        "x-billing": {
+          "billable": true,
+          "counted": "1 billable API call per distinct address resolved in the request: 1 for a destination-only cart, 2 when the origin address is also resolved. Line items and product codes don't add calls. Addresses are matched as written, so two spellings of the same address count separately.",
+          "unit": "billable API call"
+        },
         "x-fern-audiences": [
           "v10",
           "v20",
@@ -5587,6 +5597,11 @@
         "tags": [
           "Data"
         ],
+        "x-billing": {
+          "billable": false,
+          "counted": "Included. Doesn't count toward billable API calls.",
+          "unit": "billable API call"
+        },
         "x-fern-audiences": [
           "v10",
           "v20",
@@ -5777,6 +5792,11 @@
         "tags": [
           "Merchant TaxCloud"
         ],
+        "x-billing": {
+          "billable": true,
+          "counted": "1 billable API call per distinct address resolved in each cart. When a request contains several carts, each cart counts its own addresses.",
+          "unit": "billable API call"
+        },
         "x-fern-audiences": [
           "v10",
           "v20",
@@ -5932,6 +5952,11 @@
         "tags": [
           "Merchant TaxCloud"
         ],
+        "x-billing": {
+          "billable": false,
+          "counted": "Included. Doesn't count toward billable API calls.",
+          "unit": "billable API call"
+        },
         "x-fern-audiences": [
           "v10",
           "v20",
@@ -6083,6 +6108,11 @@
         "tags": [
           "Merchant TaxCloud"
         ],
+        "x-billing": {
+          "billable": false,
+          "counted": "Included. Doesn't count toward billable API calls.",
+          "unit": "billable API call"
+        },
         "x-fern-audiences": [
           "v10",
           "v20",
@@ -6228,6 +6258,11 @@
         "tags": [
           "Merchant TaxCloud"
         ],
+        "x-billing": {
+          "billable": false,
+          "counted": "Included. Doesn't count toward billable API calls.",
+          "unit": "billable API call"
+        },
         "x-fern-audiences": [
           "v10",
           "v20",
@@ -6373,6 +6408,11 @@
         "tags": [
           "Merchant TaxCloud"
         ],
+        "x-billing": {
+          "billable": false,
+          "counted": "Included. Doesn't count toward billable API calls.",
+          "unit": "billable API call"
+        },
         "x-fern-audiences": [
           "v10",
           "v20",
@@ -6478,6 +6518,11 @@
         "tags": [
           "Merchant"
         ],
+        "x-billing": {
+          "billable": false,
+          "counted": "Included. Doesn't count toward billable API calls.",
+          "unit": "billable API call"
+        },
         "x-fern-audiences": [
           "v10",
           "v20",
@@ -6583,6 +6628,11 @@
         "tags": [
           "Merchant"
         ],
+        "x-billing": {
+          "billable": false,
+          "counted": "Included. Doesn't count toward billable API calls.",
+          "unit": "billable API call"
+        },
         "x-fern-audiences": [
           "v10",
           "v20",
@@ -6793,6 +6843,11 @@
         "tags": [
           "Merchant"
         ],
+        "x-billing": {
+          "billable": false,
+          "counted": "Included. Doesn't count toward billable API calls.",
+          "unit": "billable API call"
+        },
         "x-fern-audiences": [
           "v10",
           "v20",
@@ -6898,6 +6953,11 @@
         "tags": [
           "Merchant"
         ],
+        "x-billing": {
+          "billable": false,
+          "counted": "Included. Doesn't count toward billable API calls.",
+          "unit": "billable API call"
+        },
         "x-fern-audiences": [
           "v10",
           "v20",
@@ -6993,6 +7053,11 @@
         "tags": [
           "Merchant"
         ],
+        "x-billing": {
+          "billable": false,
+          "counted": "Included. Doesn't count toward billable API calls.",
+          "unit": "billable API call"
+        },
         "x-fern-audiences": [
           "v10",
           "v20",
@@ -7054,6 +7119,11 @@
         "tags": [
           "Merchant"
         ],
+        "x-billing": {
+          "billable": false,
+          "counted": "Included. Doesn't count toward billable API calls.",
+          "unit": "billable API call"
+        },
         "x-fern-audiences": [
           "v10",
           "v20",
@@ -7189,6 +7259,11 @@
         "tags": [
           "Merchant Nexus"
         ],
+        "x-billing": {
+          "billable": false,
+          "counted": "Included. Doesn't count toward billable API calls.",
+          "unit": "billable API call"
+        },
         "x-fern-audiences": [
           "v10",
           "v20",
@@ -7314,6 +7389,11 @@
         "tags": [
           "Merchant Nexus"
         ],
+        "x-billing": {
+          "billable": false,
+          "counted": "Included. Doesn't count toward billable API calls.",
+          "unit": "billable API call"
+        },
         "x-fern-audiences": [
           "v10",
           "v20",
@@ -7439,6 +7519,11 @@
         "tags": [
           "Merchant Nexus"
         ],
+        "x-billing": {
+          "billable": false,
+          "counted": "Included. Doesn't count toward billable API calls.",
+          "unit": "billable API call"
+        },
         "x-fern-audiences": [
           "v10",
           "v20",
@@ -7564,6 +7649,11 @@
         "tags": [
           "Merchant Nexus"
         ],
+        "x-billing": {
+          "billable": false,
+          "counted": "Included. Doesn't count toward billable API calls.",
+          "unit": "billable API call"
+        },
         "x-fern-audiences": [
           "v10",
           "v20",
@@ -7719,6 +7809,11 @@
         "tags": [
           "Merchant TaxCloud"
         ],
+        "x-billing": {
+          "billable": false,
+          "counted": "Included. Doesn't count toward billable API calls.",
+          "unit": "billable API call"
+        },
         "x-fern-audiences": [
           "v10",
           "v20",
@@ -7874,6 +7969,11 @@
         "tags": [
           "Merchant TaxCloud"
         ],
+        "x-billing": {
+          "billable": false,
+          "counted": "Included. Doesn't count toward billable API calls.",
+          "unit": "billable API call"
+        },
         "x-fern-audiences": [
           "v10",
           "v20",
@@ -8019,6 +8119,11 @@
         "tags": [
           "Merchant TaxCloud"
         ],
+        "x-billing": {
+          "billable": false,
+          "counted": "Included. Doesn't count toward billable API calls.",
+          "unit": "billable API call"
+        },
         "x-fern-audiences": [
           "v10",
           "v20",
@@ -8164,6 +8269,11 @@
         "tags": [
           "Merchant TaxCloud"
         ],
+        "x-billing": {
+          "billable": false,
+          "counted": "Included. Doesn't count toward billable API calls.",
+          "unit": "billable API call"
+        },
         "x-fern-audiences": [
           "v10",
           "v20",
@@ -8319,6 +8429,11 @@
         "tags": [
           "Merchant TaxCloud"
         ],
+        "x-billing": {
+          "billable": false,
+          "counted": "Included. Doesn't count toward billable API calls.",
+          "unit": "billable API call"
+        },
         "x-fern-audiences": [
           "v10",
           "v20",
@@ -8434,6 +8549,11 @@
         "tags": [
           "Merchant"
         ],
+        "x-billing": {
+          "billable": false,
+          "counted": "Included. Doesn't count toward billable API calls.",
+          "unit": "billable API call"
+        },
         "x-fern-audiences": [
           "v10",
           "v20",
@@ -9791,6 +9911,11 @@
         "tags": [
           "Tax Rates"
         ],
+        "x-billing": {
+          "billable": true,
+          "counted": "1 billable API call per request, by address, lat/lng or postal code, whether or not the result was cached. A lookup that finds no matching rate still counts. Requests rejected before the lookup runs (invalid key, invalid parameters, plan restrictions, rate limits) don't count.",
+          "unit": "billable API call"
+        },
         "x-fern-audiences": [
           "v60"
         ]
@@ -9827,6 +9952,11 @@
         "tags": [
           "Search"
         ],
+        "x-billing": {
+          "billable": false,
+          "counted": "Included. Doesn't count toward billable API calls.",
+          "unit": "billable API call"
+        },
         "x-fern-audiences": [
           "v10",
           "v20",
@@ -9935,6 +10065,11 @@
         "tags": [
           "Search"
         ],
+        "x-billing": {
+          "billable": false,
+          "counted": "Included. Doesn't count toward billable API calls.",
+          "unit": "billable API call"
+        },
         "x-fern-audiences": [
           "v10",
           "v20",
@@ -9947,7 +10082,7 @@
     },
     "/search/tic/recommend": {
       "post": {
-        "description": "Returns a recommended Taxability Information Code (TIC) for a free-text product description using a machine-learning model. Requires authentication via the X-API-KEY header or key query parameter.",
+        "description": "Returns a recommended Taxability Information Code (TIC) for a free-text product description using a machine-learning model. Requires authentication via the X-API-KEY header or key query parameter. Each successful request counts as one billable API call.",
         "operationId": "recommendTIC",
         "requestBody": {
           "content": {
@@ -10053,6 +10188,11 @@
         "tags": [
           "Search"
         ],
+        "x-billing": {
+          "billable": true,
+          "counted": "1 billable API call per successful request. Failed or rate-limited requests don't count.",
+          "unit": "billable API call"
+        },
         "x-fern-audiences": [
           "v10",
           "v20",
@@ -10093,6 +10233,11 @@
         "tags": [
           "System"
         ],
+        "x-billing": {
+          "billable": false,
+          "counted": "Included. Doesn't count toward billable API calls.",
+          "unit": "billable API call"
+        },
         "x-fern-audiences": [
           "v10",
           "v20",
@@ -10133,6 +10278,11 @@
         "tags": [
           "System"
         ],
+        "x-billing": {
+          "billable": false,
+          "counted": "Included. Doesn't count toward billable API calls.",
+          "unit": "billable API call"
+        },
         "x-fern-audiences": [
           "v10",
           "v20",
